@@ -1,0 +1,21 @@
+{
+  "spaceKey": "~thro",
+  "pageTitle": "Data Dashboard",
+  "parentPageTitle": "Publishing to Confluence",
+  "templatePath": "./confluence-template.html",
+  "macroTemplatePath": "./macro-template.html",
+  "distDir": "./dist",
+  "includedFiles": [
+    "**/*.js",
+    "**/*.css",
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.svg",
+    "**/*.json",
+    "**/*.woff2"
+  ],
+  "excludedFiles": [
+    "**/*.map",
+    "**/*.test.js"
+  ]
+}

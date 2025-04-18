@@ -1,0 +1,118 @@
+<h1>{{pageTitle}}</h1>
+
+{{confluence-toc minLevel=2 maxLevel=3}}
+
+<!-- Introduction Section -->
+<h2>Introduction</h2>
+
+{{#confluence-panel title="About This Showcase" type="info"}}
+  <p>
+    This page demonstrates the various Confluence macros available in the 
+    <strong>publish-confluence</strong> tool. It showcases macro capabilities 
+    such as panels, layouts, status indicators, code blocks, and more.
+  </p>
+{{/confluence-panel}}
+
+{{#confluence-info title="Macro Documentation"}}
+  <p>For more information about the available macros, please refer to the <a href="#">MACROS.md</a> documentation.</p>
+{{/confluence-info}}
+
+<!-- Interactive Application Section -->
+<h2>Interactive Application Demo</h2>
+
+<p>Below is an interactive React application embedded using the HTML macro:</p>
+
+{{{macro}}}
+
+<!-- Layout Demonstration -->
+<h2>Layout Examples</h2>
+
+{{#confluence-layout}}
+  {{#layout-section type="two_equal"}}
+    {{#layout-cell}}
+      <h3>Left Column</h3>
+      <p>This is the left column of a two-column layout.</p>
+      
+      {{#confluence-status type="green" text="Completed"}}{{/confluence-status}}
+    {{/layout-cell}}
+    
+    {{#layout-cell}}
+      <h3>Right Column</h3>
+      <p>This is the right column of a two-column layout.</p>
+      
+      {{#confluence-status type="yellow" text="In Progress"}}{{/confluence-status}}
+    {{/layout-cell}}
+  {{/layout-section}}
+{{/confluence-layout}}
+
+<!-- Admonition Macros Section -->
+<h2>Admonition Macros</h2>
+
+{{#confluence-note title="Note Example"}}
+  <p>This is a standard note admonition in Confluence.</p>
+{{/confluence-note}}
+
+{{#confluence-warning title="Warning Example"}}
+  <p>This is a warning admonition. Use this to alert users about potential issues.</p>
+{{/confluence-warning}}
+
+{{#confluence-tip title="Tip Example"}}
+  <p>This is a tip admonition. Use this to provide helpful suggestions.</p>
+{{/confluence-tip}}
+
+<!-- Code Blocks Section -->
+<h2>Code Examples</h2>
+
+<h3>JavaScript Example</h3>
+
+{{#confluence-code language="javascript" title="Example React Component" linenumbers=true}}
+import React, { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+
+export default Counter;
+{{/confluence-code}}
+
+<h3>CSS Example</h3>
+
+{{#confluence-code language="css" title="Component Styles"}}
+.button {
+  background-color: #0052CC;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #0065FF;
+}
+{{/confluence-code}}
+
+<!-- Expand Section -->
+<h2>Expandable Content</h2>
+
+{{#confluence-expand title="Click to see more details"}}
+  <p>This content is hidden by default and will be revealed when the user clicks on the header.</p>
+  
+  <ul>
+    <li>Additional detail item 1</li>
+    <li>Additional detail item 2</li>
+    <li>Additional detail item 3</li>
+  </ul>
+{{/confluence-expand}}
+
+<hr/>
+<p><em>Last updated: {{currentDate}}</em></p>

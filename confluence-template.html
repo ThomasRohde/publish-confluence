@@ -1,0 +1,563 @@
+{{#confluence-expand title="Table of Contents"}}
+{{confluence-toc minLevel=2 maxLevel=3}}
+{{/confluence-expand}}
+
+{{#confluence-expand title="Example applications"}}
+{{confluence-children}}
+{{/confluence-expand}}
+
+<h2>Overview</h2>
+<p>Publish-confluence is a powerful solution for embedding interactive web applications, dashboards, and widgets directly into Confluence. With a single command, you can push your latest build to a Confluence page, complete with all required assets and custom layout. No more manual uploads, brittle macros, or copy-paste workflows.
+
+Designed for rapid iteration, publish-confluence lets you update your app, rebuild, and immediately publish changes to Confluence—making it ideal for fast feedback, demos, and continuous delivery. The tool’s flexible template system and smart asset management enable you to deliver rich, production-quality experiences inside Confluence, while keeping your workflow simple and repeatable.
+
+Whether you’re building data visualizations, internal tools, or documentation widgets, publish-confluence empowers you to:</p>
+<ul>
+    <li>Develop locally with your favorite stack and build tools</li>
+    <li>Instantly deploy to Confluence for review or production</li>
+    <li>Automate and standardize your publishing process</li>
+</ul>
+
+{{#confluence-layout}}
+  {{#layout-section type="two_equal"}}
+    {{#layout-cell}}
+      <h3>Key Features</h3>
+      <ul>
+        <li><strong>App Publishing:</strong> Deploy JavaScript/TypeScript applications to Confluence pages in seconds—perfect for fast iteration and continuous delivery.</li>
+        <li><strong>Seamless Asset Management:</strong> Automatically uploads and attaches all your build assets (JS, CSS, images, fonts, etc.) to the Confluence page, ensuring everything just works.</li>
+        <li><strong>Customizable Templates:</strong> Use Handlebars-powered templates to fully control both the page layout and the embedded HTML macro, supporting everything from simple widgets to complex dashboards.</li>
+        <li><strong>Macro Helper Library:</strong> Easily compose Confluence-native macros (panels, layouts, code blocks, status, admonitions, and more) directly in your templates for rich, interactive content.</li>
+        <li><strong>Effortless Configuration:</strong> Get started quickly with sensible defaults, or fine-tune every aspect via a simple JSON config and environment variables.</li>
+        <li><strong>Supports Modern Workflows:</strong> Designed for modern JavaScript/TypeScript projects and build tools (Vite, Webpack, Rollup, etc.), with first-class support for rapid development and testing.</li>
+        <li><strong>Robust CLI Experience:</strong> Includes commands for project scaffolding, content fetching, and prompt generation for AI-assisted workflows.</li>
+        <li><strong>Flexible Logging:</strong> Choose your preferred verbosity level for clean output or detailed debugging.</li>
+        <li><strong>Enhanced Documentation:</strong> Comprehensive guides and examples to help you get started quickly and effectively.</li>
+        <li><strong>Community Support:</strong> Engage with a vibrant community for troubleshooting and sharing best practices.</li>
+    </ul>
+    {{/layout-cell}}
+    
+    {{#layout-cell}}
+      {{#confluence-note title="Quick Start"}}
+        <ol>
+          <li>Set up authentication using environment variables or a <code>.env</code> file</li>
+          <li>Create a <code>publish-confluence.json</code> configuration file</li>
+          <li>Run the tool: <code>publish-confluence</code></li>
+        </ol>
+      {{/confluence-note}}
+    {{/layout-cell}}
+  {{/layout-section}}
+{{/confluence-layout}}
+
+<h2>Use Cases</h2>
+
+<h3>Interactive Dashboards and Visualizations</h3>
+<p>Create dynamic React, Vue, or Angular dashboards that display real-time data directly in Confluence. These applications can fetch data from APIs and create interactive visualizations that stakeholders can access without needing to navigate to separate applications.</p>
+
+<p>Example scenarios:</p>
+<ul>
+  <li>Project status dashboards showing sprint burndown charts and ticket metrics</li>
+  <li>Business intelligence visualizations with filtering and drill-down capabilities</li>
+  <li>Product analytics dashboards that update in real-time from your backend systems</li>
+  <li>Resource allocation and planning tools shared with stakeholders via Confluence</li>
+</ul>
+
+<h3>Training Materials and Interactive Documentation</h3>
+<p>Transform your technical documentation with embedded interactive examples that demonstrate how code functions. Create guided walkthroughs that allow users to experiment with your APIs or frameworks directly within Confluence.</p>
+
+<p>Example scenarios:</p>
+<ul>
+  <li>API documentation with live, interactive examples that users can modify and test</li>
+  <li>Step-by-step tutorials with interactive elements to validate user progress</li>
+  <li>Code sandboxes embedded in technical documentation</li>
+  <li>Interactive component libraries showing design system implementations</li>
+</ul>
+
+<h3>Team Collaboration Tools</h3>
+<p>Deploy collaborative tools that team members can access directly from your Confluence workspace, facilitating planning, decision-making, and brainstorming without leaving the context of your documentation.</p>
+
+<p>Example scenarios:</p>
+<ul>
+  <li>Planning poker and estimation tools for agile teams</li>
+  <li>Decision matrices and RACI charts that team members can update</li>
+  <li>Kanban boards or simple project management interfaces</li>
+  <li>Shared team calendars or scheduling tools</li>
+</ul>
+
+<h2>Installation</h2>
+
+<p>To use publish-confluence in your enterprise environment, you'll need to clone it from GitHub, build it, and install it globally on your local machine.</p>
+
+{{#confluence-code language="bash" title="Installation Steps" linenumbers=true}}
+# Clone the repository
+git clone https://github.com/your-org/publish-confluence.git
+
+# Navigate to the project directory
+cd publish-confluence
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Install globally
+npm install -g .
+{{/confluence-code}}
+
+{{#confluence-panel title="Windows-specific Notes" type="note"}}
+  <p>On Windows, global installation makes the command available in Command Prompt, PowerShell, and Git Bash. If you encounter any permission issues during installation, try running your terminal as Administrator.</p>
+  
+  <p>To verify successful installation, run:</p>
+  
+  {{#confluence-code language="powershell" linenumbers=false}}
+publish-confluence --version
+  {{/confluence-code}}
+  
+  <p>If you need to update a globally installed package after making changes:</p>
+  
+  {{#confluence-code language="powershell" linenumbers=false}}
+# Rebuild and reinstall
+npm run build
+npm install -g .
+  {{/confluence-code}}
+{{/confluence-panel}}
+
+<h2>Configuration</h2>
+
+<p>Configure publish-confluence using a <code>publish-confluence.json</code> file in your project root:</p>
+
+{{#confluence-code language="json" title="publish-confluence.json" linenumbers=true}}
+{
+  "spaceKey": "YOURSPACE",
+  "pageTitle": "Your JavaScript App",
+  "parentPageTitle": "Parent Page",
+  "templatePath": "./confluence-template.html",
+  "macroTemplatePath": "./macro-template.html",
+  "distDir": "./dist",
+  "includedFiles": ["**/*.js", "**/*.css", "**/*.png", "**/*.jpg", "**/*.svg"],
+  "excludedFiles": ["**/*.map"]
+}
+{{/confluence-code}}
+
+<h3>Authentication Options</h3>
+
+<p>You have two options for providing authentication credentials:</p>
+
+<h4>Option 1: Environment Variables (Recommended for CI/CD and Shared Environments)</h4>
+
+<p>Set the following environment variables in your system or user profile:</p>
+
+{{#confluence-code language="powershell" title="Setting Environment Variables in PowerShell" linenumbers=true}}
+# Set user-level environment variables (persist across sessions)
+[Environment]::SetEnvironmentVariable("CONFLUENCE_BASE_URL", "https://your-confluence-instance.com", "User")
+[Environment]::SetEnvironmentVariable("CONFLUENCE_TOKEN", "your_api_token", "User")
+
+# For current session only
+$env:CONFLUENCE_BASE_URL = "https://your-confluence-instance.com"
+$env:CONFLUENCE_TOKEN = "your_api_token"
+{{/confluence-code}}
+
+{{#confluence-code language="batch" title="Setting Environment Variables in Command Prompt" linenumbers=true}}
+:: Set user-level environment variables (persist across sessions)
+setx CONFLUENCE_BASE_URL "https://your-confluence-instance.com"
+setx CONFLUENCE_TOKEN "your_api_token"
+
+:: For current session only
+set CONFLUENCE_BASE_URL=https://your-confluence-instance.com
+set CONFLUENCE_TOKEN=your_api_token
+{{/confluence-code}}
+
+<h4>Option 2: Using a .env File (Recommended for Local Development)</h4>
+
+<p>Create a <code>.env</code> file in your project root:</p>
+
+{{#confluence-code language="text" title=".env file" linenumbers=true}}
+CONFLUENCE_BASE_URL=https://your-confluence-instance.com
+CONFLUENCE_TOKEN=your_api_token
+{{/confluence-code}}
+
+{{#confluence-panel title="Security Considerations" type="warning"}}
+  <p>When using <code>.env</code> files:</p>
+  <ul>
+    <li>Always add <code>.env</code> to your <code>.gitignore</code> file to prevent committing credentials</li>
+    <li>Consider using environment variables for CI/CD pipelines rather than .env files</li>
+    <li>Rotate your API tokens regularly according to your organization's security policies</li>
+  </ul>
+{{/confluence-panel}}
+
+<h3>Configuration Options</h3>
+
+<table>
+  <tr>
+    <th>Option</th>
+    <th>Description</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td><code>spaceKey</code></td>
+    <td>Confluence space key (required)</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td><code>pageTitle</code></td>
+    <td>Title of the page to create/update</td>
+    <td>Value from package.json</td>
+  </tr>
+  <tr>
+    <td><code>parentPageTitle</code></td>
+    <td>Title of the parent page</td>
+    <td>Space homepage</td>
+  </tr>
+  <tr>
+    <td><code>templatePath</code></td>
+    <td>Path to the Confluence page template</td>
+    <td>./confluence-template.html</td>
+  </tr>
+  <tr>
+    <td><code>macroTemplatePath</code></td>
+    <td>Path to the HTML macro template</td>
+    <td>null</td>
+  </tr>
+  <tr>
+    <td><code>includedFiles</code></td>
+    <td>Array of glob patterns for files to include</td>
+    <td>Common web assets</td>
+  </tr>
+  <tr>
+    <td><code>excludedFiles</code></td>
+    <td>Array of glob patterns for files to exclude</td>
+    <td>Source maps</td>
+  </tr>
+  <tr>
+    <td><code>distDir</code></td>
+    <td>Directory containing build output files</td>
+    <td>./dist</td>
+  </tr>
+</table>
+
+{{#confluence-note title="Important Note"}}
+  <p>If <code>macroTemplatePath</code> is not specified (null), file attachments will be skipped, as the HTML macro is required for properly referencing attached files.</p>
+{{/confluence-note}}
+
+<h2>Command Line Options</h2>
+
+{{#confluence-code language="bash" title="CLI Usage" linenumbers=true}}
+Usage: publish-confluence [options] [command]
+
+Options:
+  -q, --quiet     Suppress all output except errors
+  -v, --verbose   Enable verbose output
+  -d, --debug     Enable debug output
+  -h, --help      Display help
+
+Commands:
+  create          Create a new publish-confluence project
+  fetch           Fetch content from a Confluence page
+  generate-prompt Generate a project prompt for LLM assistance
+{{/confluence-code}}
+
+<h2>Example Workflow</h2>
+
+<ol>
+    <li>Create a JavaScript application with a build process that outputs to <code>./dist</code></li>
+    <li>Configure publish-confluence with your Confluence details</li>
+    <li>Run <code>publish-confluence</code> after building your application</li>
+    <li>View your application on the published Confluence page</li>
+</ol>
+
+<h2>Templates System</h2>
+
+<p>The tool uses two primary templates:</p>
+
+<ol>
+  <li><strong>Page Template</strong>: The overall Confluence page content, which includes the macro placeholder</li>
+  <li><strong>Macro Template</strong>: The HTML structure for the Confluence HTML macro</li>
+</ol>
+
+<h3>Page Template Variables</h3>
+
+<ul>
+  <li><code>\{{pageTitle}}</code>: The title of the page</li>
+  <li><code>\{{{macro}}}</code>: Expands to the compiled HTML macro content (triple braces prevent HTML escaping)</li>
+  <li><code>\{{currentDate}}</code>: Current date in ISO format (YYYY-MM-DD)</li>
+</ul>
+
+<h3>Macro Template Variables</h3>
+
+<ul>
+  <li><code>\{{{scripts}}}</code>: Expands to <code>&lt;script&gt;</code> tags for all attached JavaScript files</li>
+  <li><code>\{{{styles}}}</code>: Expands to <code>&lt;link&gt;</code> tags for all attached CSS files</li>
+</ul>
+
+<h3>Page Template Example</h3>
+
+<p>If you don't provide a custom page template, the tool uses this default:</p>
+
+{{#confluence-code language="html" title="Default Page Template" linenumbers=true}}
+<h1>\{{pageTitle}}</h1>
+
+\{{{macro}}}
+
+<hr/>
+<p><em>Last updated: \{{currentDate}}</em></p>
+{{/confluence-code}}
+
+{{#confluence-note title="Important Note about Macro Templates"}}
+  <p>By default, <code>macroTemplatePath</code> is set to <code>null</code> in the configuration. If you wish to include asset attachments, you must create a custom macro template and specify its path in your configuration.</p>
+{{/confluence-note}}
+
+<h2>Supported Macro Helpers</h2>
+
+<p>Publish-confluence provides Handlebars helper functions that you can use in your page templates to generate different types of Confluence macros.</p>
+
+<h3>Panel Macro</h3>
+
+{{#confluence-code language="handlebars" title="Panel Macro Example" linenumbers=true}}
+\{{#confluence-panel title="Important Information" type="note"}}
+  <p>This panel contains important information that users should be aware of.</p>
+\{{/confluence-panel}}
+{{/confluence-code}}
+
+<p>Panel types: <code>note</code>, <code>info</code>, <code>warning</code>, <code>success</code>, <code>error</code></p>
+
+<h3>Layout Macros</h3>
+
+{{#confluence-code language="handlebars" title="Layout Macro Example" linenumbers=true}}
+\{{#confluence-layout}}
+  \{{#layout-section type="two_equal"}}
+    \{{#layout-cell}}
+      <!-- Content for left column -->
+    \{{/layout-cell}}
+    \{{#layout-cell}}
+      <!-- Content for right column -->
+    \{{/layout-cell}}
+  \{{/layout-section}}
+\{{/confluence-layout}}
+{{/confluence-code}}
+
+<p>Section types: <code>single</code>, <code>two_equal</code>, <code>two_left_sidebar</code>, <code>two_right_sidebar</code>, <code>three_equal</code></p>
+
+<h3>Admonition Macros</h3>
+
+{{#confluence-code language="handlebars" title="Admonition Examples" linenumbers=true}}
+\{{#confluence-info title="Information"}}
+  <p>This is an informational note.</p>
+\{{/confluence-info}}
+
+\{{#confluence-note title="Note"}}
+  <p>This is a standard note.</p>
+\{{/confluence-note}}
+
+\{{#confluence-warning title="Warning"}}
+  <p>This is a warning message.</p>
+\{{/confluence-warning}}
+
+\{{#confluence-tip title="Tip"}}
+  <p>This is a helpful tip.</p>
+\{{/confluence-tip}}
+{{/confluence-code}}
+
+<h3>Expand Macro</h3>
+
+{{#confluence-code language="handlebars" title="Expand Macro Example" linenumbers=true}}
+\{{#confluence-expand title="Click to see more details"}}
+  <p>This content is hidden by default and will be revealed when clicked.</p>
+\{{/confluence-expand}}
+{{/confluence-code}}
+
+<h3>Code Block</h3>
+
+{{#confluence-code language="handlebars" title="Code Block Example" linenumbers=true}}
+\{{#confluence-code language="javascript" title="Example JavaScript" linenumbers=true}}
+function hello() {
+  console.log("Hello, world!");
+}
+\{{/confluence-code}}
+{{/confluence-code}}
+
+<h3>Table of Contents</h3>
+
+{{#confluence-code language="handlebars" title="TOC Example" linenumbers=true}}
+\{{confluence-toc minLevel=2 maxLevel=4}}
+{{/confluence-code}}
+
+<h3>Status</h3>
+
+{{#confluence-code language="handlebars" title="Status Example" linenumbers=true}}
+\{{confluence-status type="green" text="Completed"}}
+{{/confluence-code}}
+
+<p>Status types: <code>green</code>, <code>yellow</code>, <code>red</code>, <code>blue</code></p>
+
+<h3>Raw Helper</h3>
+
+{{#confluence-code language="handlebars" title="Raw Helper Example" linenumbers=true}}
+\{{#raw}}
+  <!-- This content will not be HTML-escaped -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Page loaded!');
+    });
+  </script>
+\{{/raw}}
+{{/confluence-code}}
+
+<h3>Other Useful Macros</h3>
+
+<table>
+  <tr>
+    <th>Macro</th>
+    <th>Description</th>
+    <th>Example</th>
+  </tr>
+  <tr>
+    <td>Divider</td>
+    <td>Add a horizontal divider</td>
+    <td><code>\{{confluence-divider}}</code></td>
+  </tr>
+  <tr>
+    <td>Date</td>
+    <td>Display a formatted date</td>
+    <td><code>\{{confluence-date date="2023-05-15" format="MMM DD, YYYY"}}</code></td>
+  </tr>
+  <tr>
+    <td>Anchor</td>
+    <td>Create a named anchor point</td>
+    <td><code>\{{confluence-anchor name="section-id"}}</code></td>
+  </tr>
+  <tr>
+    <td>User Mention</td>
+    <td>Mention a Confluence user</td>
+    <td><code>\{{confluence-user key="username"}}</code></td>
+  </tr>
+</table>
+
+<h2>Custom Templates Example</h2>
+
+<p>Create your own templates to customize the page and macro content. Here's a complete example using our macro helpers:</p>
+
+{{#confluence-code language="html" title="confluence-template.html (page template)" linenumbers=true}}
+<h1>\{{pageTitle}}</h1>
+
+\{{confluence-toc minLevel=2 maxLevel=3}}
+
+<h2>Application Dashboard</h2>
+
+\{{#confluence-panel title="About This Tool" type="info"}}
+  <p>This interactive dashboard provides real-time insights into your project data.</p>
+  \{{confluence-status type="green" text="Active"}}
+\{{/confluence-panel}}
+
+\{{#confluence-layout}}
+  \{{#layout-section type="two_equal"}}
+    \{{#layout-cell}}
+      <h3>How to Use This Tool</h3>
+      <ol>
+        <li>Select your project from the dropdown</li>
+        <li>Choose the date range for analysis</li>
+        <li>Use the filter options to refine the data</li>
+        <li>Export reports as needed</li>
+      </ol>
+      
+      \{{#confluence-expand title="Advanced Features"}}
+        <ul>
+          <li>Custom visualization options</li>
+          <li>Data export in multiple formats</li>
+          <li>Automated report scheduling</li>
+          <li>Team collaboration tools</li>
+        </ul>
+      \{{/confluence-expand}}
+    \{{/layout-cell}}
+    
+    \{{#layout-cell}}
+      \{{{macro}}}
+    \{{/layout-cell}}
+  \{{/layout-section}}
+\{{/confluence-layout}}
+
+<h2>Documentation</h2>
+
+\{{#confluence-note title="Important Information"}}
+  <p>For detailed documentation on using this tool, please visit our 
+  <a href="https://example.com/docs">documentation portal</a>.</p>
+\{{/confluence-note}}
+
+\{{#confluence-code language="javascript" title="Sample API Usage" linenumbers=true}}
+// Example of how to integrate with this tool's API
+const dashboard = new DashboardAPI({
+  projectId: 'PROJ-123',
+  timeRange: { start: '2023-01-01', end: '2023-12-31' },
+  filters: { status: 'active' }
+});
+
+dashboard.initialize('#container')
+  .then(() => console.log('Dashboard loaded successfully'))
+  .catch(err => console.error('Error loading dashboard:', err));
+\{{/confluence-code}}
+
+<hr/>
+<p><em>Last updated: {{currentDate}}</em></p>
+{{/confluence-code}}
+
+{{#confluence-code language="html" title="macro-template.html (macro template)" linenumbers=true}}
+<div class="dashboard-container">
+  <div id="app">
+    <p>Loading dashboard application...</p>
+    <div class="loading-spinner"></div>
+  </div>
+  
+  \{{{styles}}}
+  \{{{scripts}}}
+  
+  <div class="dashboard-footer">
+    <p>Having trouble? Contact <a href="mailto:support@example.com">support</a></p>
+  </div>
+</div>
+{{/confluence-code}}
+
+<h2>Troubleshooting</h2>
+
+{{#confluence-panel title="Common Issues and Solutions" type="warning"}}
+  <h4>If you encounter issues:</h4>
+  <ol>
+    <li>Use the <code>--debug</code> flag to enable detailed logging:
+      <pre>publish-confluence --debug</pre>
+    </li>
+    <li>Check that your Confluence credentials are correct in the <code>.env</code> file</li>
+    <li>Verify that your space key and parent page (if specified) exist</li>
+    <li>Ensure your build directory contains the expected files</li>
+    <li>Check that you have the necessary permissions in Confluence</li>
+  </ol>
+{{/confluence-panel}}
+
+<h3>Common Error Messages and Solutions</h3>
+
+<table>
+  <tr>
+    <th>Error Message</th>
+    <th>Possible Cause</th>
+    <th>Solution</th>
+  </tr>
+  <tr>
+    <td>"Authentication credentials are invalid"</td>
+    <td>Invalid or expired token</td>
+    <td>Generate a new API token in your Atlassian account</td>
+  </tr>
+  <tr>
+    <td>"You do not have permission to perform this action"</td>
+    <td>Insufficient Confluence permissions</td>
+    <td>Request necessary permissions from your Confluence admin</td>
+  </tr>
+  <tr>
+    <td>"Parent page not found"</td>
+    <td>The specified parent page doesn't exist or is inaccessible</td>
+    <td>Check the exact title of the parent page or use the space homepage instead</td>
+  </tr>
+  <tr>
+    <td>"No files found to attach"</td>
+    <td>Build files missing or incorrect patterns</td>
+    <td>Verify build output exists and check includedFiles patterns</td>
+  </tr>
+</table>
+<hr/>
+<p><em>Last updated: {{currentDate}}</em></p>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danish Payment Card Market Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Inter font globally */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind gray-50 */
+        }
+        /* Custom styles for better visualization */
+        .chart-container {
+            position: relative;
+            height: 350px; /* Adjust height as needed */
+            width: 100%;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+        /* Style tables */
+        th, td {
+            padding: 0.75rem; /* p-3 */
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb; /* border-gray-200 */
+        }
+        th {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            font-weight: 600; /* font-semibold */
+            font-size: 0.875rem; /* text-sm */
+        }
+        td {
+            font-size: 0.875rem; /* text-sm */
+        }
+        /* Style tabs */
+        .tab-button {
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            border-radius: 0.375rem; /* rounded-md */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            background-color: #e5e7eb; /* bg-gray-200 */
+            color: #374151; /* text-gray-700 */
+        }
+        .tab-button.active {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            margin-top: 1rem;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Responsive table container */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        /* Add hover effect to table rows */
+        tbody tr:hover {
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">Danish Payment Card Market Dashboard</h1>
+
+    <section id="overview" class="mb-8 p-6 bg-white rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Market Overview</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 class="font-semibold text-blue-800">Debit Card Dominance</h3>
+                <p class="text-sm text-blue-700">The Danish market heavily favors debit cards, especially the national Dankort system, often co-branded as Visa/Dankort.</p>
+            </div>
+            <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                <h3 class="font-semibold text-green-800">Credit Card Usage</h3>
+                <p class="text-sm text-green-700">Credit card usage is less prevalent. Reward programs are often tied to premium cards with fees, not a standard feature.</p>
+            </div>
+            <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <h3 class="font-semibold text-yellow-800">Key Networks</h3>
+                <p class="text-sm text-yellow-700">Visa and Mastercard are widely accepted internationally. Dankort is dominant domestically.</p>
+            </div>
+            <div class="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <h3 class="font-semibold text-purple-800">Digital Influence</h3>
+                <p class="text-sm text-purple-700">Digital banks (e.g., Lunar) and specialized providers (e.g., Bank Norwegian) offer transparent pricing and niche benefits, influencing the market.</p>
+            </div>
+             <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                <h3 class="font-semibold text-indigo-800">Contactless & Mobile</h3>
+                <p class="text-sm text-indigo-700">Contactless payments are widespread. MobilePay is a highly popular domestic mobile payment solution.</p>
+            </div>
+             <div class="p-4 bg-pink-50 rounded-lg border border-pink-200">
+                <h3 class="font-semibold text-pink-800">Primary Benefit</h3>
+                <p class="text-sm text-pink-700">Travel insurance is the main benefit associated with premium credit cards across most providers.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="comparison" class="mb-8 p-6 bg-white rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Card Comparison (Standard Fees)</h2>
+        <p class="text-sm text-gray-600 mb-4">Note: Fees often vary based on customer segments (e.g., Youth, Premium, Private Banking) and bundled packages. These tables show standard or common fees where available.</p>
+
+        <div class="mb-4">
+            <button class="tab-button active" onclick="showTab('debit-comparison')">Debit Cards</button>
+            <button class="tab-button" onclick="showTab('credit-comparison')">Credit Cards</button>
+        </div>
+
+        <div id="debit-comparison" class="tab-content active">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Debit Card Fees</h3>
+            <div class="table-container">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th>Bank</th>
+                            <th>Card Type(s)</th>
+                            <th>Annual Fee (DKK)</th>
+                            <th>ATM Fee - Other DK Banks (DKK)</th>
+                            <th>ATM Fee - Intl Other (DKK/%+min)</th>
+                            <th>Currency Conversion Markup (EUR / Other %)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td>Danske Bank</td>
+                            <td>Visa/Dankort (Std)</td>
+                            <td>269</td>
+                            <td>8-12</td>
+                            <td>1% min 30</td>
+                            <td>0.5% / 1.5%</td>
+                        </tr>
+                         <tr>
+                            <td>Danske Bank</td>
+                            <td>MC Direct (Std)</td>
+                            <td>199</td>
+                            <td>10</td>
+                            <td>1% min 30</td>
+                            <td>0.5% / 1.5%</td>
+                        </tr>
+                        <tr>
+                            <td>Nordea</td>
+                            <td>Visa/Dankort, Nordea Pay (Std)</td>
+                            <td>350 (Often 0 in package)</td>
+                            <td>8</td>
+                            <td>1% min 30</td>
+                            <td>0.5% / 1.5%</td>
+                        </tr>
+                        <tr>
+                            <td>Jyske Bank</td>
+                            <td>Visa Debit (Hverdag)</td>
+                            <td>150</td>
+                            <td>15</td>
+                            <td>15</td>
+                            <td>1.0% / 1.5%</td>
+                        </tr>
+                         <tr>
+                            <td>Jyske Bank</td>
+                            <td>Visa/Dankort (Hverdag)</td>
+                            <td>300</td>
+                            <td>15</td>
+                            <td>15</td>
+                            <td>1.0% / 1.5%</td>
+                        </tr>
+                        <tr>
+                            <td>Nykredit</td>
+                            <td>Visa/Dankort (BoligBank)</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1.0% / 1.5%</td>
+                        </tr>
+                         <tr>
+                            <td>Nykredit</td>
+                            <td>MC Debit (Bank/BoligBank)</td>
+                            <td>225</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1.0% / 1.5%</td>
+                        </tr>
+                        <tr>
+                            <td>Spar Nord</td>
+                            <td>Visa Debit (Std)</td>
+                            <td>200</td>
+                            <td>20</td>
+                            <td>1% min 30</td>
+                            <td>1.0% / 1.5%</td>
+                        </tr>
+                         <tr>
+                            <td>Spar Nord</td>
+                            <td>Dankort (Std)</td>
+                            <td>200</td>
+                            <td>20</td>
+                            <td>N/A (Domestic Only)</td>
+                            <td>N/A</td>
+                        </tr>
+                        <tr>
+                            <td>AL-Bank</td>
+                            <td>Visa/Dankort, MC Debit (Std - 2 free)</td>
+                            <td>0</td>
+                            <td>15</td>
+                            <td>1% min 30</td>
+                            <td>1.0% / 1.5%</td>
+                        </tr>
+                        <tr>
+                            <td>Lunar</td>
+                            <td>Visa Debit (Light Plan)</td>
+                            <td>0 (+59 delivery)</td>
+                            <td>9</td>
+                            <td>19</td>
+                            <td>1.0% / 1.0%</td>
+                        </tr>
+                         <tr>
+                            <td>Lunar</td>
+                            <td>Visa Debit (Plus Plan)</td>
+                            <td>79/month</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0% / 0%</td>
+                        </tr>
+                        <tr>
+                            <td>Sydbank</td>
+                            <td>MC Debit Classic, MC Dankort (Std)</td>
+                            <td>235</td>
+                            <td>8</td>
+                            <td>1.5% min 40</td>
+                            <td>1.0% / 1.5%</td>
+                        </tr>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="credit-comparison" class="tab-content">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Credit Card Fees & Features</h3>
+             <div class="table-container">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th>Bank</th>
+                            <th>Card Type (Example Tier)</th>
+                            <th>Annual Fee (DKK - Std)</th>
+                            <th>ATM Fee (DKK/%+min)</th>
+                            <th>Currency Conversion Markup (EUR / Other %)</th>
+                            <th>Stated APR/Interest (%)</th>
+                            <th>Key Benefit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td>Danske Bank</td>
+                            <td>MC Guld</td>
+                            <td>795</td>
+                            <td>2% min 50</td>
+                            <td>0.5% / 1.5%</td>
+                            <td>Not Stated (Interest applies if not paid)</td>
+                            <td>Travel Insurance (Europe)</td>
+                        </tr>
+                         <tr>
+                            <td>Danske Bank</td>
+                            <td>MC Platin</td>
+                            <td>1,395</td>
+                            <td>2% min 50</td>
+                            <td>0.5% / 1.5%</td>
+                            <td>Not Stated</td>
+                            <td>Travel Insurance (Worldwide)</td>
+                        </tr>
+                        <tr>
+                            <td>Nordea</td>
+                            <td>Nordea Gold</td>
+                            <td>800</td>
+                            <td>2% min 50</td>
+                            <td>0.5% / 1.5%</td>
+                            <td>Not Stated</td>
+                            <td>Travel/Purchase Insurance</td>
+                        </tr>
+                         <tr>
+                            <td>Nordea</td>
+                            <td>Nordea Platinum</td>
+                            <td>1,500</td>
+                            <td>2% min 50</td>
+                            <td>0.5% / 1.5%</td>
+                            <td>Not Stated</td>
+                            <td>Travel/Purchase Insurance, LoungeKey (10 visits)</td>
+                        </tr>
+                        <tr>
+                            <td>Jyske Bank</td>
+                            <td>MC Gold (Hverdag)</td>
+                            <td>550 (Insurance optional extra)</td>
+                            <td>15</td>
+                            <td>1.0% / 1.5% ? (Not stated clearly for credit)</td>
+                            <td>Not Stated</td>
+                            <td>Insurance Optional</td>
+                        </tr>
+                        <tr>
+                            <td>Nykredit</td>
+                            <td>MC Gold (Bank)</td>
+                            <td>1,000</td>
+                            <td>2% min 50</td>
+                            <td>1.0% / 1.5%</td>
+                            <td>0% (18% if arrears)</td>
+                            <td>Travel Insurance</td>
+                        </tr>
+                         <tr>
+                            <td>Nykredit</td>
+                            <td>MC Platinum (Bank)</td>
+                            <td>2,100</td>
+                            <td>2% min 50</td>
+                            <td>1.0% / 1.5%</td>
+                            <td>0% (18% if arrears)</td>
+                            <td>Travel Insurance, Priority Pass (10 visits)</td>
+                        </tr>
+                        <tr>
+                            <td>Spar Nord</td>
+                            <td>MC Gold (Std)</td>
+                            <td>Varies (Insurance optional)</td>
+                            <td>Varies</td>
+                            <td>1.0% / 1.5% ?</td>
+                            <td>Not Stated</td>
+                            <td>Insurance Optional</td>
+                        </tr>
+                        <tr>
+                            <td>AL-Bank</td>
+                            <td>MC Credit Gold (Std)</td>
+                            <td>1,395 (incl. Insurance)</td>
+                            <td>2% min 50</td>
+                            <td>1.0% / 1.5%</td>
+                            <td>Overdraft Rate</td>
+                            <td>Travel Insurance</td>
+                        </tr>
+                        <tr>
+                            <td>Bank Norwegian</td>
+                            <td>Visa Credit</td>
+                            <td>0</td>
+                            <td>0 (Interest applies immediately)</td>
+                            <td>1.99% / 1.99%</td>
+                            <td>21.93% ÅOP</td>
+                            <td>Travel Insurance, Rewards (CashPoints/Cashback)</td>
+                        </tr>
+                         <tr>
+                            <td>Sydbank</td>
+                            <td>MC Credit Gold (Std)</td>
+                            <td>795</td>
+                            <td>2% min 50</td>
+                            <td>1.0% / 1.5%</td>
+                            <td>12.7% Nom.</td>
+                            <td>Travel Insurance</td>
+                        </tr>
+                         <tr>
+                            <td>Sydbank</td>
+                            <td>MC Credit Platinum (Std)</td>
+                            <td>2,195</td>
+                            <td>2% min 50</td>
+                            <td>1.0% / 1.5%</td>
+                            <td>12.7% Nom.</td>
+                            <td>Travel Insurance, Lounge Access (5 visits)</td>
+                        </tr>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="infographics" class="mb-8 p-6 bg-white rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Visual Comparisons</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="chart-container">
+                <h3 class="text-lg font-medium text-gray-700 mb-2 text-center">Standard Debit Card Annual Fees (DKK)</h3>
+                <canvas id="debitFeeChart"></canvas>
+            </div>
+            <div class="chart-container">
+                 <h3 class="text-lg font-medium text-gray-700 mb-2 text-center">Example Credit Card Annual Fees (DKK - Gold/Platinum)</h3>
+                <canvas id="creditFeeChart"></canvas>
+            </div>
+            <div class="chart-container">
+                 <h3 class="text-lg font-medium text-gray-700 mb-2 text-center">Typical Currency Conversion Markups</h3>
+                 <canvas id="currencyMarkupChart"></canvas>
+            </div>
+             <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="text-lg font-medium text-gray-700 mb-3 text-center">Common Premium Credit Card Benefits</h3>
+                <ul class="space-y-2 text-sm text-gray-600">
+                    <li class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Travel Insurance (Often standard on Gold/Platinum)</li>
+                    <li class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>Airport Lounge Access (Typically Platinum/higher tiers, varying visits)</li>
+                     <li class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v1H2a1 1 0 000 2h1v1a1 1 0 001 1h3a1 1 0 001-1V7h1V6h-1V2H5zm6 0a2 2 0 00-2 2v1H8a1 1 0 100 2h1v1a1 1 0 001 1h3a1 1 0 001-1V7h1V6h-1V2h-3zM4 12a2 2 0 00-2 2v1H1a1 1 0 100 2h1v1a1 1 0 001 1h3a1 1 0 001-1v-1h1v-1h-1v-1H4zm6 0a2 2 0 00-2 2v1H7a1 1 0 100 2h1v1a1 1 0 001 1h3a1 1 0 001-1v-1h1v-1h-1v-1h-3z" clip-rule="evenodd" /></svg>Rewards (Less common; Bank Norwegian offers Cashback/Points)</li>
+                    <li class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>Purchase Protection/Extended Warranty (Offered by some, e.g., Nordea)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+     <section id="recommendations" class="mb-8 p-6 bg-white rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Recommendations by User Profile</h2>
+        <div class="space-y-4">
+            <div>
+                <h3 class="font-semibold text-md text-gray-800">🏠 Everyday Domestic User</h3>
+                <p class="text-sm text-gray-600">Standard Debit Card (Visa/Dankort or Mastercard Debit) from main bank, often free within packages.</p>
+            </div>
+            <div>
+                <h3 class="font-semibold text-md text-gray-800">✈️ Frequent Traveler</h3>
+                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1 pl-2">
+                    <li><span class="font-medium">Insurance Focus:</span> Gold/Platinum Credit Card from traditional bank (check annual fee vs. benefits).</li>
+                    <li><span class="font-medium">Low Cost/Rewards:</span> Bank Norwegian Visa Credit (0 DKK fee, insurance, rewards).</li>
+                    <li><span class="font-medium">Fee Minimization:</span> Lunar Premium plans (monthly fee for 0% conversion/ATM fees) or other fintech cards (Wise/Revolut).</li>
+                </ul>
+            </div>
+             <div>
+                <h3 class="font-semibold text-md text-gray-800">🏆 Reward Seeker</h3>
+                 <ul class="list-disc list-inside text-sm text-gray-600 space-y-1 pl-2">
+                     <li>Bank Norwegian Visa Credit (0.5% Cashback or CashPoints).</li>
+                     <li>Lunar SAS EuroBonus Debit Card (add-on fee).</li>
+                     <li>Niche cards for specific store discounts (e.g., Forbrugsforeningen).</li>
+                 </ul>
+            </div>
+             <div>
+                <h3 class="font-semibold text-md text-gray-800">💰 Budget-Conscious / Student</h3>
+                 <ul class="list-disc list-inside text-sm text-gray-600 space-y-1 pl-2">
+                     <li>Basic Payment Account ('Basal Betalingskonto') with low-cost debit card.</li>
+                     <li>Lunar 'Light' plan (free digital card).</li>
+                     <li>Youth accounts at traditional banks (often free debit cards).</li>
+                     <li>Bank Norwegian Visa Credit (0 DKK annual fee, if approved).</li>
+                 </ul>
+            </div>
+             <div>
+                <h3 class="font-semibold text-md text-gray-800">🌍 Expat / New Resident</h3>
+                 <ul class="list-disc list-inside text-sm text-gray-600 space-y-1 pl-2">
+                     <li>Start with a Basic Payment Account ('Basal Betalingskonto').</li>
+                     <li>Assess needs: Consider traditional bank packages or digital/niche providers (Lunar, Bank Norwegian) for specific benefits or lower international fees.</li>
+                 </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center text-xs text-gray-500 mt-8">
+        Data based on "A Comparative Analysis of Personal Debit and Credit Cards in Denmark" document provided. Standard fees and features shown; variations exist based on customer segments and specific terms. Always verify details directly with the bank. Data snapshot as of April 16, 2025.
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        function showTab(tabId) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Deactivate all tab buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+
+            // Show the selected tab content
+            const activeContent = document.getElementById(tabId);
+            if (activeContent) {
+                activeContent.classList.add('active');
+            }
+
+            // Activate the clicked button
+            const activeButton = document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+        }
+
+        // Chart.js Implementation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Data for Charts (Simplified from tables for visualization)
+            const debitFeeData = {
+                labels: ['Danske V/D', 'Nordea V/D', 'Jyske V/D', 'Nykredit V/D', 'Spar Nord V/D', 'AL-Bank V/D', 'Lunar Light', 'Sydbank MC D'],
+                datasets: [{
+                    label: 'Standard Annual Fee (DKK)',
+                    data: [269, 350, 300, 0, 200, 0, 0, 235], // Simplified standard fees
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)', // Blue-500
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const creditFeeData = {
+                labels: ['Danske Gold', 'Danske Plat', 'Nordea Gold', 'Nordea Plat', 'Nykredit Gold', 'Nykredit Plat', 'AL-Bank Gold', 'Bank Norwegian', 'Sydbank Gold', 'Sydbank Plat'],
+                datasets: [{
+                    label: 'Example Annual Fee (DKK)',
+                    data: [795, 1395, 800, 1500, 1000, 2100, 1395, 0, 795, 2195], // Example fees for higher tiers
+                    backgroundColor: 'rgba(16, 185, 129, 0.6)', // Emerald-500
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+             const currencyMarkupData = {
+                labels: ['Traditional Banks (EUR)', 'Traditional Banks (Other)', 'Bank Norwegian', 'Lunar Premium'],
+                datasets: [{
+                    label: 'Typical Markup %',
+                    data: [1.0, 1.5, 1.99, 0], // Typical ranges/examples
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.6)', // Red-500
+                        'rgba(249, 115, 22, 0.6)', // Orange-500
+                        'rgba(245, 158, 11, 0.6)', // Amber-500
+                        'rgba(139, 92, 246, 0.6)' // Violet-500
+                    ],
+                    borderColor: [
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(249, 115, 22, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(139, 92, 246, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+
+            // Chart Configurations
+            const commonChartOptions = {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: { family: "'Inter', sans-serif" }
+                        }
+                    },
+                    x: {
+                         ticks: {
+                            font: { family: "'Inter', sans-serif" }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Hide legend if label is clear enough
+                    },
+                     tooltip: {
+                        bodyFont: { family: "'Inter', sans-serif" },
+                        titleFont: { family: "'Inter', sans-serif" }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            };
+
+            // Create Debit Fee Chart
+            const debitFeeCtx = document.getElementById('debitFeeChart').getContext('2d');
+            new Chart(debitFeeCtx, {
+                type: 'bar',
+                data: debitFeeData,
+                options: commonChartOptions
+            });
+
+            // Create Credit Fee Chart
+            const creditFeeCtx = document.getElementById('creditFeeChart').getContext('2d');
+            new Chart(creditFeeCtx, {
+                type: 'bar',
+                data: creditFeeData,
+                options: commonChartOptions
+            });
+
+             // Create Currency Markup Chart
+            const currencyMarkupCtx = document.getElementById('currencyMarkupChart').getContext('2d');
+            new Chart(currencyMarkupCtx, {
+                type: 'bar',
+                data: currencyMarkupData,
+                 options: {
+                    ...commonChartOptions,
+                     indexAxis: 'y', // Make it a horizontal bar chart for better label readability
+                     scales: {
+                        x: { // Note: x-axis for horizontal bar
+                            beginAtZero: true,
+                             ticks: {
+                                font: { family: "'Inter', sans-serif" },
+                                callback: function(value) { return value + '%' } // Add percentage sign
+                            }
+                        },
+                        y: { // Note: y-axis for horizontal bar
+                            ticks: {
+                                font: { family: "'Inter', sans-serif" }
+                            }
+                        }
+                    }
+                 }
+            });
+        });
+    </script>
+
+</body>
+</html>

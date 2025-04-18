@@ -1,0 +1,30 @@
+{
+  "name": "data-dashboard",
+  "version": "1.0.0",
+  "description": "Interactive data dashboard sample for publish-confluence",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "publish": "npm run build && publish-confluence"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "date-fns": "^2.30.0",
+    "preact": "^10.18.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.5.0",
+    "publish-confluence": "file:../../",
+    "terser": "^5.39.0",
+    "vite": "^4.5.0"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

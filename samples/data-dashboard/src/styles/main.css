@@ -1,0 +1,240 @@
+/* 
+ * Main styles for the data dashboard application
+ * Designed to work well within Confluence HTML macros
+ */
+
+/* Base dashboard styles - namespaced to avoid conflicts with Confluence */
+.dashboard-wrapper {
+  --dashboard-primary: #0052CC;
+  --dashboard-secondary: #172B4D;
+  --dashboard-bg: #ffffff;
+  --dashboard-border: #DFE1E6;
+  --dashboard-accent: #36B37E;
+  --dashboard-warning: #FF5630;
+  --dashboard-text: #172B4D;
+  --dashboard-text-light: #6B778C;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+  color: var(--dashboard-text);
+}
+
+/* Button styles */
+.dashboard-button {
+  background: #F4F5F7;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 3px;
+  color: var(--dashboard-text);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  transition: background 0.2s ease;
+}
+
+.dashboard-button:hover {
+  background: #EBECF0;
+}
+
+.dashboard-button:active {
+  background: #DFE1E6;
+}
+
+.dashboard-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dashboard-button-primary {
+  background: var(--dashboard-primary);
+  border-color: var(--dashboard-primary);
+  color: white;
+}
+
+.dashboard-button-primary:hover {
+  background: #0747A6;
+}
+
+.dashboard-button-primary:active {
+  background: #00368C;
+}
+
+.dashboard-button-secondary {
+  background: #F4F5F7;
+  border-color: #DFE1E6;
+}
+
+.dashboard-button-sm {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+/* Form controls */
+.dashboard-input, .dashboard-select {
+  background: white;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 3px;
+  color: var(--dashboard-text);
+  font-size: 14px;
+  padding: 6px 8px;
+  min-width: 120px;
+}
+
+.dashboard-input:focus, .dashboard-select:focus {
+  border-color: var(--dashboard-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+}
+
+/* Chart container styles */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--dashboard-border);
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.chart-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Filter controls */
+.filter-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-right: 6px;
+  color: var(--dashboard-text-light);
+}
+
+/* Data table styles */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table th, .data-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--dashboard-border);
+}
+
+.data-table th {
+  font-weight: 600;
+  color: var(--dashboard-text-light);
+  background: #F4F5F7;
+}
+
+.data-table tr:hover td {
+  background-color: #F4F5F7;
+}
+
+/* Dashboard layout */
+.dashboard-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.dashboard-grid > div {
+  background-color: var(--dashboard-bg, #ffffff);
+  border: 1px solid var(--dashboard-border, #DFE1E6);
+  border-radius: 3px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  min-height: 300px;
+}
+
+/* Loading states */
+.dashboard-loading,
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.loading-spinner:before {
+  content: '';
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--dashboard-border);
+  border-top-color: var(--dashboard-primary);
+  animation: spinner .6s linear infinite;
+}
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+
+/* Error states */
+.dashboard-error {
+  text-align: center;
+  padding: 32px;
+  color: var(--dashboard-warning);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .data-table {
+    font-size: 12px;
+  }
+  
+  .data-table th, .data-table td {
+    padding: 6px 8px;
+  }
+}
+
+@media only screen and (max-width: 992px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

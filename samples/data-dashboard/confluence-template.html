@@ -1,0 +1,57 @@
+<h1>Interactive Data Dashboard</h1>
+
+<div class="dashboard-introduction">
+  <p>This interactive dashboard demonstrates advanced usage of <strong>publish-confluence</strong> for embedding complex JavaScript applications in Confluence pages.</p>
+  <div class="aui-message aui-message-info">
+    <p class="title">
+      <span class="aui-icon icon-info"></span>
+      <strong>Last updated:</strong> {{currentDate}}
+    </p>
+    <p>This dashboard is automatically published using a CI/CD pipeline. Updates occur daily at 9:00 AM.</p>
+  </div>
+</div>
+
+<h2>Dashboard Analytics</h2>
+
+<div class="dashboard-container">
+  {{{macro}}}
+</div>
+
+<h3>How to use this dashboard</h3>
+<ol>
+  <li>Use the date range picker to select your desired time period</li>
+  <li>Hover over chart elements to see detailed information</li>
+  <li>Click on segments in the pie chart to filter the data</li>
+  <li>Export data using the button in the top-right corner</li>
+</ol>
+
+<h3>Technical Information</h3>
+<table class="aui">
+  <thead>
+    <tr>
+      <th>Technology</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Framework</td>
+      <td>Preact for lightweight rendering</td>
+    </tr>
+    <tr>
+      <td>Charts</td>
+      <td>Chart.js for responsive visualizations</td>
+    </tr>
+    <tr>
+      <td>Bundler</td>
+      <td>Vite for fast builds and optimized output</td>
+    </tr>
+    <tr>
+      <td>Deployment</td>
+      <td>publish-confluence with automated CI/CD</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr/>
+<p><em>For technical support, please contact the development team.</em></p>

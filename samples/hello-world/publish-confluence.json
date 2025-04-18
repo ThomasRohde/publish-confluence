@@ -1,0 +1,21 @@
+{
+  "spaceKey": "~thro",
+  "pageTitle": "Hello World",
+  "distDir": "./dist",
+  "templatePath": "./confluence-template.html",
+  "macroTemplatePath": "./macro-template.html",
+  "includedFiles": [
+    "**/*.js",
+    "**/*.css",
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.svg",
+    "**/*.woff",
+    "**/*.woff2",
+    "**/*.ttf",
+    "**/*.eot"
+  ],
+  "excludedFiles": [
+    "**/*.map"
+  ]
+}

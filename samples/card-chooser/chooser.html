@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danish Card Chooser Wizard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Style for wizard steps */
+        .wizard-step {
+            display: none; /* Hide steps by default */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .wizard-step.active {
+            display: block; /* Show active step */
+            opacity: 1;
+        }
+        /* Add some visual flair to buttons */
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        /* Style radio buttons and labels for better click area */
+        input[type="radio"] + label {
+            cursor: pointer;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: all 0.2s ease;
+            display: block; /* Make label take full width */
+            margin-bottom: 0.5rem; /* Add space between options */
+        }
+        input[type="radio"]:checked + label {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            border-color: #2563eb; /* blue-600 */
+        }
+        input[type="radio"] {
+            display: none; /* Hide the actual radio button */
+        }
+        /* Progress bar styling */
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb; /* gray-200 */
+            border-radius: 9999px; /* rounded-full */
+            height: 8px;
+            overflow: hidden; /* Ensure inner bar stays contained */
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #3b82f6; /* blue-500 */
+            border-radius: 9999px; /* rounded-full */
+            transition: width 0.5s ease-in-out;
+        }
+        /* Result card styling */
+        .result-card {
+            background-color: white;
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1.5rem; /* p-6 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        .result-card h3 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            margin-bottom: 0.5rem; /* mb-2 */
+            color: #1f2937; /* gray-800 */
+        }
+        .result-card p {
+            color: #4b5563; /* gray-600 */
+            margin-bottom: 0.25rem; /* mb-1 */
+        }
+        .result-card ul {
+            list-style-type: disc;
+            margin-left: 1.25rem; /* ml-5 */
+            color: #4b5563; /* gray-600 */
+        }
+        .result-card .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 600; /* font-semibold */
+            margin-right: 0.5rem; /* mr-2 */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+        .badge-blue { background-color: #dbeafe; color: #1e40af; } /* blue-100, blue-800 */
+        .badge-green { background-color: #d1fae5; color: #065f46; } /* green-100, green-700 */
+        .badge-yellow { background-color: #fef3c7; color: #92400e; } /* yellow-100, yellow-700 */
+        .badge-red { background-color: #fee2e2; color: #991b1b; } /* red-100, red-800 */
+        .badge-purple { background-color: #ede9fe; color: #5b21b6; } /* violet-100, violet-700 */
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow-xl">
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">Danish Card Chooser Wizard</h1>
+        <p class="text-center text-gray-600 mb-6">Find the right debit or credit card for your needs in Denmark.</p>
+
+        <div class="progress-bar-container mb-8">
+            <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+        </div>
+
+        <form id="cardWizardForm">
+            <div id="step1" class="wizard-step active">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">1. What type of card are you primarily looking for?</h2>
+                <input type="radio" id="debit" name="cardType" value="debit" required>
+                <label for="debit">Debit Card (Money deducted directly from account)</label>
+
+                <input type="radio" id="credit" name="cardType" value="credit">
+                <label for="credit">Credit Card (Pay later, potential for benefits/insurance)</label>
+
+                <input type="radio" id="unsure_type" name="cardType" value="unsure">
+                <label for="unsure_type">I'm not sure / Open to suggestions</label>
+
+                <div class="mt-6 flex justify-end">
+                    <button type="button" onclick="nextStep(1)" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-md">Next</button>
+                </div>
+            </div>
+
+            <div id="step2" class="wizard-step">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">2. Where will you primarily use the card?</h2>
+                <input type="radio" id="domestic" name="usage" value="domestic" required>
+                <label for="domestic">Mainly in Denmark</label>
+
+                <input type="radio" id="international" name="usage" value="international">
+                <label for="international">Frequently Abroad / Online International Purchases</label>
+
+                <input type="radio" id="mixed_usage" name="usage" value="mixed">
+                <label for="mixed_usage">A mix of both</label>
+
+                <div class="mt-6 flex justify-between">
+                    <button type="button" onclick="prevStep(2)" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-md">Back</button>
+                    <button type="button" onclick="nextStep(2)" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-md">Next</button>
+                </div>
+            </div>
+
+            <div id="step3" class="wizard-step">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">3. How often do you travel internationally per year?</h2>
+                 <input type="radio" id="travel_rarely" name="travelFreq" value="rarely" required>
+                <label for="travel_rarely">Rarely (0-1 times)</label>
+
+                <input type="radio" id="travel_occasionally" name="travelFreq" value="occasionally">
+                <label for="travel_occasionally">Occasionally (2-4 times)</label>
+
+                <input type="radio" id="travel_frequently" name="travelFreq" value="frequently">
+                <label for="travel_frequently">Frequently (5+ times)</label>
+
+                <h2 class="text-xl font-semibold mb-4 mt-6 text-gray-700">Is included travel insurance important?</h2>
+                 <input type="radio" id="insurance_yes" name="insurance" value="yes" required>
+                <label for="insurance_yes">Yes, very important</label>
+
+                <input type="radio" id="insurance_maybe" name="insurance" value="maybe">
+                <label for="insurance_maybe">It's a nice bonus, but not essential</label>
+
+                <input type="radio" id="insurance_no" name="insurance" value="no">
+                <label for="insurance_no">No, I have separate insurance</label>
+
+                <div class="mt-6 flex justify-between">
+                    <button type="button" onclick="prevStep(3)" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-md">Back</button>
+                    <button type="button" onclick="nextStep(3)" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-md">Next</button>
+                </div>
+            </div>
+
+            <div id="step4" class="wizard-step">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">4. Are rewards (cashback, points) or lounge access important?</h2>
+                <input type="radio" id="rewards_yes" name="rewards" value="yes" required>
+                <label for="rewards_yes">Yes, rewards/points are a priority</label>
+
+                <input type="radio" id="lounge_yes" name="rewards" value="lounge">
+                <label for="lounge_yes">Yes, lounge access is a priority</label>
+
+                 <input type="radio" id="rewards_bonus" name="rewards" value="bonus">
+                <label for="rewards_bonus">They are a nice bonus, but not essential</label>
+
+                <input type="radio" id="rewards_no" name="rewards" value="no">
+                <label for="rewards_no">No, not important</label>
+
+                <div class="mt-6 flex justify-between">
+                    <button type="button" onclick="prevStep(4)" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-md">Back</button>
+                    <button type="button" onclick="nextStep(4)" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-md">Next</button>
+                </div>
+            </div>
+
+             <div id="step5" class="wizard-step">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">5. How sensitive are you to fees?</h2>
+                <input type="radio" id="fees_low" name="fees" value="low" required>
+                <label for="fees_low">Very sensitive - I want the lowest possible annual/monthly fee, even if it means fewer benefits or higher usage fees.</label>
+
+                <input type="radio" id="fees_moderate" name="fees" value="moderate">
+                <label for="fees_moderate">Moderately sensitive - Willing to pay a small fee for good value or convenience.</label>
+
+                <input type="radio" id="fees_benefits" name="fees" value="benefits">
+                <label for="fees_benefits">Less sensitive - Willing to pay higher fees for significant benefits (insurance, rewards, lounge access, fee waivers on usage).</label>
+
+                <div class="mt-6 flex justify-between">
+                    <button type="button" onclick="prevStep(5)" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-md">Back</button>
+                    <button type="submit" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-md">Get Recommendations</button>
+                </div>
+            </div>
+        </form>
+
+        <div id="step6" class="wizard-step">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Your Card Recommendations</h2>
+            <div id="resultsContainer" class="space-y-4">
+                </div>
+             <p class="text-sm text-gray-500 mt-6 text-center">
+                <strong>Disclaimer:</strong> These recommendations are based on the provided research document (April 2025). Fees, terms, and benefits can change. Always verify the latest details directly with the bank or card issuer before applying.
+            </p>
+            <div class="mt-8 flex justify-center">
+                <button type="button" onclick="restartWizard()" class="btn bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-md">Start Over</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5; // Number of input steps before results
+
+        // Function to navigate to the next step
+        function nextStep(step) {
+            // Basic validation: Check if a radio button in the current step is selected
+            const currentStepElement = document.getElementById(`step${step}`);
+            const radioGroup = currentStepElement.querySelector('input[type="radio"]:checked');
+            if (!radioGroup && step < totalSteps) { // Don't require selection on the last input step if submitting
+                 // Find the first radio button's name in the step for error message
+                const firstRadioName = currentStepElement.querySelector('input[type="radio"]').name;
+                alert(`Please make a selection for question ${step} before proceeding.`);
+                return; // Stop execution if validation fails
+            }
+
+            if (step < totalSteps + 1) { // Allow moving to results (step 6)
+                document.getElementById(`step${step}`).classList.remove('active');
+                currentStep = step + 1;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgressBar();
+            }
+        }
+
+        // Function to navigate to the previous step
+        function prevStep(step) {
+            if (step > 1) {
+                document.getElementById(`step${step}`).classList.remove('active');
+                currentStep = step - 1;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgressBar();
+            }
+        }
+
+        // Function to update the progress bar
+        function updateProgressBar() {
+            const progress = ((currentStep - 1) / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        // Function to handle form submission and generate recommendations
+        document.getElementById('cardWizardForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+             // Final validation for the last step
+            const lastStepElement = document.getElementById(`step${totalSteps}`);
+            const lastRadioGroup = lastStepElement.querySelector('input[type="radio"]:checked');
+            if (!lastRadioGroup) {
+                alert(`Please make a selection for question ${totalSteps} before proceeding.`);
+                return; // Stop execution if validation fails
+            }
+
+
+            // Hide the last input step and show results
+            document.getElementById(`step${totalSteps}`).classList.remove('active');
+            currentStep = totalSteps + 1; // Move to results step index
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            updateProgressBar(); // Should show 100% or be hidden
+
+
+            // Gather user selections
+            const formData = new FormData(event.target);
+            const selections = Object.fromEntries(formData.entries());
+
+            // --- Recommendation Logic ---
+            // Based on the PDF analysis (Section X primarily)
+            const recommendations = generateRecommendations(selections);
+
+            // Display recommendations
+            displayRecommendations(recommendations);
+        });
+
+        // Function to generate recommendations based on selections
+        function generateRecommendations(s) {
+            const results = [];
+            const wantsDebit = s.cardType === 'debit';
+            const wantsCredit = s.cardType === 'credit';
+            const unsureType = s.cardType === 'unsure';
+
+            const isDomestic = s.usage === 'domestic';
+            const isInternational = s.usage === 'international';
+            const isMixedUsage = s.usage === 'mixed';
+
+            const travelsFrequently = s.travelFreq === 'frequently';
+            const travelsOccasionally = s.travelFreq === 'occasionally';
+            const travelsRarely = s.travelFreq === 'rarely';
+
+            const wantsInsurance = s.insurance === 'yes';
+            const insuranceBonus = s.insurance === 'maybe';
+
+            const wantsRewards = s.rewards === 'yes';
+            const wantsLounge = s.rewards === 'lounge';
+            const rewardsBonus = s.rewards === 'bonus';
+
+            const feeSensitiveLow = s.fees === 'low';
+            const feeSensitiveModerate = s.fees === 'moderate';
+            const feeSensitiveBenefits = s.fees === 'benefits';
+
+            // Profile: Everyday Domestic User (Low Travel, Low International Use)
+            if ((wantsDebit || unsureType) && (isDomestic || (isMixedUsage && travelsRarely)) && !wantsInsurance && !wantsRewards && !wantsLounge) {
+                 results.push({
+                    title: "Standard Debit Card (e.g., Visa/Dankort, Mastercard Debit)",
+                    description: "Best for everyday domestic spending. Often included free or cheaply in bank packages.",
+                    pros: ["Low/no annual fee within bank packages", "Simple direct debit", "Widely accepted in Denmark (Dankort)"],
+                    cons: ["Can have fees for non-bank ATM use", "Currency conversion fees apply abroad (typically 1-1.5%)", "Few benefits"],
+                    tags: ["Debit", "Domestic Use", "Low Cost"],
+                    examples: ["Visa/Dankort from Danske Bank, Nordea, Jyske, Nykredit, AL-Bank, etc.", "Mastercard Debit from Sydbank, AL-Bank, Nykredit"]
+                });
+            }
+
+             // Profile: Budget-Conscious User (Fee Sensitive Low)
+            if (feeSensitiveLow) {
+                if (wantsDebit || unsureType) {
+                    results.push({
+                        title: "Basic Payment Account Debit Card",
+                        description: "Legally mandated basic account, ensuring access with potentially low fees.",
+                        pros: ["Guaranteed access for EU residents", "Focus on low basic cost"],
+                        cons: ["May have limited features", "Usage fees (ATM, etc.) might still apply"],
+                        tags: ["Debit", "Low Cost", "Basic"],
+                        examples: ["Check Basalbetalingskonto.dk for specific bank offers"]
+                    });
+                     results.push({
+                        title: "Lunar Light (Digital Bank)",
+                        description: "Digital-first option with a free basic plan.",
+                        pros: ["No monthly fee for 'Light' plan", "App-based convenience", "Virtual card included"],
+                        cons: ["Physical card costs extra (59 DKK)", "Fees apply for ATM withdrawals (9 DKK DK/EU) and currency conversion (1%) on Light plan"],
+                        tags: ["Debit", "Digital", "Low Cost"],
+                        examples: ["Lunar Visa Debit (Light Plan)"]
+                    });
+                }
+                 if (wantsCredit || unsureType) {
+                    results.push({
+                        title: "Bank Norwegian Visa Credit Card",
+                        description: "A credit card option with no annual fee, appealing for cost-conscious users wanting credit.",
+                        pros: ["No annual fee", "Includes basic travel/cancellation insurance", "Offers choice of cashback or CashPoints", "0 DKK ATM *fee* (but interest applies immediately)"],
+                        cons: ["High APR (e.g., 21.93% ÅOP) if balance isn't paid in full", "Interest accrues immediately on cash withdrawals", "Higher currency conversion fee (1.99%)"],
+                        tags: ["Credit", "Low Cost", "Rewards", "Insurance"],
+                        examples: ["Bank Norwegian Visa"]
+                    });
+                }
+            }
+
+
+            // Profile: Frequent Traveler - Insurance Focus
+            if ((wantsCredit || unsureType) && (travelsFrequently || travelsOccasionally) && wantsInsurance && (feeSensitiveBenefits || feeSensitiveModerate)) {
+                 results.push({
+                    title: "Premium Credit Card (Gold/Platinum Tier)",
+                    description: "Best for frequent travelers prioritizing comprehensive travel insurance. Often includes worldwide coverage.",
+                    pros: ["Comprehensive travel insurance (often worldwide on Platinum)", "Potential for lounge access (Platinum)", "Purchase protection features", "Higher credit limits"],
+                    cons: ["High annual fees (800-2200+ DKK) unless waived via premium banking status", "High fees/interest for cash withdrawals", "Standard currency conversion fees (1-1.5%)"],
+                    tags: ["Credit", "Travel", "Insurance", "Premium"],
+                    examples: ["Nordea Gold/Platinum", "Danske Bank Guld/Platin", "Nykredit Gold/Platinum", "Jyske Bank Gold/Platinum", "Sydbank Gold/Platinum", "AL-Bank Gold/Platinum"]
+                });
+            }
+
+             // Profile: Frequent Traveler - Low Cost / Fee Minimization Focus
+            if ((isInternational || isMixedUsage || travelsFrequently || travelsOccasionally) && (feeSensitiveLow || feeSensitiveModerate)) {
+                 if (wantsCredit || unsureType) {
+                    // Bank Norwegian already added under Budget-Conscious, but relevant here too. Add if not already present.
+                     if (!results.some(r => r.title.includes("Bank Norwegian"))) {
+                         results.push({
+                            title: "Bank Norwegian Visa Credit Card",
+                            description: "No annual fee credit card with basic travel insurance and rewards, good for cost-conscious travelers.",
+                            pros: ["No annual fee", "Includes basic travel/cancellation insurance", "Choice of cashback or CashPoints", "0 DKK ATM *fee* (but interest applies immediately)"],
+                            cons: ["High APR if balance isn't paid", "Interest on cash withdrawals", "1.99% currency conversion fee"],
+                            tags: ["Credit", "Travel", "Low Cost", "Rewards", "Insurance"],
+                            examples: ["Bank Norwegian Visa"]
+                        });
+                    }
+                }
+                 if (wantsDebit || unsureType) {
+                     results.push({
+                        title: "Lunar Plus/Unlimited (Digital Bank)",
+                        description: "Subscription-based debit card offering fee waivers for frequent international use.",
+                        pros: ["0% currency conversion fee", "Free ATM withdrawals worldwide", "Includes travel insurance (Tryg)", "App convenience"],
+                        cons: ["Monthly subscription fee (79/139 DKK)", "Requires paid plan for benefits"],
+                        tags: ["Debit", "Travel", "Digital", "Fee Minimization", "Insurance"],
+                        examples: ["Lunar Visa Debit (Plus or Unlimited Plan)"]
+                    });
+                     // Mentioning alternatives briefly
+                     results.push({
+                         title: "Other Fintech Travel Cards (e.g., Wise, Revolut)",
+                         description: "Specialized non-bank options designed for low international fees (outside the scope of the provided bank research).",
+                         pros: ["Often very low currency conversion fees", "Multi-currency accounts"],
+                         cons: ["Not traditional banks", "May have different fee structures or limits"],
+                         tags: ["Debit", "Travel", "Fee Minimization", "Fintech"],
+                         examples: ["Wise Multi-currency Card", "Revolut Card"]
+                     });
+                }
+            }
+
+             // Profile: Reward Seeker
+            if (wantsRewards && (wantsCredit || unsureType)) {
+                 // Bank Norwegian already likely added, ensure it's mentioned for rewards.
+                 if (!results.some(r => r.title.includes("Bank Norwegian"))) {
+                     results.push({
+                        title: "Bank Norwegian Visa Credit Card",
+                        description: "The main accessible option for general rewards (cashback/points) on a free card.",
+                        pros: ["Choice of 0.5% cashback or Norwegian CashPoints", "No annual fee", "Includes basic travel insurance"],
+                        cons: ["High APR if balance isn't paid", "1.99% currency conversion fee"],
+                        tags: ["Credit", "Rewards", "Low Cost", "Insurance"],
+                        examples: ["Bank Norwegian Visa"]
+                    });
+                 } else {
+                     // Add rewards tag if missing from existing entry
+                     const bnEntry = results.find(r => r.title.includes("Bank Norwegian"));
+                     if (bnEntry && !bnEntry.tags.includes("Rewards")) {
+                         bnEntry.tags.push("Rewards");
+                     }
+                 }
+            }
+             if (wantsRewards && (wantsDebit || unsureType)) {
+                 results.push({
+                    title: "Lunar SAS EuroBonus Card (Add-on)",
+                    description: "A co-branded debit card option for earning SAS EuroBonus points.",
+                    pros: ["Earn EuroBonus points on purchases"],
+                    cons: ["Requires a paid Lunar subscription (Plus/Unlimited)", "Additional monthly fee for the SAS card itself"],
+                    tags: ["Debit", "Rewards", "Travel", "Airline Points"],
+                    examples: ["Lunar SAS EuroBonus Mastercard (Requires Lunar Plan + Add-on Fee)"]
+                });
+                  results.push({
+                    title: "Niche Reward/Discount Cards",
+                    description: "Cards offering specific discounts or cashback at partner stores or fuel stations.",
+                    pros: ["Potentially higher rewards/discounts in specific categories"],
+                    cons: ["Rewards limited to specific partners", "May have own fees/terms"],
+                    tags: ["Credit", "Rewards", "Niche"],
+                    examples: ["Forbrugsforeningen Card", "Ikano Bank Visa", "Circle K Mastercard"]
+                });
+            }
+
+             // Profile: Lounge Access Seeker
+            if (wantsLounge && (wantsCredit || unsureType) && feeSensitiveBenefits) {
+                 results.push({
+                    title: "High-Tier Credit Card (Platinum/World Elite)",
+                    description: "Lounge access is typically reserved for the highest credit card tiers.",
+                    pros: ["Airport lounge access (Priority Pass/LoungeKey)", "Comprehensive travel insurance", "Other premium benefits"],
+                    cons: ["Very high annual fees (often 1500-2200+ DKK)", "Strict eligibility criteria likely"],
+                    tags: ["Credit", "Travel", "Lounge Access", "Premium", "Insurance"],
+                    examples: ["Nordea Platinum (LoungeKey)", "Nykredit Platinum/World Elite (Priority Pass)", "Sydbank Platinum (Priority Pass - limited visits)", "Jyske Bank Platinum (Priority Pass as paid add-on)"]
+                });
+            }
+
+            // Fallback / General Considerations if few specific matches
+            if (results.length === 0) {
+                 results.push({
+                    title: "Consider Your Primary Bank's Offerings",
+                    description: "If you have an existing relationship, check your bank's standard debit (Visa/Dankort) and credit card options. Package deals might offer good value.",
+                    pros: ["Convenience of single provider", "Potential fee waivers based on customer status"],
+                    cons: ["May not be the absolute cheapest or have specific desired benefits"],
+                    tags: ["General", "Debit", "Credit"],
+                    examples: ["Check Danske Bank, Nordea, Jyske Bank, Nykredit, Sydbank, AL-Bank, Spar Nord, etc."]
+                });
+                 results.push({
+                    title: "Re-evaluate Priorities",
+                    description: "Your combination of preferences didn't strongly match a specific profile. Consider which factors (cost, insurance, rewards, travel fees) are most important.",
+                    pros: [],
+                    cons: [],
+                    tags: ["General"],
+                    examples: []
+                });
+            }
+
+            // --- Deduplicate results based on title ---
+            const uniqueResults = results.reduce((acc, current) => {
+                const x = acc.find(item => item.title === current.title);
+                if (!x) {
+                    return acc.concat([current]);
+                } else {
+                    // Optionally merge tags or data if needed, but for now, just keep the first instance
+                    return acc;
+                }
+            }, []);
+
+
+            return uniqueResults;
+        }
+
+        // Function to display recommendations in the results container
+        function displayRecommendations(recommendations) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = ''; // Clear previous results
+
+            if (recommendations.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-600">No specific recommendations found based on your selections. Please try adjusting your criteria or consult bank information directly.</p>';
+                return;
+            }
+
+            recommendations.forEach(rec => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'result-card';
+
+                let tagsHTML = rec.tags.map(tag => {
+                    let colorClass = 'badge-blue'; // Default
+                    if (tag.toLowerCase().includes('cost') || tag.toLowerCase().includes('basic')) colorClass = 'badge-yellow';
+                    if (tag.toLowerCase().includes('travel') || tag.toLowerCase().includes('insurance') || tag.toLowerCase().includes('lounge')) colorClass = 'badge-purple';
+                    if (tag.toLowerCase().includes('rewards') || tag.toLowerCase().includes('points')) colorClass = 'badge-green';
+                    if (tag.toLowerCase().includes('credit')) colorClass = 'badge-red';
+                    if (tag.toLowerCase().includes('debit')) colorClass = 'badge-blue';
+                    if (tag.toLowerCase().includes('premium')) colorClass = 'badge-gray-dark'; // Need to define this
+                     if (tag.toLowerCase().includes('digital') || tag.toLowerCase().includes('fintech')) colorClass = 'badge-teal'; // Need to define this
+
+                    return `<span class="badge ${colorClass}">${tag}</span>`;
+                }).join('');
+
+
+                let prosHTML = rec.pros.length > 0 ? '<strong>Pros:</strong><ul>' + rec.pros.map(p => `<li>${p}</li>`).join('') + '</ul>' : '';
+                let consHTML = rec.cons.length > 0 ? '<strong class="mt-2 inline-block">Cons:</strong><ul>' + rec.cons.map(c => `<li>${c}</li>`).join('') + '</ul>' : '';
+                let examplesHTML = rec.examples.length > 0 ? '<p class="mt-2"><strong>Examples:</strong> ' + rec.examples.join(', ') + '</p>' : '';
+
+
+                cardElement.innerHTML = `
+                    <div class="mb-2">${tagsHTML}</div>
+                    <h3>${rec.title}</h3>
+                    <p class="mb-3">${rec.description}</p>
+                    ${prosHTML}
+                    ${consHTML}
+                    ${examplesHTML}
+                `;
+                container.appendChild(cardElement);
+            });
+        }
+
+         // Function to restart the wizard
+        function restartWizard() {
+            document.getElementById('cardWizardForm').reset(); // Reset form fields
+            document.getElementById(`step${currentStep}`).classList.remove('active'); // Hide results
+            currentStep = 1;
+            document.getElementById(`step${currentStep}`).classList.add('active'); // Show first step
+            updateProgressBar(); // Reset progress bar
+            document.getElementById('resultsContainer').innerHTML = ''; // Clear results container
+        }
+
+
+        // Initial setup
+        updateProgressBar(); // Set initial progress bar state (0%)
+
+    </script>
+
+</body>
+</html>

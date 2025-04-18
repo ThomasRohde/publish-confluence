@@ -1,0 +1,32 @@
+<div class="dashboard-wrapper" style="min-height: 600px; width: 100%; margin: 20px 0;">
+  <!-- Loading state that will be replaced once JS loads -->
+  <div id="dashboard-loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading dashboard data...</div>
+  </div>
+  
+  <!-- Dashboard application container -->
+  <div id="dashboard-app" style="display: none; height: 100%;">
+    <!-- App will be mounted here by JavaScript -->
+    <div id="controls-container"></div>
+    <div class="dashboard-grid">
+      <div class="chart-container" id="summary-metrics"></div>
+      <div class="chart-container" id="trend-chart"></div>
+      <div class="chart-container" id="distribution-chart"></div>
+      <div class="chart-container" id="data-table"></div>
+    </div>
+  </div>
+  
+  <!-- Error state container -->
+  <div id="dashboard-error" style="display: none; color: #c00; padding: 20px; text-align: center;">
+    <h3>Unable to load dashboard</h3>
+    <p class="error-message"></p>
+    <button id="retry-button" class="aui-button">Retry</button>
+  </div>
+
+  <!-- Inject style tags here -->
+  {{{styles}}}
+
+  <!-- Inject script tags here -->
+  {{{scripts}}}
+</div>

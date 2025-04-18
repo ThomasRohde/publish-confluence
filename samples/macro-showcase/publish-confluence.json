@@ -1,0 +1,18 @@
+{
+  "spaceKey": "~thro",
+  "pageTitle": "Confluence Macro Showcase",
+  "parentPageTitle": "Publishing to Confluence",
+  "templatePath": "./confluence-template.html",
+  "macroTemplatePath": "./macro-template.html",
+  "distDir": "./dist",
+  "includedFiles": [
+    "**/*.js", 
+    "**/*.css", 
+    "**/*.png", 
+    "**/*.jpg", 
+    "**/*.svg"
+  ],
+  "excludedFiles": [
+    "**/*.map"
+  ]
+}
