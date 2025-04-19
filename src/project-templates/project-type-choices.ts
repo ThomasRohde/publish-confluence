@@ -31,5 +31,10 @@ export const PROJECT_TYPE_CHOICES: ProjectTypeChoice[] = [
     id: 4,
     name: 'TypeScript Application',
     description: 'Static typing, enhanced developer experience'
+  },
+  {
+    id: 5,
+    name: 'Documentation Project',
+    description: 'Pure documentation pages (no JavaScript)'
   }
 ];

@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import * as readline from 'readline';
 import { getProjectTemplate, Logger } from './project-templates';
+import { DocumentationProject } from './project-templates/documentation-project';
 import { PROJECT_TYPE_CHOICES } from './project-templates/project-type-choices';
 
 /**
@@ -60,15 +61,13 @@ export async function createProject(log: Logger): Promise<void> {
     PROJECT_TYPE_CHOICES.forEach(type => 
       console.log(chalk.cyan(`${type.id}. ${type.name} (${type.description})`))
     );
-    
-    let projectTypeInput = await question(rl, 'Select project type (1-4)', '1');
+      let projectTypeInput = await question(rl, `Select project type (1-${PROJECT_TYPE_CHOICES.length})`, '1');
     const projectType = parseInt(projectTypeInput) || 1;
     
-    if (projectType < 1 || projectType > 4) {
+    if (projectType < 1 || projectType > PROJECT_TYPE_CHOICES.length) {
       log.error(`Invalid project type selection. Using type 1 (${PROJECT_TYPE_CHOICES[0].name})`);
     }
-    
-    // Get the project template based on the selected type
+      // Get the project template based on the selected type
     const template = getProjectTemplate(projectType, log);
     
     // Basic configuration
@@ -76,18 +75,33 @@ export async function createProject(log: Logger): Promise<void> {
       projectName = await question(rl, 'Enter project name', path.basename(process.cwd()));
     }
     
-    const pageTitle = await question(rl, 'Enter the page title', projectName);
+    // Special handling for Documentation Project
+    let pageCount = 1;
+    if (projectType === 5) { // Documentation Project
+      const pageCountInput = await question(rl, 'Enter the number of pages', '1');
+      pageCount = parseInt(pageCountInput) || 1;
+      if (pageCount < 1) {
+        pageCount = 1;
+        log.error('Invalid page count. Using 1 page.');
+      }
+    }
+      const pageTitle = await question(rl, 'Enter the page title', projectName);
     const spaceKey = await question(rl, 'Enter the Confluence space key', 'MYSPACE');
-    const parentPageTitle = await question(rl, 'Enter the parent page title (optional)', '');
-    const distDir = await question(rl, 'Enter the distribution directory', './dist');
     
+    // Ask for parent page title (always needed regardless of project type)
+    const parentPageTitle = await question(rl, 'Enter the parent page title (optional)', '');
+    
+    const distDir = await question(rl, 'Enter the distribution directory', './dist');    
     // Advanced configuration
     console.log(chalk.blue('\nAdvanced configuration (press Enter to use defaults):'));
     const templatePath = await question(rl, 'Path to the page template', './confluence-template.html');
-    const macroTemplatePath = await question(rl, 'Path to the macro template', './macro-template.html');
     
-    const createDotEnv = (await question(rl, 'Create .env file for authentication? (y/n)', 'y')).toLowerCase() === 'y';
-    const createTemplates = (await question(rl, 'Create template files? (y/n)', 'y')).toLowerCase() === 'y';
+    // Only ask for macro template path if not a documentation project
+    let macroTemplatePath = null;
+    if (projectType !== 5) {
+      macroTemplatePath = await question(rl, 'Path to the macro template', './macro-template.html');
+    }
+      const createDotEnv = (await question(rl, 'Create .env file for authentication? (y/n)', 'y')).toLowerCase() === 'y';
     
     // Create publish-confluence.json
     const config: any = {
@@ -101,17 +115,64 @@ export async function createProject(log: Logger): Promise<void> {
       excludedFiles: ['**/*.map'],
     };
     
+    // For Documentation Project with multiple pages, set up child pages
+    if (projectType === 5 && pageCount > 1) {
+      // Create child page configurations
+      const childPages = [];
+      for (let i = 1; i < pageCount; i++) {
+        childPages.push({
+          pageTitle: `Page ${i}`,
+          templatePath: `./child-pages/page-${i}.html`,
+          macroTemplatePath: null
+        });
+      }
+      
+      // Add child pages to config
+      config.childPages = childPages;
+    }
+    
     // Create config file
     const configPath = path.resolve(process.cwd(), 'publish-confluence.json');
     await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
     log.success(`Created publish-confluence.json`);
+      // Always create template files
+    await fs.writeFile(path.resolve(process.cwd(), templatePath), template.getPageTemplate(), 'utf8');
     
-    // Create template files if requested
-    if (createTemplates) {
-      await fs.writeFile(path.resolve(process.cwd(), templatePath), template.getPageTemplate(), 'utf8');
-      await fs.writeFile(path.resolve(process.cwd(), macroTemplatePath), template.getMacroTemplate(), 'utf8');
+    // For Documentation Project with multiple pages, create child page structure
+    if (projectType === 5 && pageCount > 1) {
+      // Create child pages directory
+      const childPagesDir = path.join(process.cwd(), 'child-pages');
+      await fs.mkdir(childPagesDir, { recursive: true });
       
+      // Create template files for each child page
+      for (let i = 1; i < pageCount; i++) {
+        const childTemplate = `<h1>Page ${i}</h1>
+
+<p>Add your content for child page ${i} here.</p>
+
+{{#confluence-info title="Child Page ${i}"}}
+<p>This is a child page in your documentation structure.</p>
+{{/confluence-info}}
+
+<hr/>
+<p><em>Last updated: {{currentDate}}</em></p>`;
+
+        await fs.writeFile(
+          path.join(childPagesDir, `page-${i}.html`),
+          childTemplate,
+          'utf8'
+        );
+      }
+      
+      log.success(`Created ${pageCount - 1} child page templates in 'child-pages' directory`);
+    }
+    
+    // Create macro template if needed (not for Documentation Project)
+    if (projectType !== 5 && template.getMacroTemplate()) {
+      await fs.writeFile(path.resolve(process.cwd(), macroTemplatePath as string), template.getMacroTemplate(), 'utf8');
       log.success(`Created template files: ${templatePath}, ${macroTemplatePath}`);
+    } else {
+      log.success(`Created template file: ${templatePath}`);
     }
     
     // Create .env file if requested
