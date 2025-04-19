@@ -9,7 +9,7 @@ import { PublishConfig } from './types';
  * Recursive Zod schema for PublishConfig including childPages
  */
 const pageConfigSchema: ZodTypeAny = z.lazy(() => z.object({
-  spaceKey: z.string().min(1, { message: "spaceKey is required and cannot be empty" }),
+  spaceKey: z.string().min(1, { message: "spaceKey is required and cannot be empty" }).optional(),
   pageTitle: z.string().min(1, { message: "pageTitle is required and cannot be empty" }),
   parentPageTitle: z.string().optional(),
   templatePath: z.string().default('./confluence-template.html'),
@@ -52,8 +52,11 @@ const log = createLogger();
  */
 function validateConfig(config: Partial<PublishConfig>): PublishConfig {
   try {
-    // Parse and cast result to PublishConfig
-    const validated = pageConfigSchema.parse(config) as PublishConfig;
+    // First process the inheritance from parent to child pages
+    const processedConfig = processConfigInheritance(config);
+    
+    // Then parse and cast result to PublishConfig
+    const validated = pageConfigSchema.parse(processedConfig) as PublishConfig;
 
     // Apply special logic for macroTemplatePath defaults
     if (validated.macroTemplatePath !== null && validated.includedFiles.length === 0) {
@@ -79,6 +82,56 @@ function validateConfig(config: Partial<PublishConfig>): PublishConfig {
     // Re-throw other errors
     throw err;
   }
+}
+
+/**
+ * Recursively processes configuration to apply inheritance
+ * from parent to child pages for properties like spaceKey
+ * 
+ * @param config - Configuration object to process
+ * @param parentConfig - Parent configuration to inherit from
+ * @returns Processed configuration with inheritance applied
+ */
+function processConfigInheritance(config: Partial<PublishConfig>, parentConfig?: Partial<PublishConfig>): Partial<PublishConfig> {
+  // For root config, no inheritance needed
+  if (!parentConfig) {
+    // Process child pages if they exist
+    if (config.childPages && Array.isArray(config.childPages)) {
+      // Need to cast to any to avoid TypeScript circular reference issues
+      (config.childPages as any) = config.childPages.map((childConfig: Partial<PublishConfig>) => 
+        processConfigInheritance(childConfig, config)
+      );
+    }
+    return config;
+  }
+
+  // For child configs, inherit properties from parent if they're missing
+  const inheritedConfig = { ...config };
+  
+  // Properties that should be inherited if not specified in child
+  if (!inheritedConfig.spaceKey && parentConfig.spaceKey) {
+    inheritedConfig.spaceKey = parentConfig.spaceKey;
+    log.verbose(`Child page "${inheritedConfig.pageTitle}" inherited spaceKey "${parentConfig.spaceKey}" from parent`);
+  }
+
+  // Additional properties that make sense to inherit
+  if (!inheritedConfig.templatePath && parentConfig.templatePath) {
+    inheritedConfig.templatePath = parentConfig.templatePath;
+  }
+  
+  if (!('macroTemplatePath' in inheritedConfig) && 'macroTemplatePath' in parentConfig) {
+    inheritedConfig.macroTemplatePath = parentConfig.macroTemplatePath;
+  }
+
+  // Process nested child pages recursively
+  if (inheritedConfig.childPages && Array.isArray(inheritedConfig.childPages)) {
+    // Need to cast to any to avoid TypeScript circular reference issues
+    (inheritedConfig.childPages as any) = inheritedConfig.childPages.map((childConfig: Partial<PublishConfig>) => 
+      processConfigInheritance(childConfig, inheritedConfig)
+    );
+  }
+
+  return inheritedConfig;
 }
 
 /**

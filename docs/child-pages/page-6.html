@@ -45,7 +45,7 @@
   <p>If a child page doesn't need an HTML macro or attachments (e.g., a pure documentation page), set <code>macroTemplatePath</code> and <code>distDir</code> to <code>null</code>.</p>
 {{/confluence-note}}
 
-<h2>Project Structure & Tech Stacks</h2>
+<h2>Project Structure and Tech Stacks</h2>
 <p>While <code>publish-confluence</code> is flexible, following certain project structures and choosing appropriate technologies can lead to better performance and maintainability when embedding applications in Confluence.</p>
 
 <h3>Recommended Project Structure</h3>
@@ -85,7 +85,7 @@ my-confluence-app/
     <li><strong>Framework:</strong> React, Vue</li>
     <li><strong>Bundler:</strong> Vite, Webpack 5</li>
     <li><strong>CSS:</strong> CSS Modules, Styled Components, Tailwind CSS</li>
-    <li><strong>Optimization:</strong> Implement code splitting, tree shaking, and lazy loading. Use a loading indicator in your `macro-template.html`.</li>
+    <li><strong>Optimization:</strong> Implement code splitting, tree shaking, and lazy loading. Use a loading indicator in your <code>macro-template.html</code>.</li>
 </ul>
 
 <h4>3. Data Visualization Applications</h4>
@@ -93,71 +93,34 @@ my-confluence-app/
 <ul>
     <li><strong>Framework:</strong> Any lightweight framework (Preact, Svelte, Vanilla JS)</li>
     <li><strong>Visualization Library:</strong> Chart.js, D3.js, ECharts, Plotly.js (consider bundle size impact)</li>
-    *   <strong>Data Handling:</strong> Fetch data efficiently. Consider client-side aggregation or server-side pre-aggregation. Use web workers for heavy computations if needed.</li>
+    <li><strong>Data Handling:</strong> Fetch data efficiently. Consider client-side aggregation or server-side pre-aggregation. Use web workers for heavy computations if needed.</li>
     <li><strong>Interactivity:</strong> Add filters, zooming, and tooltips for better exploration.</li>
 </ul>
-
-<h2>Build Optimization Tips</h2>
-<p>Optimizing your build process is crucial for a good user experience within Confluence:</p>
-<ol>
-    <li><strong>Code Splitting:</strong> Break your application into smaller chunks that load on demand. Most modern bundlers support this via dynamic `import()`.
-        {{#confluence-code language="javascript" title="Dynamic Import Example" linenumbers=false}}
-// Load a heavy component only when needed
-const ChartComponent = React.lazy(() => import('./components/HeavyChart'));
-
-function MyDashboard() {
-  // ...
-  return (
-    <React.Suspense fallback={<div>Loading Chart...</div>}>
-      <ChartComponent data={chartData} />
-    </React.Suspense>
-  );
-}
-        {{/confluence-code}}
-    </li>
-    <li><strong>Tree Shaking:</strong> Ensure your bundler is configured to remove unused code from your final bundles.</li>
-    <li><strong>Asset Optimization:</strong>
-        <ul>
-            <li>Compress images (use tools like TinyPNG or image optimizers in your build).</li>
-            <li>Use modern image formats like WebP where appropriate.</li>
-            <li>Use SVGs for icons and simple graphics.</li>
-            <li>Subset fonts to include only the characters and weights you need.</li>
-        </ul>
-    </li>
-    <li><strong>Minimize Dependencies:</strong> Audit your `package.json`. Remove unused libraries. Choose smaller alternatives where possible (e.g., `date-fns` instead of `moment.js`, `preact` instead of `react`).</li>
-    <li><strong>Target Modern Browsers:</strong> Configure your build tool (e.g., Babel, SWC, esbuild) to target reasonably modern browsers to reduce polyfill size.</li>
-    <li><strong>Performance Monitoring:</strong> Integrate tools like Lighthouse CI or set performance budgets in your bundler configuration to catch regressions.</li>
-</ol>
 
 <h2>Common Pitfalls to Avoid</h2>
 <p>Embedding applications in Confluence can sometimes lead to unexpected issues. Be mindful of these common pitfalls:</p>
 
 {{#confluence-warning title="Potential Issues When Embedding Apps"}}
 <ol>
-    <li><strong>DOM Conflicts & Styling Issues:</strong> Confluence has its own global styles and JavaScript. Your application's CSS might conflict.
-        <ul>
-            <li><strong>Solution:</strong> Use CSS Modules, scoped styles (Vue), Shadow DOM (if feasible), or strict BEM naming conventions. Prefix your CSS classes uniquely. Avoid overly broad selectors. Reset styles aggressively within your app's container if necessary.</li>
-        </ul>
+    <li>
+        <p><strong>DOM Conflicts and Styling Issues:</strong> Confluence has its own global styles and JavaScript. Your application's CSS might conflict.</p>
+        <p><strong>Solution:</strong> Use CSS Modules, scoped styles (Vue), Shadow DOM (if feasible), or strict BEM naming conventions. Prefix your CSS classes uniquely. Avoid overly broad selectors. Reset styles aggressively within your app's container if necessary.</p>
     </li>
-    <li><strong>Authentication & Authorization:</strong> Users viewing the Confluence page are authenticated against Confluence, but your embedded app might need its own authentication or rely on the user's Confluence session implicitly (which can be fragile).
-        <ul>
-            <li><strong>Solution:</strong> If your app needs to call backend services, use appropriate authentication methods (e.g., JWT tokens passed during initialization, OAuth flows if necessary). Be aware of CORS policies. Avoid relying solely on the Confluence session for backend authorization.</li>
-        </ul>
+    <li>
+        <p><strong>Authentication and Authorization:</strong> Users viewing the Confluence page are authenticated against Confluence, but your embedded app might need its own authentication or rely on the user's Confluence session implicitly (which can be fragile).</p>
+        <p><strong>Solution:</strong> If your app needs to call backend services, use appropriate authentication methods (e.g., JWT tokens passed during initialization, OAuth flows if necessary). Be aware of CORS policies. Avoid relying solely on the Confluence session for backend authorization.</p>
     </li>
-    <li><strong>Large Dependencies & Bundle Size:</strong> Including large frameworks or libraries can make the embedded application slow to load within the Confluence page context.
-        <ul>
-            <li><strong>Solution:</strong> Follow build optimization tips. Analyze your bundle with tools like `webpack-bundle-analyzer` or `rollup-plugin-visualizer`. Prefer lightweight libraries.</li>
-        </ul>
+    <li>
+        <p><strong>Large Dependencies and Bundle Size:</strong> Including large frameworks or libraries can make the embedded application slow to load within the Confluence page context.</p>
+        <p><strong>Solution:</strong> Follow build optimization tips. Analyze your bundle with tools like <code>webpack-bundle-analyzer</code> or <code>rollup-plugin-visualizer</code>. Prefer lightweight libraries.</p>
     </li>
-    <li><strong>Aggressive Polling or High Resource Usage:</strong> An embedded app constantly polling for data or performing heavy computations can impact browser performance and potentially Confluence server load (if making many API calls).
-        <ul>
-            <li><strong>Solution:</strong> Use WebSockets or Server-Sent Events for real-time updates instead of polling where possible. Implement reasonable polling intervals. Optimize computations, potentially using Web Workers.</li>
-        </ul>
+    <li>
+        <p><strong>Aggressive Polling or High Resource Usage:</strong> An embedded app constantly polling for data or performing heavy computations can impact browser performance and potentially Confluence server load (if making many API calls).</p>
+        <p><strong>Solution:</strong> Use WebSockets or Server-Sent Events for real-time updates instead of polling where possible. Implement reasonable polling intervals. Optimize computations, potentially using Web Workers.</p>
     </li>
-    <li><strong>JavaScript Errors Breaking the Macro:</strong> Uncaught JavaScript errors within your application can sometimes cause the entire Confluence HTML macro to fail to render or become unresponsive.
-        <ul>
-            <li><strong>Solution:</strong> Implement robust error handling within your application. Use React Error Boundaries or equivalent concepts in other frameworks. Log errors effectively to help diagnose issues. Provide graceful fallbacks or error messages within the app itself.</li>
-        </ul>
+    <li>
+        <p><strong>JavaScript Errors Breaking the Macro:</strong> Uncaught JavaScript errors within your application can sometimes cause the entire Confluence HTML macro to fail to render or become unresponsive.</p>
+        <p><strong>Solution:</strong> Implement robust error handling within your application. Use React Error Boundaries or equivalent concepts in other frameworks. Log errors effectively to help diagnose issues. Provide graceful fallbacks or error messages within the app itself.</p>
     </li>
 </ol>
 {{/confluence-warning}}

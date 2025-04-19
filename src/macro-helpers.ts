@@ -11,7 +11,7 @@ import { generateUuid } from './utils';
  * @param handlebars - The Handlebars instance to register helpers with
  */
 export function registerMacroHelpers(handlebars: typeof Handlebars): void {
-  /**
+    /**
    * HTML macro - Embeds HTML content in a Confluence page
    * 
    * Usage:
@@ -156,10 +156,17 @@ export function registerMacroHelpers(handlebars: typeof Handlebars): void {
    */
   handlebars.registerHelper('confluence-code', function(this: any, options: Handlebars.HelperOptions) {
     const macroId = generateUuid();
-    const content = options.fn(this);
+    let content = options.fn(this);
     const language = options.hash.language || '';
     const title = options.hash.title || '';
     const lineNumbers = options.hash.linenumbers === true ? 'true' : 'false';
+    
+    // Special handling for content that may contain CDATA end markers
+    // This prevents issues when showing examples of templates that themselves use CDATA
+    if (content.includes(']]>')) {
+      // Split the CDATA section to avoid illegal nested CDATA markers
+      content = content.replace(/]]>/g, ']]]]><![CDATA[>');
+    }
     
     return new handlebars.SafeString(
       `<ac:structured-macro ac:name="code" ac:schema-version="1" ac:macro-id="${macroId}">

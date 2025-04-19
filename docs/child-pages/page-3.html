@@ -15,37 +15,34 @@
 <h3>Purpose and Structure</h3>
 <p>Use the page template to:</p>
 <ul>
-    <li>Set the main page heading (often using <code><h1>{{pageTitle}}</h1></code>).</li>
-    <li>Add introductory text, instructions, or surrounding content using standard XHTML tags like <code><p></code>, <code><ul></code>, etc.</li>
+    <li>Set the main page heading (often using <code>&lt;h1&gt;\{{pageTitle}}&lt;/h1&gt;</code>).</li>
+    <li>Add introductory text, instructions, or surrounding content using standard XHTML tags like <code>&lt;p&gt;</code>, <code>&lt;ul&gt;</code>, etc.</li>
     <li>Incorporate Confluence-specific features like Tables of Contents, Panels, or Layouts using the provided <a href="/wiki/spaces/YOURSPACE/pages/PAGEID-for-Macro-Helpers">Macro Helpers</a>.</li>
-    <li>Define where the main application macro (generated from the Macro Template) should be embedded using the <code>{{{macro}}}</code> variable.</li>
-    <li>Add footers or metadata, like the last updated date using <code>{{currentDate}}</code>.</li>
+    <li>Define where the main application macro (generated from the Macro Template) should be embedded using the <code>\{{{macro}}}</code> variable.</li>
+    <li>Add footers or metadata, like the last updated date using <code>\{{currentDate}}</code>.</li>
 </ul>
 
 <h3>Available Handlebars Variables</h3>
 <ul>
-    <li><code>{{pageTitle}}</code>: The title of the Confluence page being created or updated.</li>
-    <li><code>{{{macro}}}</code>: Expands to the compiled HTML macro content generated from the <strong>Macro Template</strong>. Use triple braces <code>{{{ }}}</code> to prevent HTML escaping. This is the most common way to include your application.</li>
-    <li><code>{{currentDate}}</code>: The current date when the tool is run, formatted as YYYY-MM-DD.</li>
+    <li><code>\{{pageTitle}}</code>: The title of the Confluence page being created or updated.</li>
+    <li><code>\{{{macro}}}</code>: Expands to the compiled HTML macro content generated from the <strong>Macro Template</strong>. Use triple braces <code>\{{{ }}}</code> to prevent HTML escaping. This is the most common way to include your application.</li>
+    <li><code>\{{currentDate}}</code>: The current date when the tool is run, formatted as YYYY-MM-DD.</li>
 </ul>
 
 <h3>Default Page Template</h3>
 <p>If you don't specify a <code>templatePath</code> in your configuration, the tool uses this default:</p>
 {{#confluence-code language="html" title="Default confluence-template.html" linenumbers=true}}
-<![CDATA[
 <h1>{{pageTitle}}</h1>
 
 {{{macro}}}
 
 <hr/>
 <p><em>Last updated: {{currentDate}}</em></p>
-]]>
 {{/confluence-code}}
 
 <h3>Example Custom Page Template</h3>
 <p>Here's an example combining standard XHTML, Confluence macros, and the application placeholder:</p>
 {{#confluence-code language="html" title="Example custom confluence-template.html" linenumbers=true}}
-<![CDATA[
 <h1>{{pageTitle}}</h1>
 
 {{confluence-toc maxLevel=2}}
@@ -74,7 +71,6 @@
 
 <hr />
 <p><em>Page generated on: {{currentDate}}</em></p>
-]]>
 {{/confluence-code}}
 
 <hr />
@@ -83,27 +79,26 @@
 <p>This template defines the HTML content that goes <em>inside</em> the Confluence HTML macro. It's primarily used to set up the root element for your JavaScript application and include the necessary script and style tags.</p>
 
 {{#confluence-warning title="Important Note on Attachments"}}
-  <p>You <strong>must</strong> specify a valid path for <code>macroTemplatePath</code> in your <code>publish-confluence.json</code> configuration if you want the tool to upload your build assets (JS, CSS, images, etc.) as attachments and include them on the page. If <code>macroTemplatePath</code> is not set (or null), asset uploading and the inclusion of <code>{{{scripts}}}</code> and <code>{{{styles}}}</code> is skipped.</p>
+  <p>You <strong>must</strong> specify a valid path for <code>macroTemplatePath</code> in your <code>publish-confluence.json</code> configuration if you want the tool to upload your build assets (JS, CSS, images, etc.) as attachments and include them on the page. If <code>macroTemplatePath</code> is not set (or null), asset uploading and the inclusion of <code>\{{{scripts}}}</code> and <code>\{{{styles}}}</code> is skipped.</p>
 {{/confluence-warning}}
 
 <h3>Purpose and Structure</h3>
 <p>Use the macro template to:</p>
 <ul>
-    <li>Define the root HTML element where your JavaScript application will mount (e.g., <code><div id="app"></div></code>).</li>
-    <li>Include placeholders for the automatically generated script tags (<code>{{{scripts}}}</code>) and stylesheet links (<code>{{{styles}}}</code>) that point to the uploaded assets.</li>
+    <li>Define the root HTML element where your JavaScript application will mount (e.g., <code>&lt;div id="app"&gt;&lt;/div&gt;</code>).</li>
+    <li>Include placeholders for the automatically generated script tags (<code>\{{{scripts}}}</code>) and stylesheet links (<code>\{{{styles}}}</code>) that point to the uploaded assets.</li>
     <li>Optionally add loading indicators or basic fallback content that shows before the JavaScript application loads.</li>
 </ul>
 
 <h3>Available Handlebars Variables</h3>
 <ul>
-    <li><code>{{{scripts}}}</code>: Expands to one or more <code><script src="..."></script></code> tags linking to the JavaScript files found in your <code>distDir</code> (based on <code>includedFiles</code>/<code>excludedFiles</code>). Use triple braces <code>{{{ }}}</code>.</li>
-    <li><code>{{{styles}}}</code>: Expands to one or more <code><link rel="stylesheet" href="..."></code> tags linking to the CSS files found in your <code>distDir</code>. Use triple braces <code>{{{ }}}</code>.</li>
+    <li><code>\{{{scripts}}}</code>: Expands to one or more <code>&lt;script src="..."&gt;&lt;/script&gt;</code> tags linking to the JavaScript files found in your <code>distDir</code> (based on <code>includedFiles</code>/<code>excludedFiles</code>). Use triple braces <code>\{{{ }}}</code>.</li>
+    <li><code>\{{{styles}}}</code>: Expands to one or more <code>&lt;link rel="stylesheet" href="..."&gt;</code> tags linking to the CSS files found in your <code>distDir</code>. Use triple braces <code>\{{{ }}}</code>.</li>
 </ul>
 
 <h3>Default Macro Template</h3>
 <p>If you provide a <code>macroTemplatePath</code> but the file is simple, this is a good starting point:</p>
 {{#confluence-code language="html" title="Default macro-template.html" linenumbers=true}}
-<![CDATA[
 <div>
   <div id="app">
     <!-- Your JS app mounts here -->
@@ -112,13 +107,11 @@
   {{{styles}}}
   {{{scripts}}}
 </div>
-]]>
 {{/confluence-code}}
 
 <h3>Example Custom Macro Template</h3>
 <p>This example includes a more structured loading state:</p>
 {{#confluence-code language="html" title="Example custom macro-template.html" linenumbers=true}}
-<![CDATA[
 <div class="app-container" style="min-height: 400px; position: relative;">
   <div id="app-loading-indicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
      <p>Please wait while the application loads.</p>
@@ -161,7 +154,6 @@
     });
   </script>
 </div>
-]]>
 {{/confluence-code}}
 
 <hr />
@@ -169,21 +161,20 @@
 <h2>3.3. Using Macro Helpers in Templates</h2>
 <p>You have two main ways to incorporate Confluence macros (like panels, layouts, code blocks) into your published page:</p>
 
-<h3>Approach 1: Using <code>{{{macro}}}</code> in Page Template (Recommended)</h3>
+<h3>Approach 1: Using <code>\{{{macro}}}</code> in Page Template (Recommended)</h3>
 <p>This is the simplest and most common approach, especially when your primary goal is to embed a single JavaScript application.</p>
 <ol>
     <li>Create both a <code>confluence-template.html</code> (Page Template) and a <code>macro-template.html</code> (Macro Template).</li>
-    <li>In your <code>confluence-template.html</code>, place the <code>{{{macro}}}</code> variable where you want the application to appear. You can surround it with other content or Confluence macro helpers as needed.</li>
-    <li>In your <code>macro-template.html</code>, define the structure for your app (e.g., <code><div id="app"></code>) and include <code>{{{styles}}}</code> and <code>{{{scripts}}}</code>.</li>
+    <li>In your <code>confluence-template.html</code>, place the <code>\{{{macro}}}</code> variable where you want the application to appear. You can surround it with other content or Confluence macro helpers as needed.</li>
+    <li>In your <code>macro-template.html</code>, define the structure for your app (e.g., <code>&lt;div id="app"&gt;</code>) and include <code>\{{{styles}}}</code> and <code>\{{{scripts}}}</code>.</li>
 </ol>
+
 <p><strong>Example (Page Template):</strong></p>
 {{#confluence-code language="html" linenumbers="false"}}
-<![CDATA[
 <h1>{{pageTitle}}</h1>
 <p>Application details:</p>
 {{{macro}}} <!-- The entire app defined in macro-template.html goes here -->
 <p>Last updated: {{currentDate}}</p>
-]]>
 {{/confluence-code}}
 
 <h3>Approach 2: Using Macro Helpers Directly in Page Template</h3>
@@ -191,12 +182,11 @@
 <ol>
     <li>Create only a <code>confluence-template.html</code> (Page Template).</li>
     <li>Do <strong>not</strong> set <code>macroTemplatePath</code> in your configuration (or set it to null). Asset attachment will be skipped.</li>
-    <li>Use the Confluence macro helpers (like <code>{{#confluence-panel}}</code>, <code>{{#confluence-layout}}</code>, <code>{{#confluence-code}}</code>, etc.) directly within your <code>confluence-template.html</code> to build the page structure.</li>
-    <li>If you *do* need to embed a simple HTML/JS snippet, you can use the <code>{{#confluence-html}}...{{/confluence-html}}</code> helper directly in the page template. Remember you won't have the automatic <code>{{{scripts}}}</code> and <code>{{{styles}}}</code> variables in this case.</li>
+    <li>Use the Confluence macro helpers (like <code>\{{#confluence-panel}}</code>, <code>\{{#confluence-layout}}</code>, <code>\{{#confluence-code}}</code>, etc.) directly within your <code>confluence-template.html</code> to build the page structure.</li>
+    <li>If you *do* need to embed a simple HTML/JS snippet, you can use the <code>\{{#confluence-html}}</code>...<code>\{{/confluence-html}}</code> helper directly in the page template. Remember you won't have the automatic <code>\{{{scripts}}}</code> and <code>\{{{styles}}}</code> variables in this case.</li>
 </ol>
 <p><strong>Example (Page Template using direct helpers):</strong></p>
 {{#confluence-code language="html" linenumbers="false"}}
-<![CDATA[
 <h1>{{pageTitle}}</h1>
 {{#confluence-info title="Project Status"}}
   <p>The project is currently {{confluence-status type="yellow" text="In Progress"}}.</p>
@@ -209,5 +199,4 @@ function greet() {
 {{/confluence-code}}
 
 <p>Last updated: {{currentDate}}</p>
-]]>
 {{/confluence-code}}

@@ -14,30 +14,30 @@
 
 <h2>Key Characteristics</h2>
 <ul>
-  <li><strong>XHTML-Based:</strong> It heavily relies on XHTML 1.0 syntax (e.g., self-closing tags like <code><br /></code>, lowercase tags and attributes).</li>
+  <li><strong>XHTML-Based:</strong> It heavily relies on XHTML 1.0 syntax (e.g., self-closing tags like <code>&lt;br /&gt;</code>, lowercase tags and attributes).</li>
   <li><strong>XML Compliance:</strong> The final format must be well-formed XML.</li>
   <li><strong>Custom Elements:</strong> Uses elements in the <code>ac:</code> (Atlassian Confluence) and <code>ri:</code> (Resource Identifier) namespaces for Confluence-specific features.</li>
-  <li><strong>Macro Representation:</strong> Confluence macros are represented using the <code><ac:structured-macro></code> element.</li>
+  <li><strong>Macro Representation:</strong> Confluence macros are represented using the <code>&lt;ac:structured-macro&gt;</code> element.</li>
 </ul>
 
 <h2>Common XHTML Elements Used</h2>
 <p>You can use standard XHTML elements within your templates, especially inside macro helper bodies (like panels or layout cells):</p>
 <ul>
-    <li><code><p>...</p></code>: Paragraphs</li>
-    <li><code><h1></code> to <code><h6>...</h6></code>: Headings</li>
-    <li><code><ul></code>, <code><ol></code>, <code><li>...</li></code>: Lists</li>
-    <li><code><a href="...">...</a></code>: Links (though Confluence often uses <code><ac:link></code> for internal links)</li>
-    <li><code><strong>...</strong></code> or <code><b>...</b></code>: Bold text</li>
-    <li><code><em>...</em></code> or <code><i>...</i></code>: Emphasis/Italic text</li>
-    <li><code><code>...</code></code>: Inline code</li>
-    <li><code><br /></code>: Line breaks</li>
-    <li><code><hr /></code>: Horizontal rules (or use <code>\{{confluence-divider}}</code>)</li>
-    <li><code><table></code>, <code><thead></code>, <code><tbody></code>, <code><tr></code>, <code><th></code>, <code><td>...</td></code>: Tables</li>
-    <li><code><pre>...</pre></code>: Preformatted text (often used within code blocks)</li>
+    <li><code>&lt;p&gt;...&lt;/p&gt;</code>: Paragraphs</li>
+    <li><code>&lt;h1&gt;</code> to <code>&lt;h6&gt;...&lt;/h6&gt;</code>: Headings</li>
+    <li><code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code>, <code>&lt;li&gt;...&lt;/li&gt;</code>: Lists</li>
+    <li><code>&lt;a href="..."&gt;...&lt;/a&gt;</code>: Links (though Confluence often uses <code>&lt;ac:link&gt;</code> for internal links)</li>
+    <li><code>&lt;strong&gt;...&lt;/strong&gt;</code> or <code>&lt;b&gt;...&lt;/b&gt;</code>: Bold text</li>
+    <li><code>&lt;em&gt;...&lt;/em&gt;</code> or <code>&lt;i&gt;...&lt;/i&gt;</code>: Emphasis/Italic text</li>
+    <li><code>&lt;code&gt;...&lt;/code&gt;</code>: Inline code</li>
+    <li><code>&lt;br /&gt;</code>: Line breaks</li>
+    <li><code>&lt;hr /&gt;</code>: Horizontal rules (or use <code>\{{confluence-divider}}</code>)</li>
+    <li><code>&lt;table&gt;</code>, <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, <code>&lt;tr&gt;</code>, <code>&lt;th&gt;</code>, <code>&lt;td&gt;...&lt;/td&gt;</code>: Tables</li>
+    <li><code>&lt;pre&gt;...&lt;/pre&gt;</code>: Preformatted text (often used within code blocks)</li>
 </ul>
 
 <h2>Confluence Macro Representation</h2>
-<p>The Handlebars helpers provided by <code>publish-confluence</code> (like <code>\{{#confluence-panel}}</code>, <code>\{{#confluence-code}}</code>, etc.) generate the necessary <code><ac:structured-macro></code> elements for you. Understanding the basic structure can be helpful for debugging:</p>
+<p>The Handlebars helpers provided by <code>publish-confluence</code> (like <code>\{{#confluence-panel}}</code>, <code>\{{#confluence-code}}</code>, etc.) generate the necessary <code>&lt;ac:structured-macro&gt;</code> elements for you. Understanding the basic structure can be helpful for debugging:</p>
 
 {{#confluence-code language="xml" title="Generic Macro Structure Example"}}
 <![CDATA[
@@ -53,13 +53,13 @@
 
 <ul>
     <li><code>ac:name</code>: Specifies the type of macro (e.g., "panel", "code", "html", "toc").</li>
-    <li><code><ac:parameter ac:name="..."></code>: Defines parameters passed to the macro (like title, language, type).</li>
-    <li><code><ac:rich-text-body></code>: Contains the main content of the macro, which should itself be valid Storage Format XHTML.</li>
+    <li><code>&lt;ac:parameter ac:name="..."&gt;</code>: Defines parameters passed to the macro (like title, language, type).</li>
+    <li><code>&lt;ac:rich-text-body&gt;</code>: Contains the main content of the macro, which should itself be valid Storage Format XHTML.</li>
 </ul>
 <p>The <code>publish-confluence</code> helpers abstract this complexity away, allowing you to write more natural Handlebars templates.</p>
 
 <h2>CDATA Usage</h2>
-<p>Sometimes, content needs to be explicitly marked as character data to prevent the XML parser from interpreting it. This is done using <code><![CDATA[...]]></code> sections. You'll most commonly encounter this:</p>
+<p>Sometimes, content needs to be explicitly marked as character data to prevent the XML parser from interpreting it. This is done using <code>&lt;![CDATA[...]]&gt;</code> sections. You'll most commonly encounter this:</p>
 <ul>
     <li>Inside code blocks generated by <code>\{{#confluence-code}}</code> to preserve formatting and special characters.</li>
     <li>Occasionally within macro parameters or link bodies if they contain characters that could conflict with XML parsing.</li>
@@ -69,13 +69,13 @@
 <h2>Whitespace Considerations</h2>
 
 {{#confluence-warning title="Important: Avoid Excessive Whitespace"}}
-  <p>Confluence renders most block elements (like <code><p></code>) with default margins. Generating unnecessary empty elements (e.g., <code><p></p></code>) or excessive <code><br /></code> tags in your templates can lead to large, unwanted vertical gaps on the rendered Confluence page.</p>
+  <p>Confluence renders most block elements (like <code>&lt;p&gt;</code>) with default margins. Generating unnecessary empty elements (e.g., <code>&lt;p&gt;&lt;/p&gt;</code>) or excessive <code>&lt;br /&gt;</code> tags in your templates can lead to large, unwanted vertical gaps on the rendered Confluence page.</p>
   <p>Follow these tips (as detailed in <code>Confluence.md</code>):</p>
   <ul>
-    <li>Avoid empty paragraphs <code><p></p></code>.</li>
-    <li>Use <code><br /></code> only for intentional line breaks within a block, not for spacing between blocks.</li>
-    <li>Leverage Confluence macros (panels, layouts) for structure instead of multiple <code><p></code> tags.</li>
-    <li>Ensure your template logic doesn't generate empty macro bodies (e.g., <code><ac:rich-text-body></ac:rich-text-body></code>).</li>
+    <li>Avoid empty paragraphs <code>&lt;p&gt;&lt;/p&gt;</code>.</li>
+    <li>Use <code>&lt;br /&gt;</code> only for intentional line breaks within a block, not for spacing between blocks.</li>
+    <li>Leverage Confluence macros (panels, layouts) for structure instead of multiple <code>&lt;p&gt;</code> tags.</li>
+    <li>Ensure your template logic doesn't generate empty macro bodies (e.g., <code>&lt;ac:rich-text-body&gt;&lt;/ac:rich-text-body&gt;</code>).</li>
   </ul>
 {{/confluence-warning}}
 

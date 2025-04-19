@@ -98,20 +98,20 @@ publish-confluence fetch [options]
   </thead>
   <tbody>
     <tr>
-      <td><code>--space-key <key></code></td>
-      <td><code>-s <key></code></td>
+      <td><code>--space-key</code> &lt;key&gt;</td>
+      <td><code>-s</code> &lt;key&gt;</td>
       <td>The key of the Confluence space containing the page. Use <code>~username</code> for personal spaces.</td>
       <td>Yes</td>
     </tr>
     <tr>
-      <td><code>--page-title <title></code></td>
-      <td><code>-p <title></code></td>
+      <td><code>--page-title</code> &lt;title&gt;</td>
+      <td><code>-p</code> &lt;title&gt;</td>
       <td>The exact title of the Confluence page to fetch.</td>
       <td>Yes</td>
     </tr>
     <tr>
-      <td><code>--format <format></code></td>
-      <td><code>-f <format></code></td>
+      <td><code>--format</code> &lt;format&gt;</td>
+      <td><code>-f</code> &lt;format&gt;</td>
       <td>The output format. Options are <code>storage</code> (default, returns XHTML body) or <code>json</code> (returns the full page JSON object).</td>
       <td>No</td>
     </tr>
@@ -151,8 +151,8 @@ publish-confluence generate-prompt [options]
   </thead>
   <tbody>
     <tr>
-      <td><code>--file <filepath></code></td>
-      <td><code>-f <filepath></code></td>
+      <td><code>--file</code> &lt;filepath&gt;</td>
+      <td><code>-f</code> &lt;filepath&gt;</td>
       <td>Read the initial project idea or requirements from a specified text file instead of prompting interactively.</td>
       <td>No</td>
     </tr>
@@ -179,4 +179,4 @@ publish-confluence generate-prompt -f ./project-requirements.txt
 {{/confluence-code}}
 
 <hr />
-<p><em>Last updated: {{currentDate}}</em></p>
+<p><em>Last updated: \{{currentDate}}</em></p>
