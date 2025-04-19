@@ -6,6 +6,7 @@ import * as readline from 'readline';
 import { getProjectTemplate, Logger } from './project-templates';
 import { DocumentationProject } from './project-templates/documentation-project';
 import { PROJECT_TYPE_CHOICES } from './project-templates/project-type-choices';
+import { PROMPT_TEXT } from './prompt';
 
 /**
  * Create a readline interface for interactive prompts
@@ -102,6 +103,7 @@ export async function createProject(log: Logger): Promise<void> {
       macroTemplatePath = await question(rl, 'Path to the macro template', './macro-template.html');
     }
       const createDotEnv = (await question(rl, 'Create .env file for authentication? (y/n)', 'y')).toLowerCase() === 'y';
+    const createPromptFile = (await question(rl, 'Create prompt file for LLM template generation? (y/n)', 'y')).toLowerCase() === 'y';
     
     // Create publish-confluence.json
     const config: any = {
@@ -185,37 +187,46 @@ CONFLUENCE_TOKEN=your-api-token`;
       await fs.writeFile(path.resolve(process.cwd(), '.env'), envContent, 'utf8');
       log.success(`Created .env file with placeholder credentials`);
     }
-    
-    // Update package.json or create one if it doesn't exist
-    if (!Object.keys(packageJson).length) {
-      // Create a new package.json using the template
-      const packageJsonTemplate = template.getPackageJsonTemplate(projectName);
-      
-      await fs.writeFile(
-        path.resolve(process.cwd(), 'package.json'),
-        JSON.stringify(packageJsonTemplate, null, 2),
-        'utf8'
-      );
-      
-      log.success(`Created package.json`);
-    } else {
-      // Update existing package.json
-      if (!packageJson.scripts) {
-        packageJson.scripts = {};
-      }
-      
-      // Add publish script if it doesn't exist
-      if (!packageJson.scripts.publish) {
-        packageJson.scripts.publish = "npm run build ; publish-confluence";
+      // Create prompt file for LLM template generation if requested
+    if (createPromptFile) {
+      const promptFilePath = path.resolve(process.cwd(), 'template-prompt.md');
+      await fs.writeFile(promptFilePath, PROMPT_TEXT, 'utf8');
+      log.success(`Created template-prompt.md for generating templates with AI`);
+    }
+      // Update package.json or create one if it doesn't exist (skip for documentation projects)
+    if (projectType !== 5) { // 5 is Documentation Project
+      if (!Object.keys(packageJson).length) {
+        // Create a new package.json using the template
+        const packageJsonTemplate = template.getPackageJsonTemplate(projectName);
         
         await fs.writeFile(
           path.resolve(process.cwd(), 'package.json'),
-          JSON.stringify(packageJson, null, 2),
+          JSON.stringify(packageJsonTemplate, null, 2),
           'utf8'
         );
         
-        log.success(`Updated package.json with publish script`);
+        log.success(`Created package.json`);
+      } else {
+        // Update existing package.json
+        if (!packageJson.scripts) {
+          packageJson.scripts = {};
+        }
+        
+        // Add publish script if it doesn't exist
+        if (!packageJson.scripts.publish) {
+          packageJson.scripts.publish = "npm run build ; publish-confluence";
+          
+          await fs.writeFile(
+            path.resolve(process.cwd(), 'package.json'),
+            JSON.stringify(packageJson, null, 2),
+            'utf8'
+          );
+          
+          log.success(`Updated package.json with publish script`);
+        }
       }
+    } else {
+      log.verbose('Skipping package.json creation for Documentation Project');
     }
     
     // Create source directory structure and files using the template

@@ -1,0 +1,46 @@
+<h1>{{pageTitle}}</h1>
+
+<h2>Overview</h2>
+<p><strong>Publish-confluence</strong> is a powerful solution for embedding interactive web applications, dashboards, and widgets directly into Confluence. With a single command, you can push your latest build to a Confluence page, complete with all required assets and custom layout. No more manual uploads, brittle macros, or copy-paste workflows.</p>
+<p>Designed for rapid iteration, publish-confluence lets you update your app, rebuild, and immediately publish changes to Confluence—making it ideal for fast feedback, demos, and continuous delivery. The tool’s flexible template system and smart asset management enable you to deliver rich, production-quality experiences inside Confluence, while keeping your workflow simple and repeatable.</p>
+
+{{#confluence-layout}}
+  {{#layout-section type="two_equal"}}
+    {{#layout-cell}}
+      <h3>Key Features</h3>
+      <ul>
+        <li><strong>Instant App Publishing:</strong> Deploy JavaScript/TypeScript applications to Confluence pages in seconds.</li>
+        <li><strong>Seamless Asset Management:</strong> Automatically uploads and attaches all build assets (JS, CSS, images, fonts).</li>
+        <li><strong>Customizable Templates:</strong> Use Handlebars for full control over page and macro layout.</li>
+        <li><strong>Macro Helper Library:</strong> Easily compose Confluence-native macros (panels, layouts, code blocks, etc.).</li>
+        <li><strong>Effortless Configuration:</strong> Simple JSON config and environment variables.</li>
+        <li><strong>Supports Modern Workflows:</strong> Designed for Vite, Webpack, Rollup, etc.</li>
+        <li><strong>Robust CLI Experience:</strong> Includes commands for scaffolding, fetching, and prompt generation.</li>
+        <li><strong>Nested Page Publishing:</strong> Manage hierarchical documentation structures.</li>
+      </ul>
+    {{/layout-cell}}
+    {{#layout-cell}}
+      <h3>Core Concepts</h3>
+      <p><strong>Templates:</strong> Control the structure of your Confluence page (`confluence-template.html`) and the embedded HTML macro (`macro-template.html`) using Handlebars.</p>
+      <p><strong>Asset Management:</strong> The tool automatically finds your build output (JS, CSS, images), uploads them as attachments, and injects the correct links into your macro template via `{{{scripts}}}` and `{{{styles}}}`.</p>
+      <p><strong>Macro Helpers:</strong> Use built-in Handlebars helpers (like `{{#confluence-panel}}` or `{{confluence-toc}}`) within your page template to generate rich Confluence content alongside your embedded application.</p>
+
+      <h3>Use Cases</h3>
+      <ul>
+         <li><strong>Interactive Dashboards:</strong> Embed real-time data visualizations (React, Vue, Preact, etc.).</li>
+         <li><strong>Training Materials:</strong> Create interactive documentation with live code examples.</li>
+         <li><strong>Internal Tools:</strong> Deploy team collaboration tools (planning poker, simple forms) directly in your workspace.</li>
+         <li><strong>Documentation Widgets:</strong> Enhance documentation with small, interactive components.</li>
+      </ul>
+    {{/layout-cell}}
+  {{/layout-section}}
+{{/confluence-layout}}
+
+<h2>Documentation Sections</h2>
+{{#confluence-panel title="Main Topics" type="info"}}
+  <p>Explore the documentation using the links below. These correspond to the main sections of the documentation:</p>
+  {{confluence-children}}
+{{/confluence-panel}}
+
+{{confluence-divider}}
+<p><em>Page generated on: {{currentDate}}</em></p>

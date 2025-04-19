@@ -1,0 +1,182 @@
+<h1>{{pageTitle}}</h1>
+
+{{confluence-toc minLevel=2 maxLevel=3}}
+
+<p>The <code>publish-confluence</code> tool provides a command-line interface (CLI) for publishing applications, managing projects, and interacting with Confluence pages.</p>
+
+<h2>General Usage and Options</h2>
+
+<p>The basic structure of a command is:</p>
+{{#confluence-code language="bash" title="Basic Usage"}}
+publish-confluence [options] [command]
+{{/confluence-code}}
+
+<p>If no command is specified, the default <code>publish</code> command is executed.</p>
+
+<h3>Global Options</h3>
+<p>These options can be used with any command:</p>
+<table class="aui">
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Alias</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--quiet</code></td>
+      <td><code>-q</code></td>
+      <td>Suppress all output except errors. Useful for CI/CD environments.</td>
+    </tr>
+    <tr>
+      <td><code>--verbose</code></td>
+      <td><code>-v</code></td>
+      <td>Enable verbose output, showing more details about the process.</td>
+    </tr>
+    <tr>
+      <td><code>--debug</code></td>
+      <td><code>-d</code></td>
+      <td>Enable debug output, providing extensive details for troubleshooting.</td>
+    </tr>
+    <tr>
+      <td><code>--help</code></td>
+      <td><code>-h</code></td>
+      <td>Display help information for the tool or a specific command.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Commands</h2>
+
+<h3><code>publish</code> (Default Command)</h3>
+<p>This is the primary command used to build (if necessary, depending on your workflow) and publish your application to Confluence. It reads your <code>publish-confluence.json</code> configuration, finds your build assets, uploads them, renders the templates, and creates or updates the specified Confluence page.</p>
+{{#confluence-code language="bash" title="Publish Usage"}}
+# Runs the default publish process
+publish-confluence
+
+# Explicitly calling the publish command (equivalent to the above)
+publish-confluence publish
+
+# Publishing with debug output
+publish-confluence --debug
+{{/confluence-code}}
+<p>This command does not have specific options beyond the global ones; its behavior is controlled by the <code>publish-confluence.json</code> file and environment variables.</p>
+
+<h3><code>create</code> Command</h3>
+<p>The <code>create</code> command helps you initialize a new project structure suitable for use with <code>publish-confluence</code>. It interactively guides you through setting up:</p>
+<ul>
+    <li>A basic project directory (if needed).</li>
+    <li>Default template files (<code>confluence-template.html</code> and <code>macro-template.html</code>).</li>
+    <li>A <code>publish-confluence.json</code> configuration file with initial values.</li>
+    <li>A <code>.env</code> file for your Confluence credentials.</li>
+</ul>
+{{#confluence-code language="bash" title="Create Usage"}}
+# Start the interactive project setup wizard
+publish-confluence create
+
+# Run in quiet mode (may skip prompts if defaults are sufficient, or fail)
+publish-confluence create -q
+{{/confluence-code}}
+<p>This command is useful for quickly scaffolding a new project that you intend to publish to Confluence.</p>
+
+<h3><code>fetch</code> Command</h3>
+<p>The <code>fetch</code> command allows you to retrieve the content of an existing Confluence page, primarily in its raw Storage Format (XHTML).</p>
+{{#confluence-code language="bash" title="Fetch Usage"}}
+publish-confluence fetch [options]
+{{/confluence-code}}
+
+<h4>Fetch Options</h4>
+<table class="aui">
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Alias</th>
+      <th>Description</th>
+      <th>Required</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--space-key <key></code></td>
+      <td><code>-s <key></code></td>
+      <td>The key of the Confluence space containing the page. Use <code>~username</code> for personal spaces.</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td><code>--page-title <title></code></td>
+      <td><code>-p <title></code></td>
+      <td>The exact title of the Confluence page to fetch.</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td><code>--format <format></code></td>
+      <td><code>-f <format></code></td>
+      <td>The output format. Options are <code>storage</code> (default, returns XHTML body) or <code>json</code> (returns the full page JSON object).</td>
+      <td>No</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Fetch Examples</h4>
+{{#confluence-code language="bash" title="Fetch Examples"}}
+# Fetch the storage format (XHTML) of a page in space "MYSPACE"
+publish-confluence fetch -s MYSPACE -p "My Important Page"
+
+# Fetch the storage format from a personal space
+publish-confluence fetch -s ~jsmith -p "My Personal Notes"
+
+# Fetch the full page data as JSON
+publish-confluence fetch -s DOCS -p "API Reference" -f json
+
+# Fetch using verbose logging
+publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" -v
+{{/confluence-code}}
+
+<h3><code>generate-prompt</code> Command</h3>
+<p>The <code>generate-prompt</code> command creates a structured prompt suitable for use with Large Language Models (LLMs) like ChatGPT or Claude. This prompt helps the LLM understand your project context, including configuration, templates, and goals, enabling it to provide more relevant assistance.</p>
+{{#confluence-code language="bash" title="Generate Prompt Usage"}}
+publish-confluence generate-prompt [options]
+{{/confluence-code}}
+
+<h4>Generate Prompt Options</h4>
+<table class="aui">
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Alias</th>
+      <th>Description</th>
+      <th>Required</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--file <filepath></code></td>
+      <td><code>-f <filepath></code></td>
+      <td>Read the initial project idea or requirements from a specified text file instead of prompting interactively.</td>
+      <td>No</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Generate Prompt Output</h4>
+<p>The command outputs a detailed Markdown prompt including:</p>
+<ul>
+    <li>Project description and requirements (gathered interactively or from file).</li>
+    <li>Technical constraints (based on your environment).</li>
+    <li>Contents of your <code>publish-confluence.json</code>.</li>
+    <li>Contents of your template files (<code>confluence-template.html</code>, <code>macro-template.html</code>).</li>
+    <li>Build configuration details (if detectable).</li>
+</ul>
+
+<h4>Generate Prompt Example</h4>
+{{#confluence-code language="bash" title="Generate Prompt Example"}}
+# Generate a prompt interactively
+publish-confluence generate-prompt
+
+# Generate a prompt using requirements from a file
+publish-confluence generate-prompt -f ./project-requirements.txt
+{{/confluence-code}}
+
+<hr />
+<p><em>Last updated: {{currentDate}}</em></p>

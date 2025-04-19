@@ -1,0 +1,173 @@
+<h1>{{pageTitle}}</h1>
+
+{{confluence-toc minLevel=2 maxLevel=3}}
+
+<h2>Introduction to `publish-confluence.json`</h2>
+<p>The behavior of the <code>publish-confluence</code> tool is primarily controlled through a configuration file named <code>publish-confluence.json</code> located in the root of your project. This file allows you to specify details about the target Confluence page, the location of your built application files, and how templates should be used.</p>
+
+{{#confluence-info title="File Location"}}
+  <p>The tool automatically looks for <code>publish-confluence.json</code> in the current working directory where you run the <code>publish-confluence</code> command.</p>
+{{/confluence-info}}
+
+<h2>Configuration Options</h2>
+<p>The following table details the available options you can set within your <code>publish-confluence.json</code> file:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Description</th>
+      <th>Default Value</th>
+      <th>Required</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>spaceKey</code></td>
+      <td>The key of the Confluence space where the page should be published. For personal spaces, use the format <code>~username</code>.</td>
+      <td><em>None</em></td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td><code>pageTitle</code></td>
+      <td>The title for the Confluence page that will be created or updated.</td>
+      <td>The <code>name</code> field from your project's <code>package.json</code> file.</td>
+      <td>No (but highly recommended)</td>
+    </tr>
+    <tr>
+      <td><code>parentPageTitle</code></td>
+      <td>The exact title of an existing page under which the new page should be created. If omitted, the page will be created under the space's home page.</td>
+      <td>Space homepage</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>templatePath</code></td>
+      <td>The relative path to the Handlebars template file used for the overall Confluence page structure.</td>
+      <td><code>./confluence-template.html</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>macroTemplatePath</code></td>
+      <td>The relative path to the Handlebars template file used for the content inside the HTML macro. <strong>If this is <code>null</code> or omitted, asset attachment (JS/CSS) will be skipped.</strong></td>
+      <td><code>null</code></td>
+      <td>No (Required for attaching assets)</td>
+    </tr>
+    <tr>
+      <td><code>distDir</code></td>
+      <td>The relative path to the directory containing your built application files (JavaScript, CSS, images, etc.).</td>
+      <td><code>./dist</code></td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>includedFiles</code></td>
+      <td>An array of <a href="https://github.com/sindresorhus/globby#globbing-patterns" target="_blank">glob patterns</a> specifying which files within the <code>distDir</code> should be attached to the Confluence page.</td>
+      <td><code>["**/*.js", "**/*.css", "**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.svg", "**/*.gif", "**/*.woff", "**/*.woff2", "**/*.ttf", "**/*.eot"]</code> (Common web assets)</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>excludedFiles</code></td>
+      <td>An array of glob patterns specifying files within the <code>distDir</code> to exclude from attachment. Exclusions override inclusions.</td>
+      <td><code>["**/*.map"]</code> (Source maps)</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>childPages</code></td>
+      <td>An array of configuration objects for creating or updating nested child pages. Each object follows the same structure as the main configuration but inherits unspecified values from the parent.</td>
+      <td><code>[]</code> (Empty array)</td>
+      <td>No</td>
+    </tr>
+  </tbody>
+</table>
+
+{{#confluence-warning title="Important Note on `macroTemplatePath`"}}
+ <p>To embed a JavaScript application and have its assets (JS, CSS) automatically attached and linked, you <strong>must</strong> specify a valid path for <code>macroTemplatePath</code>. If it's set to <code>null</code> or omitted, the tool assumes you are only publishing static content using the page template and will skip the asset attachment process.</p>
+{{/confluence-warning}}
+
+<h2>Example Configurations</h2>
+
+<h3>Basic Configuration</h3>
+<p>A minimal configuration for publishing an application from the <code>./dist</code> folder to a specific page, using default template paths.</p>
+{{#confluence-code language="json" title="publish-confluence.json (Basic)"}}
+{
+  "spaceKey": "MYSPACE",
+  "pageTitle": "My Awesome Dashboard",
+  "parentPageTitle": "Team Dashboards",
+  "macroTemplatePath": "./macro-template.html"
+}
+{{/confluence-code}}
+
+<h3>Detailed Configuration</h3>
+<p>A more detailed example specifying custom template paths, build directory, and specific file inclusion/exclusion rules.</p>
+{{#confluence-code language="json" title="publish-confluence.json (Detailed)"}}
+{
+  "spaceKey": "~jsmith",
+  "pageTitle": "Project Alpha Report",
+  "parentPageTitle": "Project Reports",
+  "templatePath": "./templates/confluence-page.hbs",
+  "macroTemplatePath": "./templates/app-macro.hbs",
+  "distDir": "./build/prod",
+  "includedFiles": [
+    "static/js/*.js",
+    "static/css/*.css",
+    "static/media/**"
+  ],
+  "excludedFiles": [
+    "**/*.map",
+    "asset-manifest.json"
+  ]
+}
+{{/confluence-code}}
+
+<h2>Nested Page Configuration (`childPages`)</h2>
+<p>The <code>childPages</code> option allows you to define a hierarchy of pages to be published in a single run. Each object in the <code>childPages</code> array represents a child page and can have its own configuration, inheriting settings from its parent if not specified.</p>
+
+{{#confluence-code language="json" title="publish-confluence.json (Nested Pages)"}}
+{
+  "spaceKey": "DOCS",
+  "pageTitle": "My Product Documentation",
+  "distDir": "./dist/main-docs",
+  "templatePath": "./templates/main-page.html",
+  "macroTemplatePath": null, // Root page might not have an app
+  "childPages": [
+    {
+      "pageTitle": "Getting Started Guide",
+      "distDir": "./dist/getting-started", // Specific build for this page
+      "templatePath": "./templates/guide-page.html"
+      // Inherits spaceKey, parentPageTitle (becomes "My Product Documentation")
+    },
+    {
+      "pageTitle": "API Reference",
+      "templatePath": "./templates/api-page.html",
+      "childPages": [
+        {
+          "pageTitle": "Core API",
+          "distDir": "./dist/api-core",
+          "macroTemplatePath": "./templates/api-viewer.html" // This page embeds an app
+        },
+        {
+          "pageTitle": "Plugin API",
+          "distDir": "./dist/api-plugin"
+        }
+      ]
+    },
+    {
+      "pageTitle": "Interactive Demo",
+      "distDir": "./dist/demo-app", // Build output for the demo app
+      "templatePath": "./templates/demo-page.html",
+      "macroTemplatePath": "./templates/demo-macro.html" // Template for the demo app macro
+    }
+  ]
+}
+{{/confluence-code}}
+
+<p>In this example:</p>
+<ul>
+    <li>"My Product Documentation" is the root page in the "DOCS" space.</li>
+    <li>"Getting Started Guide" and "API Reference" are created as direct children of the root page.</li>
+    <li>"Core API" and "Plugin API" are created as children of "API Reference".</li>
+    <li>"Interactive Demo" is also a direct child of the root page and includes an embedded application via <code>macroTemplatePath</code>.</li>
+    <li>Each page can specify its own <code>distDir</code> and templates, or inherit them.</li>
+</ul>
+
+<hr/>
+<p><em>For details on authentication, see Page 1.3. For details on the template files themselves, see Page 3.</em></p>

@@ -1,0 +1,166 @@
+<h1>{{pageTitle}}</h1>
+
+{{confluence-toc minLevel=2 maxLevel=3}}
+
+<p>This page covers advanced configuration options and best practices for using <code>publish-confluence</code> effectively, helping you create more complex structures and optimize your embedded applications.</p>
+
+<h2>Nested Page Publishing</h2>
+<p><code>publish-confluence</code> supports creating and updating a hierarchy of pages in a single run using the <code>childPages</code> configuration option. This is useful for organizing related applications or documentation sections under a common parent.</p>
+
+<p>To configure nested pages, add a <code>childPages</code> array to your main <code>publish-confluence.json</code> or within any child page configuration object. Each object in the array follows the same schema as the top-level configuration.</p>
+
+{{#confluence-code language="json" title="publish-confluence.json with childPages Example" linenumbers=true}}
+{
+  "spaceKey": "DOCS",
+  "pageTitle": "My Application Suite",
+  "distDir": "./dist/main-app",
+  "templatePath": "./templates/main-page.html",
+  "macroTemplatePath": "./templates/main-macro.html",
+  "childPages": [
+    {
+      "pageTitle": "User Guide",
+      "templatePath": "./templates/guide-page.html",
+      "macroTemplatePath": null, // No app/attachments for this page
+      "distDir": null // Not needed if no macro/attachments
+    },
+    {
+      "pageTitle": "Admin Dashboard",
+      "distDir": "./dist/admin-app",
+      "templatePath": "./templates/admin-page.html", // Can reuse or use specific templates
+      "macroTemplatePath": "./templates/admin-macro.html",
+      "childPages": [
+        {
+          "pageTitle": "Audit Log Viewer",
+          "distDir": "./dist/audit-log-app"
+          // Inherits template paths from parent if not specified
+        }
+      ]
+    }
+  ]
+}
+{{/confluence-code}}
+
+{{#confluence-note title="Configuration Inheritance"}}
+  <p>Child pages inherit configuration settings like <code>spaceKey</code>, <code>templatePath</code>, and <code>macroTemplatePath</code> from their parent if not explicitly specified. However, <code>pageTitle</code> and <code>distDir</code> are typically unique to each page being published with an application.</p>
+  <p>If a child page doesn't need an HTML macro or attachments (e.g., a pure documentation page), set <code>macroTemplatePath</code> and <code>distDir</code> to <code>null</code>.</p>
+{{/confluence-note}}
+
+<h2>Project Structure & Tech Stacks</h2>
+<p>While <code>publish-confluence</code> is flexible, following certain project structures and choosing appropriate technologies can lead to better performance and maintainability when embedding applications in Confluence.</p>
+
+<h3>Recommended Project Structure</h3>
+<p>A typical structure for a project intended for Confluence embedding might look like this:</p>
+{{#confluence-code language="text" title="Example Project Layout" linenumbers=false}}
+my-confluence-app/
+├── src/                      # Source code (JS/TS, CSS, etc.)
+│   ├── components/           # UI components
+│   ├── services/             # Data fetching, logic
+│   ├── styles/               # Stylesheets
+│   ├── index.js              # Main application entry point
+│   └── index.html            # HTML entry for development/build
+├── public/                   # Static assets (images, fonts)
+├── dist/                     # Build output (target for distDir)
+├── confluence-template.html  # Confluence page template
+├── macro-template.html       # HTML macro template
+├── publish-confluence.json   # Publishing configuration
+├── package.json              # Project dependencies & scripts
+└── vite.config.js            # Build tool configuration (e.g., Vite, Webpack)
+{{/confluence-code}}
+
+<h3>Recommended Tech Stacks</h3>
+<p>Consider the complexity and performance requirements of your embedded application:</p>
+
+<h4>1. Lightweight Applications (Best Performance)</h4>
+<p>Ideal for simple dashboards, widgets, or tools where fast loading and minimal footprint are key.</p>
+<ul>
+    <li><strong>Framework:</strong> Vanilla JS, Preact, Alpine.js, Svelte</li>
+    <li><strong>Bundler:</strong> Vite, esbuild, Rollup (focus on minimal config)</li>
+    <li><strong>CSS:</strong> Plain CSS, PostCSS, or utility classes (Tailwind subset)</li>
+    <li><strong>Goal:</strong> Keep total JS/CSS bundle size under 100-150KB. Minimize external dependencies.</li>
+</ul>
+
+<h4>2. Modern React/Vue Applications</h4>
+<p>Suitable for more complex applications with rich interactivity, state management, and component libraries.</p>
+<ul>
+    <li><strong>Framework:</strong> React, Vue</li>
+    <li><strong>Bundler:</strong> Vite, Webpack 5</li>
+    <li><strong>CSS:</strong> CSS Modules, Styled Components, Tailwind CSS</li>
+    <li><strong>Optimization:</strong> Implement code splitting, tree shaking, and lazy loading. Use a loading indicator in your `macro-template.html`.</li>
+</ul>
+
+<h4>3. Data Visualization Applications</h4>
+<p>For dashboards focused on presenting data visually.</p>
+<ul>
+    <li><strong>Framework:</strong> Any lightweight framework (Preact, Svelte, Vanilla JS)</li>
+    <li><strong>Visualization Library:</strong> Chart.js, D3.js, ECharts, Plotly.js (consider bundle size impact)</li>
+    *   <strong>Data Handling:</strong> Fetch data efficiently. Consider client-side aggregation or server-side pre-aggregation. Use web workers for heavy computations if needed.</li>
+    <li><strong>Interactivity:</strong> Add filters, zooming, and tooltips for better exploration.</li>
+</ul>
+
+<h2>Build Optimization Tips</h2>
+<p>Optimizing your build process is crucial for a good user experience within Confluence:</p>
+<ol>
+    <li><strong>Code Splitting:</strong> Break your application into smaller chunks that load on demand. Most modern bundlers support this via dynamic `import()`.
+        {{#confluence-code language="javascript" title="Dynamic Import Example" linenumbers=false}}
+// Load a heavy component only when needed
+const ChartComponent = React.lazy(() => import('./components/HeavyChart'));
+
+function MyDashboard() {
+  // ...
+  return (
+    <React.Suspense fallback={<div>Loading Chart...</div>}>
+      <ChartComponent data={chartData} />
+    </React.Suspense>
+  );
+}
+        {{/confluence-code}}
+    </li>
+    <li><strong>Tree Shaking:</strong> Ensure your bundler is configured to remove unused code from your final bundles.</li>
+    <li><strong>Asset Optimization:</strong>
+        <ul>
+            <li>Compress images (use tools like TinyPNG or image optimizers in your build).</li>
+            <li>Use modern image formats like WebP where appropriate.</li>
+            <li>Use SVGs for icons and simple graphics.</li>
+            <li>Subset fonts to include only the characters and weights you need.</li>
+        </ul>
+    </li>
+    <li><strong>Minimize Dependencies:</strong> Audit your `package.json`. Remove unused libraries. Choose smaller alternatives where possible (e.g., `date-fns` instead of `moment.js`, `preact` instead of `react`).</li>
+    <li><strong>Target Modern Browsers:</strong> Configure your build tool (e.g., Babel, SWC, esbuild) to target reasonably modern browsers to reduce polyfill size.</li>
+    <li><strong>Performance Monitoring:</strong> Integrate tools like Lighthouse CI or set performance budgets in your bundler configuration to catch regressions.</li>
+</ol>
+
+<h2>Common Pitfalls to Avoid</h2>
+<p>Embedding applications in Confluence can sometimes lead to unexpected issues. Be mindful of these common pitfalls:</p>
+
+{{#confluence-warning title="Potential Issues When Embedding Apps"}}
+<ol>
+    <li><strong>DOM Conflicts & Styling Issues:</strong> Confluence has its own global styles and JavaScript. Your application's CSS might conflict.
+        <ul>
+            <li><strong>Solution:</strong> Use CSS Modules, scoped styles (Vue), Shadow DOM (if feasible), or strict BEM naming conventions. Prefix your CSS classes uniquely. Avoid overly broad selectors. Reset styles aggressively within your app's container if necessary.</li>
+        </ul>
+    </li>
+    <li><strong>Authentication & Authorization:</strong> Users viewing the Confluence page are authenticated against Confluence, but your embedded app might need its own authentication or rely on the user's Confluence session implicitly (which can be fragile).
+        <ul>
+            <li><strong>Solution:</strong> If your app needs to call backend services, use appropriate authentication methods (e.g., JWT tokens passed during initialization, OAuth flows if necessary). Be aware of CORS policies. Avoid relying solely on the Confluence session for backend authorization.</li>
+        </ul>
+    </li>
+    <li><strong>Large Dependencies & Bundle Size:</strong> Including large frameworks or libraries can make the embedded application slow to load within the Confluence page context.
+        <ul>
+            <li><strong>Solution:</strong> Follow build optimization tips. Analyze your bundle with tools like `webpack-bundle-analyzer` or `rollup-plugin-visualizer`. Prefer lightweight libraries.</li>
+        </ul>
+    </li>
+    <li><strong>Aggressive Polling or High Resource Usage:</strong> An embedded app constantly polling for data or performing heavy computations can impact browser performance and potentially Confluence server load (if making many API calls).
+        <ul>
+            <li><strong>Solution:</strong> Use WebSockets or Server-Sent Events for real-time updates instead of polling where possible. Implement reasonable polling intervals. Optimize computations, potentially using Web Workers.</li>
+        </ul>
+    </li>
+    <li><strong>JavaScript Errors Breaking the Macro:</strong> Uncaught JavaScript errors within your application can sometimes cause the entire Confluence HTML macro to fail to render or become unresponsive.
+        <ul>
+            <li><strong>Solution:</strong> Implement robust error handling within your application. Use React Error Boundaries or equivalent concepts in other frameworks. Log errors effectively to help diagnose issues. Provide graceful fallbacks or error messages within the app itself.</li>
+        </ul>
+    </li>
+</ol>
+{{/confluence-warning}}
+
+<hr />
+<p><em>Last updated: {{currentDate}}</em></p>

@@ -1,0 +1,48 @@
+{
+  "spaceKey": "~thro",
+  "pageTitle": "Publish Confluence documentation",
+  "distDir": "./dist",
+  "templatePath": "./confluence-template.html",
+  "macroTemplatePath": null,
+  "includedFiles": [],
+  "excludedFiles": [
+    "**/*.map"
+  ],
+  "childPages": [
+    {
+      "pageTitle": "1. Getting Started",
+      "templatePath": "./child-pages/page-1.html",
+      "macroTemplatePath": null
+    },
+    {
+      "pageTitle": "2. Configuration",
+      "templatePath": "./child-pages/page-2.html",
+      "macroTemplatePath": null
+    },
+    {
+      "pageTitle": "3. Templating System",
+      "templatePath": "./child-pages/page-3.html",
+      "macroTemplatePath": null
+    },
+    {
+      "pageTitle": "4. Confluence helper macros",
+      "templatePath": "./child-pages/page-4.html",
+      "macroTemplatePath": null
+    },
+    {
+      "pageTitle": "5. Command line interface",
+      "templatePath": "./child-pages/page-5.html",
+      "macroTemplatePath": null
+    },
+    {
+      "pageTitle": "6. Advanced configuration options",
+      "templatePath": "./child-pages/page-6.html",
+      "macroTemplatePath": null
+    },
+    {
+      "pageTitle": "7. Confluence storage format",
+      "templatePath": "./child-pages/page-7.html",
+      "macroTemplatePath": null
+    }
+  ]
+}

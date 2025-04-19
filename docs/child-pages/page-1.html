@@ -1,0 +1,193 @@
+<h1>1. Getting Started</h1>
+
+{{confluence-toc maxLevel=3}}
+
+<p>This section guides you through installing <code>publish-confluence</code> and running your first publish command to get your application onto a Confluence page quickly.</p>
+
+<hr />
+
+<h2>1.1. Installation</h2>
+
+<h3>1.1.1. Prerequisites</h3>
+<ul>
+    <li><strong>Node.js:</strong> Version 20.0.0 or higher is required. You can download it from <a href="https://nodejs.org/">nodejs.org</a>.</li>
+    <li><strong>npm:</strong> Usually included with Node.js.</li>
+    <li><strong>Confluence API Token:</strong> You need an API token for your Confluence account. See Atlassian's documentation on how to create one.</li>
+    <li><strong>Confluence Permissions:</strong> Ensure you have permissions to create/edit pages and add attachments in the target Confluence space.</li>
+</ul>
+
+<h3>1.1.2. Installing via npm</h3>
+<p>You can install <code>publish-confluence</code> globally to make the command available anywhere on your system, or locally within your project.</p>
+
+{{#confluence-panel title="Global Installation (Recommended for ease of use)" type="info"}}
+  <p>Install the package globally using npm:</p>
+  {{#confluence-code language="bash" linenumbers=false}}
+# Install globally from npm (replace with actual package name if needed)
+npm install -g publish-confluence
+
+# Or install globally from a local clone of the repository
+# git clone <repository-url>
+# cd publish-confluence
+# npm install
+# npm run build
+# npm install -g .
+  {{/confluence-code}}
+  <p>After global installation, you can run <code>publish-confluence</code> from any project directory.</p>
+{{/confluence-panel}}
+
+{{#confluence-panel title="Local Installation" type="note"}}
+  <p>Install the package as a development dependency in your project:</p>
+  {{#confluence-code language="bash" linenumbers=false}}
+npm install --save-dev publish-confluence
+  {{/confluence-code}}
+  <p>When installed locally, you'll typically run the tool using <code>npx publish-confluence</code> or by adding it to your <code>package.json</code> scripts.</p>
+{{/confluence-panel}}
+
+<h3>1.1.3. Windows-Specific Notes</h3>
+{{#confluence-panel type="note"}}
+  <p>On Windows, global installation makes the command available in Command Prompt, PowerShell, and Git Bash. If you encounter permission issues during global installation (<code>npm install -g</code>), try running your terminal (Command Prompt or PowerShell) as Administrator.</p>
+{{/confluence-panel}}
+
+<h3>1.1.4. Verifying Installation</h3>
+<p>After installation, verify that the tool is accessible by running:</p>
+{{#confluence-code language="bash" linenumbers=false}}
+publish-confluence --version
+{{/confluence-code}}
+<p>Or, if installed locally:</p>
+{{#confluence-code language="bash" linenumbers=false}}
+npx publish-confluence --version
+{{/confluence-code}}
+<p>This should output the installed version number.</p>
+
+<hr />
+
+<h2>1.2. Quick Start Guide</h2>
+<p>Follow these steps to publish a simple application:</p>
+<ol>
+    <li>
+        <strong>Prepare your Application:</strong> Ensure your JavaScript application has a build process that outputs files (HTML, JS, CSS) to a directory (e.g., <code>./dist</code>).
+    </li>
+    <li>
+        <strong>Create <code>.env</code> File:</strong> In your project's root directory, create a file named <code>.env</code> and add your Confluence credentials:
+        {{#confluence-code language="text" title=".env" linenumbers=true}}
+CONFLUENCE_BASE_URL=https://your-domain.atlassian.net
+CONFLUENCE_TOKEN=your_api_token_here
+        {{/confluence-code}}
+        <p>Replace the placeholders with your actual Confluence instance URL and API token. <strong>Important:</strong> Add <code>.env</code> to your <code>.gitignore</code> file to avoid committing credentials.</p>
+    </li>
+    <li>
+        <strong>Create <code>publish-confluence.json</code>:</strong> Create a configuration file named <code>publish-confluence.json</code> in your project root. Define the target space and page title:
+        {{#confluence-code language="json" title="publish-confluence.json" linenumbers=true}}
+{
+  "spaceKey": "YOURSPACEKEY",
+  "pageTitle": "My Awesome App",
+  "parentPageTitle": "Optional Parent Page",
+  "distDir": "./dist",
+  "macroTemplatePath": "./macro-template.html"
+}
+        {{/confluence-code}}
+        <ul>
+            <li>Replace <code>YOURSPACEKEY</code> with your target Confluence space key.</li>
+            <li>Set <code>pageTitle</code> to the desired title for your Confluence page.</li>
+            <li><code>parentPageTitle</code> is optional; if omitted, the page will be created under the space home.</li>
+            <li>Ensure <code>distDir</code> points to your build output directory.</li>
+            <li>Include <code>macroTemplatePath</code> if you want to attach assets (JS/CSS). Create a basic <code>macro-template.html</code> (see Templating section). If omitted, assets won't be attached.</li>
+        </ul>
+    </li>
+     <li>
+        <strong>(Optional) Create a Macro Template:</strong> If you specified <code>macroTemplatePath</code>, create a basic <code>macro-template.html</code> file:
+        {{#confluence-code language="html" title="macro-template.html" linenumbers=true}}
+<div class="html-macro-wrapper">
+  <div id="app">
+    <!-- Your app mounts here -->
+    <p>Loading application...</p>
+  </div>
+  {{{styles}}}
+  {{{scripts}}}
+</div>
+        {{/confluence-code}}
+        <p>This template defines the content inside the Confluence HTML macro, including where your app's root element (<code>#app</code>) is and where the CSS (<code>{{{styles}}}</code>) and JS (<code>{{{scripts}}}</code>) links will be injected.</p>
+    </li>
+    <li>
+        <strong>Build your Application:</strong> Run your application's build command (e.g., <code>npm run build</code>).
+    </li>
+    <li>
+        <strong>Run Publish-Confluence:</strong> Execute the publish command:
+        {{#confluence-code language="bash" linenumbers=false}}
+# If installed globally
+publish-confluence
+
+# If installed locally
+npx publish-confluence
+        {{/confluence-code}}
+    </li>
+    <li>
+        <strong>Check Confluence:</strong> Navigate to your Confluence space. You should find a new page titled "My Awesome App" (or updated if it existed) containing your application!
+    </li>
+</ol>
+
+<hr />
+
+<h2>1.3. Authentication</h2>
+<p><code>publish-confluence</code> requires your Confluence base URL and an API token to interact with the Confluence REST API. There are two ways to provide these credentials:</p>
+
+<h3>1.3.1. Using Environment Variables</h3>
+<p>This is the recommended method for CI/CD environments or if you prefer not to use <code>.env</code> files.</p>
+<p>Set the following environment variables in your system:</p>
+<ul>
+    <li><code>CONFLUENCE_BASE_URL</code>: Your full Confluence instance URL (e.g., <code>https://your-company.atlassian.net</code>).</li>
+    <li><code>CONFLUENCE_TOKEN</code>: Your generated Confluence API token.</li>
+</ul>
+
+{{#confluence-panel title="Setting Environment Variables Examples" type="note"}}
+  <p><strong>PowerShell (Windows):</strong></p>
+  {{#confluence-code language="powershell" linenumbers=false}}
+# For current session only
+$env:CONFLUENCE_BASE_URL = "https://your-company.atlassian.net"
+$env:CONFLUENCE_TOKEN = "your_api_token"
+
+# Persist for user (requires new terminal session)
+[Environment]::SetEnvironmentVariable("CONFLUENCE_BASE_URL", "https://your-company.atlassian.net", "User")
+[Environment]::SetEnvironmentVariable("CONFLUENCE_TOKEN", "your_api_token", "User")
+  {{/confluence-code}}
+
+  <p><strong>Command Prompt (Windows):</strong></p>
+  {{#confluence-code language="batch" linenumbers=false}}
+:: For current session only
+set CONFLUENCE_BASE_URL=https://your-company.atlassian.net
+set CONFLUENCE_TOKEN=your_api_token
+
+:: Persist for user (requires new terminal session)
+setx CONFLUENCE_BASE_URL "https://your-company.atlassian.net"
+setx CONFLUENCE_TOKEN "your_api_token"
+  {{/confluence-code}}
+
+  <p><strong>Bash/Zsh (Linux/macOS):</strong></p>
+  {{#confluence-code language="bash" linenumbers=false}}
+# For current session only
+export CONFLUENCE_BASE_URL="https://your-company.atlassian.net"
+export CONFLUENCE_TOKEN="your_api_token"
+
+# Add to your shell profile (e.g., ~/.bashrc, ~/.zshrc) for persistence
+# export CONFLUENCE_BASE_URL="https://your-company.atlassian.net"
+# export CONFLUENCE_TOKEN="your_api_token"
+  {{/confluence-code}}
+{{/confluence-panel}}
+
+<h3>1.3.2. Using <code>.env</code> Files</h3>
+<p>This method is convenient for local development. Create a file named <code>.env</code> in the root of your project directory.</p>
+{{#confluence-code language="text" title=".env" linenumbers=true}}
+CONFLUENCE_BASE_URL=https://your-company.atlassian.net
+CONFLUENCE_TOKEN=your_api_token_here
+{{/confluence-code}}
+<p>The tool automatically loads variables from this file if it exists.</p>
+
+<h3>1.3.3. Security Considerations</h3>
+{{#confluence-panel title="Important Security Notes" type="warning"}}
+  <ul>
+    <li><strong>Never commit your <code>.env</code> file or API tokens directly into your version control system (Git).</strong> Always add <code>.env</code> to your <code>.gitignore</code> file.</li>
+    <li>Use environment variables securely stored in your CI/CD system's secrets management for automated publishing pipelines.</li>
+    <li>Treat your API token like a password. Protect it and consider rotating it periodically according to your organization's security policies.</li>
+    <li>Ensure the API token has the minimum required permissions (page create/edit, attachment add/read) for the target space.</li>
+  </ul>
+{{/confluence-panel}}
