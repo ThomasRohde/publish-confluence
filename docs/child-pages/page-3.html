@@ -32,9 +32,9 @@
 <h3>Default Page Template</h3>
 <p>If you don't specify a <code>templatePath</code> in your configuration, the tool uses this default:</p>
 {{#confluence-code language="html" title="Default confluence-template.html" linenumbers=true}}
-<h1>{{pageTitle}}</h1>
+<h1>\{{pageTitle}}</h1>
 
-{{{macro}}}
+\{{{macro}}}
 
 <hr/>
 <p><em>Last updated: {{currentDate}}</em></p>
@@ -43,34 +43,34 @@
 <h3>Example Custom Page Template</h3>
 <p>Here's an example combining standard XHTML, Confluence macros, and the application placeholder:</p>
 {{#confluence-code language="html" title="Example custom confluence-template.html" linenumbers=true}}
-<h1>{{pageTitle}}</h1>
+<h1>\{{pageTitle}}</h1>
 
-{{confluence-toc maxLevel=2}}
+\{{confluence-toc maxLevel=2}}
 
 <p>Welcome to the interactive application page. Below you will find the main application embedded within a layout.</p>
 
-{{#confluence-layout}}
-  {{#layout-section type="two_left_sidebar"}}
-    {{#layout-cell}}
-      {{#confluence-panel title="Instructions" type="info"}}
+\{{#confluence-layout}}
+  \{{#layout-section type="two_left_sidebar"}}
+    \{{#layout-cell}}
+      \{{#confluence-panel title="Instructions" type="info"}}
         <p>Use the controls within the application to filter and explore the data.</p>
         <ul>
           <li>Select a date range.</li>
           <li>Choose a category.</li>
           <li>Export results if needed.</li>
         </ul>
-      {{/confluence-panel}}
-      {{confluence-status type="green" text="Operational"}}
-    {{/layout-cell}}
-    {{#layout-cell}}
+      \{{/confluence-panel}}
+      \{{confluence-status type="green" text="Operational"}}
+    \{{/layout-cell}}
+    \{{#layout-cell}}
       <h2>Application View</h2>
-      {{{macro}}}
-    {{/layout-cell}}
-  {{/layout-section}}
-{{/confluence-layout}}
+      \{{{macro}}}
+    \{{/layout-cell}}
+  \{{/layout-section}}
+\{{/confluence-layout}}
 
 <hr />
-<p><em>Page generated on: {{currentDate}}</em></p>
+<p><em>Page generated on: \{{currentDate}}</em></p>
 {{/confluence-code}}
 
 <hr />
@@ -104,8 +104,8 @@
     <!-- Your JS app mounts here -->
     <p>Loading application...</p>
   </div>
-  {{{styles}}}
-  {{{scripts}}}
+  \{{{styles}}}
+  \{{{scripts}}}
 </div>
 {{/confluence-code}}
 
@@ -123,8 +123,8 @@
   </div>
 
   <!-- Inject styles and scripts -->
-  {{{styles}}}
-  {{{scripts}}}
+  \{{{styles}}}
+  \{{{scripts}}}
 
   <!-- Optional: Small script to hide loader once main app script runs -->
   <script>
@@ -171,10 +171,10 @@
 
 <p><strong>Example (Page Template):</strong></p>
 {{#confluence-code language="html" linenumbers="false"}}
-<h1>{{pageTitle}}</h1>
+<h1>\{{pageTitle}}</h1>
 <p>Application details:</p>
-{{{macro}}} <!-- The entire app defined in macro-template.html goes here -->
-<p>Last updated: {{currentDate}}</p>
+\{{{macro}}} <!-- The entire app defined in macro-template.html goes here -->
+<p>Last updated: \{{currentDate}}</p>
 {{/confluence-code}}
 
 <h3>Approach 2: Using Macro Helpers Directly in Page Template</h3>
@@ -187,16 +187,16 @@
 </ol>
 <p><strong>Example (Page Template using direct helpers):</strong></p>
 {{#confluence-code language="html" linenumbers="false"}}
-<h1>{{pageTitle}}</h1>
-{{#confluence-info title="Project Status"}}
-  <p>The project is currently {{confluence-status type="yellow" text="In Progress"}}.</p>
-{{/confluence-info}}
+<h1>\{{pageTitle}}</h1>
+\{{#confluence-info title="Project Status"}}
+  <p>The project is currently \{{confluence-status type="yellow" text="In Progress"}}.</p>
+\{{/confluence-info}}
 
-{{#confluence-code language="javascript" title="Sample Snippet"}}
+\{{#confluence-code language="javascript" title="Sample Snippet"}}
 function greet() {
   console.log("Hello from Confluence!");
 }
-{{/confluence-code}}
+\{{/confluence-code}}
 
-<p>Last updated: {{currentDate}}</p>
+<p>Last updated: \{{currentDate}}</p>
 {{/confluence-code}}
