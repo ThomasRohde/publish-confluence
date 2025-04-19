@@ -251,6 +251,8 @@ export class ConfluenceClient {
    * @param bodyContent Confluence Storage Format (XHTML) content for the page body.
    * @param parentPageTitle Optional title of the parent page. If omitted, defaults to the space's homepage.
    * @param updateMessage Optional message for the page history update.
+   * @param retryCount Optional number of retries if parent page is not found (default: 3).
+   * @param retryDelay Optional delay between retries in milliseconds (default: 2000).
    * @returns The created or updated Confluence page object.
    */
   async upsertPage(
@@ -258,7 +260,9 @@ export class ConfluenceClient {
     title: string,
     bodyContent: string,
     parentPageTitle?: string,
-    updateMessage?: string
+    updateMessage?: string,
+    retryCount: number = 3,
+    retryDelay: number = 2000
   ): Promise<ConfluencePage> {
     // Try to find existing page with up to 2 retries if not found initially
     // This helps handle cases where the page might be in process of being indexed by Confluence
@@ -295,12 +299,51 @@ export class ConfluenceClient {
     // Otherwise, create a new page
     let parentPageId: string | undefined;
     
+    // Handle parent page retrieval with retries
     if (parentPageTitle) {
-      const parentPage = await this.findPageByTitle(spaceKey, parentPageTitle);
-      if (!parentPage) {
-        throw new ResourceNotFoundError('Parent page', parentPageTitle);
+      let parentAttempts = 0;
+      
+      while (parentAttempts <= retryCount) {
+        try {
+          const parentPage = await this.findPageByTitle(spaceKey, parentPageTitle);
+          
+          if (!parentPage) {
+            // Parent page not found, but we still have retries left
+            if (parentAttempts < retryCount) {
+              if (this.debug) {
+                console.log(`Parent page "${parentPageTitle}" not found on attempt ${parentAttempts + 1}. Waiting ${retryDelay}ms before retry...`);
+              }
+              
+              // Wait before retrying - use exponential backoff for better results
+              const backoffDelay = retryDelay * Math.pow(1.5, parentAttempts);
+              await new Promise(resolve => setTimeout(resolve, backoffDelay));
+              parentAttempts++;
+              continue;
+            }
+            
+            // We've exhausted all retries - report the error
+            throw new ResourceNotFoundError('Parent page', parentPageTitle);
+          }
+          
+          // Parent page found, store its ID and break out of the retry loop
+          parentPageId = parentPage.id;
+          if (this.debug && parentAttempts > 0) {
+            console.log(`Parent page "${parentPageTitle}" found after ${parentAttempts + 1} attempts.`);
+          }
+          break;
+        } catch (error) {
+          // Only retry ResourceNotFoundError, let other errors bubble up immediately
+          if (!(error instanceof ResourceNotFoundError) || parentAttempts >= retryCount) {
+            throw error;
+          }
+          
+          parentAttempts++;
+          
+          if (this.debug) {
+            console.log(`Error finding parent page "${parentPageTitle}" (attempt ${parentAttempts}): ${error.message}`);
+          }
+        }
       }
-      parentPageId = parentPage.id;
     } else {
       // Default to space homepage if no parent specified
       parentPageId = await this.getSpaceHomepageId(spaceKey);

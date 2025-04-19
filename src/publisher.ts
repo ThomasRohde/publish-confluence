@@ -253,7 +253,69 @@ export async function uploadAttachments(
   }
 }
 
-// Add recursive publishing helper
+/**
+ * Publishes child pages recursively
+ */
+async function publishChildPages(
+  client: ConfluenceClient,
+  config: PublishConfig,
+  parentConfig: PublishConfig,
+  parentTitle: string,
+  basePath: string,
+  logger: ReturnType<typeof createLogger>
+): Promise<void> {
+  // No child pages to publish
+  if (!parentConfig.childPages || parentConfig.childPages.length === 0) {
+    return;
+  }
+
+  // Small delay after parent page creation to ensure it's fully indexed in Confluence
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  logger.info(`Publishing ${parentConfig.childPages.length} child pages under "${parentTitle}"...`);
+
+  // Process each child page sequentially
+  for (const childConfig of parentConfig.childPages) {
+    // Create a new config object by merging the child config with the parent config
+    const mergedConfig: PublishConfig = {
+      ...config,
+      ...parentConfig,
+      ...childConfig,
+      // Override any properties that should not be inherited
+      parentPageTitle: parentTitle,
+    };
+
+    // Resolve the distDir relative to the base path if it's a relative path
+    if (childConfig.distDir && !path.isAbsolute(childConfig.distDir)) {
+      mergedConfig.distDir = path.resolve(basePath, childConfig.distDir);
+    }
+
+    // Important: Do not copy childPages from parent to child unless
+    // the child explicitly defines its own childPages
+    if (!childConfig.childPages) {
+      delete mergedConfig.childPages;
+    }
+
+    // Publish the child page
+    await publishPageRecursive(client, mergedConfig);
+
+    // Recursively process grandchildren (if any)
+    if (childConfig.childPages && childConfig.childPages.length > 0) {
+      await publishChildPages(
+        client,
+        config,
+        childConfig,
+        childConfig.pageTitle,
+        basePath,
+        logger
+      );
+    }
+  }
+}
+
+/**
+ * Add recursive publishing helper
+ */
 async function publishPageRecursive(
   client: ConfluenceClient,
   cfg: PublishConfig
@@ -279,10 +341,7 @@ async function publishPageRecursive(
 
   // Recurse into children
   if (cfg.childPages) {
-    for (const child of cfg.childPages) {
-      child.parentPageTitle = cfg.pageTitle;
-      await publishPageRecursive(client, child);
-    }
+    await publishChildPages(client, cfg, cfg, cfg.pageTitle, process.cwd(), log);
   }
 }
 
