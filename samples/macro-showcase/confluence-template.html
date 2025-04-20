@@ -40,6 +40,52 @@
   {{/layout-section}}
 {{/confluence-layout}}
 
+<!-- Image Examples Section -->
+<h2>Image Examples</h2>
+
+<h3>Attached Images</h3>
+<p>These images are included in the assets attached to the page:</p>
+
+{{#confluence-layout}}
+  {{#layout-section type="three_equal"}}
+    {{#layout-cell}}
+      <h4>Basic Image</h4>
+      {{confluence-image src="sample-image.png" alt="Sample attachment image"}}
+    {{/layout-cell}}
+    
+    {{#layout-cell}}
+      <h4>With Border</h4>
+      {{confluence-image src="sample-image.png" alt="Image with border" border=true width="150"}}
+    {{/layout-cell}}
+    
+    {{#layout-cell}}
+      <h4>Thumbnail</h4>
+      {{confluence-image src="sample-image.png" alt="Thumbnail image" thumbnail=true}}
+    {{/layout-cell}}
+  {{/layout-section}}
+{{/confluence-layout}}
+
+<h3>External Images</h3>
+<p>These images are referenced from external URLs:</p>
+
+{{confluence-image 
+  src="https://cdn.prod.website-files.com/63be620d63863b897c02c28a/6568fdff879a6b03caeff9c9_2560px-Atlassian_Confluence_2017_logo.svg.png" 
+  alt="External image example" 
+  width="300" 
+  align="center"
+  title="This is loaded from an external URL"}}
+
+<h3>Image Alignment Examples</h3>
+
+<p>Left aligned image:</p>
+{{confluence-image src="sample-image.png" alt="Left aligned" align="left" width="100"}}
+
+<p style="clear: both;">Center aligned image:</p>
+{{confluence-image src="sample-image.png" alt="Center aligned" align="center" width="100"}}
+
+<p>Right aligned image:</p>
+{{confluence-image src="sample-image.png" alt="Right aligned" align="right" width="100"}}
+
 <!-- Admonition Macros Section -->
 <h2>Admonition Macros</h2>
 

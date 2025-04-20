@@ -350,4 +350,78 @@ export function registerMacroHelpers(handlebars: typeof Handlebars): void {
       </ac:structured-macro>`
     );
   });
+
+  /**
+   * Image macro - Embeds an image in Confluence with various formatting options
+   * 
+   * Usage:
+   * ```handlebars
+   * {{confluence-image src="logo.png" alt="Company Logo" width="300" height="200" align="center"}}
+   * {{confluence-image src="https://example.com/image.jpg" title="External Image" border=true thumbnail=true}}
+   * ```
+   * 
+   * @param src - Image source (filename for attached images or full URL for external images)
+   * @param alt - Alternative text for the image (for accessibility)
+   * @param title - Tooltip text displayed on hover
+   * @param width - Desired width of the image (e.g., "200", "50%")
+   * @param height - Desired height of the image (e.g., "150", "auto")
+   * @param align - Alignment of the image (left, center, right)
+   * @param border - Whether to display a border around the image (true/false)
+   * @param thumbnail - Whether to render the image as a thumbnail (true/false)
+   * @param class - CSS class for custom styling
+   * @param style - Inline CSS styles
+   */
+  handlebars.registerHelper('confluence-image', function(this: any, options: Handlebars.HelperOptions) {
+    const src = options.hash.src;
+    
+    // Ensure src parameter is provided
+    if (!src) {
+      console.warn('Warning: confluence-image helper called without required "src" parameter');
+      return '';
+    }
+    
+    // Determine if source is a URL or a filename
+    const isUrl = src.startsWith('http://') || src.startsWith('https://');
+    
+    // Optional parameters
+    const alt = options.hash.alt || '';
+    const title = options.hash.title || '';
+    const width = options.hash.width || null;
+    const height = options.hash.height || null;
+    const align = options.hash.align || null;
+    const border = options.hash.border === true ? 'true' : null;
+    const thumbnail = options.hash.thumbnail === true ? 'true' : null;
+    const cssClass = options.hash.class || null;
+    const style = options.hash.style || null;
+    
+    // Start building the image tag with its attributes
+    let imageTag = '<ac:image';
+    
+    // Add attributes only if they are provided
+    if (alt) imageTag += ` ac:alt="${alt}"`;
+    if (title) imageTag += ` ac:title="${title}"`;
+    if (width) imageTag += ` ac:width="${width}"`;
+    if (height) imageTag += ` ac:height="${height}"`;
+    if (align) imageTag += ` ac:align="${align}"`;
+    if (border) imageTag += ` ac:border="${border}"`;
+    if (thumbnail) imageTag += ` ac:thumbnail="${thumbnail}"`;
+    if (cssClass) imageTag += ` ac:class="${cssClass}"`;
+    if (style) imageTag += ` ac:style="${style}"`;
+    
+    imageTag += '>';
+    
+    // Add the appropriate source element based on the source type
+    if (isUrl) {
+      // External URL source
+      imageTag += `<ri:url ri:value="${src}"/>`;
+    } else {
+      // Attachment source (assumed to be included in the build/dist files)
+      imageTag += `<ri:attachment ri:filename="${src}"/>`;
+    }
+    
+    // Close the image tag
+    imageTag += '</ac:image>';
+    
+    return new handlebars.SafeString(imageTag);
+  });
 }

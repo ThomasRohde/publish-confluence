@@ -237,6 +237,33 @@ Display a status indicator:
 
 Status types: `green`, `yellow`, `red`, `blue`
 
+### Image Macro
+
+Embed images in your Confluence pages with customizable attributes:
+
+```handlebars
+{{confluence-image src="logo.png" alt="Company Logo" width="300" height="200" align="center"}}
+```
+
+For external images:
+
+```handlebars
+{{confluence-image src="https://example.com/image.jpg" title="External Image" border=true thumbnail=true}}
+```
+
+| Parameter   | Description                                                 |
+|-------------|-------------------------------------------------------------|
+| `src`       | Image source (filename for attachments or URL for external) |
+| `alt`       | Alternative text for accessibility                          | 
+| `title`     | Tooltip text displayed on hover                             |
+| `width`     | Desired width (e.g., "200", "50%")                          |
+| `height`    | Desired height (e.g., "150", "auto")                        |
+| `align`     | Alignment (left, center, right)                             |
+| `border`    | Whether to display a border (true/false)                    |
+| `thumbnail` | Whether to render as a thumbnail (true/false)               |
+| `class`     | CSS class for custom styling                                |
+| `style`     | Inline CSS styles                                           |
+
 ### Admonition Macros
 
 Create various admonition blocks:

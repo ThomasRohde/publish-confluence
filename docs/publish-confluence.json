@@ -1,7 +1,7 @@
 {
   "spaceKey": "~thro",
   "pageTitle": "Publish Confluence documentation",
-  "distDir": "./dist",
+  "distDir": "./assets",
   "templatePath": "./confluence-template.html",
   "macroTemplatePath": null,
   "includedFiles": [],

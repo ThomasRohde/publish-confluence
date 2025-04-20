@@ -184,6 +184,37 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 
 <hr />
 
+<h2>Image Macro</h2>
+<p>Embeds images in your Confluence pages with customizable attributes.</p>
+<p><strong>Syntax:</strong></p>
+{{#confluence-code language="handlebars" title="Image Syntax"}}
+\{{confluence-image src="path/to/image.png" alt="Alternative text" width="300" height="200" align="center" border=true thumbnail=true title="Tooltip text" class="custom-class" style="custom-style"}}
+{{/confluence-code}}
+<p><strong>Parameters:</strong></p>
+<ul>
+    <li><code>src</code> (String, Required): Image source. Can be a filename for attached images or a full URL for external images.</li>
+    <li><code>alt</code> (String, Optional): Alternative text for accessibility.</li>
+    <li><code>title</code> (String, Optional): Tooltip text displayed on hover.</li>
+    <li><code>width</code> (String, Optional): Desired width of the image (e.g., "200", "50%").</li>
+    <li><code>height</code> (String, Optional): Desired height of the image (e.g., "150", "auto").</li>
+    <li><code>align</code> (String, Optional): Alignment of the image (left, center, right).</li>
+    <li><code>border</code> (Boolean, Optional): Whether to display a border around the image. Defaults to <code>false</code>.</li>
+    <li><code>thumbnail</code> (Boolean, Optional): Whether to render the image as a thumbnail. Defaults to <code>false</code>.</li>
+    <li><code>class</code> (String, Optional): CSS class for custom styling.</li>
+    <li><code>style</code> (String, Optional): Inline CSS styles.</li>
+</ul>
+<p><strong>Example Usage:</strong></p>
+{{#confluence-code language="handlebars" title="Image Examples"}}
+<!-- Attached image example -->
+\{{confluence-image src="logo.png" alt="Company Logo" width="300" height="200" align="center"}}
+
+<!-- External image example -->
+\{{confluence-image src="https://example.com/image.jpg" title="External Image" border=true thumbnail=true}}
+{{/confluence-code}}
+<p><em>Note: For attached images, the filename specified in <code>src</code> must match a file in your project's <code>distDir</code> that is included by the <code>includedFiles</code> setting.</em></p>
+
+<hr />
+
 <h2>Admonition Macros</h2>
 <p>Creates styled blocks for specific types of information (Info, Note, Warning, Tip). These are essentially pre-configured Panel macros.</p>
 <p><strong>Syntax:</strong></p>
