@@ -31,14 +31,6 @@ npm install -g publish-confluence
   <p>After global installation, you can run <code>publish-confluence</code> from any project directory.</p>
 {{/confluence-panel}}
 
-{{#confluence-panel title="Local Installation" type="note"}}
-  <p>Install the package as a development dependency in your project:</p>
-  {{#confluence-code language="bash" linenumbers=false}}
-npm install --save-dev publish-confluence
-  {{/confluence-code}}
-  <p>When installed locally, you'll typically run the tool using <code>npx publish-confluence</code> or by adding it to your <code>package.json</code> scripts.</p>
-{{/confluence-panel}}
-
 <h3>1.1.3. Windows-Specific Notes</h3>
 {{#confluence-panel type="note"}}
   <p>On Windows, global installation makes the command available in Command Prompt, PowerShell, and Git Bash. If you encounter permission issues during global installation (<code>npm install -g</code>), try running your terminal (Command Prompt or PowerShell) as Administrator.</p>
@@ -48,10 +40,6 @@ npm install --save-dev publish-confluence
 <p>After installation, verify that the tool is accessible by running:</p>
 {{#confluence-code language="bash" linenumbers=false}}
 publish-confluence --version
-{{/confluence-code}}
-<p>Or, if installed locally:</p>
-{{#confluence-code language="bash" linenumbers=false}}
-npx publish-confluence --version
 {{/confluence-code}}
 <p>This should output the installed version number.</p>
 
@@ -112,9 +100,6 @@ CONFLUENCE_TOKEN=your_api_token_here
         {{#confluence-code language="bash" linenumbers=false}}
 # If installed globally
 publish-confluence
-
-# If installed locally
-npx publish-confluence
         {{/confluence-code}}
     </li>
     <li>

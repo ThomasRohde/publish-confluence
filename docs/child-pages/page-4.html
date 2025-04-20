@@ -251,36 +251,36 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 <h2>Other Helpers</h2>
 
 <h3>Divider</h3>
-<p>Inserts a horizontal rule (`<hr />`).</p>
-<p><strong>Syntax:</strong> `\{{confluence-divider}}`</p>
+<p>Inserts a horizontal rule.</p>
+<p><strong>Syntax:</strong> <code>\{{confluence-divider}}</code></p>
 
 <h3>Date</h3>
 <p>Displays a formatted date using the Confluence Date macro.</p>
-<p><strong>Syntax:</strong> `\{{confluence-date date="YYYY-MM-DD" format="Optional Format"}}`</p>
+<p><strong>Syntax:</strong> <code>\{{confluence-date date="YYYY-MM-DD" format="Optional Format"}}</code></p>
 <p><strong>Parameters:</strong></p>
 <ul>
     <li><code>date</code> (String, Required): The date in YYYY-MM-DD format.</li>
-    <li><code>format</code> (String, Optional): A date format string (e.g., `MMM dd, yyyy`). Defaults to Confluence default.</li>
+    <li><code>format</code> (String, Optional): A date format string (e.g., <code>MMM dd, yyyy</code>). Defaults to Confluence default.</li>
 </ul>
-<p><strong>Example:</strong> `\{{confluence-date date="2024-03-15" format="dd MMM yyyy"}}`</p>
+<p><strong>Example:</strong> <code>\{{confluence-date date="2024-03-15" format="dd MMM yyyy"}}</code></p>
 
 <h3>Anchor</h3>
 <p>Creates a named anchor point on the page.</p>
-<p><strong>Syntax:</strong> `\{{confluence-anchor name="anchor-name"}}`</p>
+<p><strong>Syntax:</strong> <code>\{{confluence-anchor name="anchor-name"}}</code></p>
 <p><strong>Parameters:</strong></p>
 <ul>
     <li><code>name</code> (String, Required): The unique name for the anchor.</li>
 </ul>
-<p><strong>Example:</strong> `\{{confluence-anchor name="installation-section"}}`</p>
+<p><strong>Example:</strong> <code>\{{confluence-anchor name="installation-section"}}</code></p>
 
 <h3>User Mention</h3>
 <p>Mentions a Confluence user, creating a link to their profile.</p>
-<p><strong>Syntax:</strong> `\{{confluence-user key="user-key"}}`</p>
+<p><strong>Syntax:</strong> <code>\{{confluence-user key="user-key"}}</code></p>
 <p><strong>Parameters:</strong></p>
 <ul>
     <li><code>key</code> (String, Required): The Confluence user key (often the username or a unique ID).</li>
 </ul>
-<p><strong>Example:</strong> `Contact \{{confluence-user key="jsmith"}} for details.`</p>
+<p><strong>Example:</strong> <code>Contact \{{confluence-user key="jsmith"}} for details.</code></p>
 
 <h3>Raw</h3>
 <p>Outputs the content within the block without any Handlebars processing or HTML escaping. Use with extreme caution.</p>
