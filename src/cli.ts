@@ -7,7 +7,7 @@ import path from 'path';
 import * as readline from 'readline';
 import { fileURLToPath } from 'url';
 import { fetchPageContent } from './fetch';
-import { createLogger, VERBOSITY } from './logger';
+import { createLogger, VERBOSITY, configureFileLogging } from './logger';
 import { registerMacroHelpers } from './macro-helpers';
 import { createProject } from './project-creator';
 import { generatePrompt } from './prompt-generator';
@@ -79,14 +79,13 @@ async function generatePromptCommand(): Promise<void> {
 
     // Combine global options and command-specific options
     const combinedOptions = { ...options, ...cmdOptions };
-    
-    // Generate the prompt using our extracted module
+      // Generate the prompt using our extracted module
     const generatedPrompt = await generatePrompt(rl, combinedOptions, log);
     
-    console.log('\nGenerated prompt:');
-    console.log('----------------------------------------');
-    console.log(generatedPrompt);
-    console.log('----------------------------------------');
+    log.info('\nGenerated prompt:');
+    log.info('----------------------------------------');
+    log.info(generatedPrompt);
+    log.info('----------------------------------------');
     log.success('Generated prompt completed!');
     
   } catch (error) {
@@ -107,6 +106,7 @@ program
   .option('-q, --quiet', 'Suppress all output except errors', false)
   .option('-v, --verbose', 'Enable verbose output', false)
   .option('-d, --debug', 'Enable debug output (includes verbose)', false)
+  .option('--log-file [path]', 'Enable logging to file with optional custom path')
   .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
   .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates'); 
 
@@ -124,8 +124,13 @@ program
       verbosity = VERBOSITY.NORMAL;
     }
     
-    publishToConfluence(options).catch(err => {
-      console.error(err);
+    // Configure file logging if enabled
+    if (options.logFile) {
+      configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
+      log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
+    }
+      publishToConfluence(options).catch(err => {
+      log.error(err);
       process.exit(1);
     });
   });
@@ -134,8 +139,7 @@ program
 program
   .command('create')
   .description('Create a new publish-confluence project')
-  .action(() => {
-    // Set verbosity level based on options
+  .action(() => {    // Set verbosity level based on options
     const options = program.opts();
     if (options.quiet) {
       verbosity = VERBOSITY.QUIET;
@@ -147,9 +151,14 @@ program
       verbosity = VERBOSITY.NORMAL;
     }
     
-    // Use the extracted createProject function from project-creator.ts
+    // Configure file logging if enabled
+    if (options.logFile) {
+      configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
+      log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
+    }
+      // Use the extracted createProject function from project-creator.ts
     createProject(log).catch(err => {
-      console.error(err);
+      log.error(err);
       process.exit(1);
     });
   });
@@ -164,8 +173,7 @@ program
   .action((cmdOptions) => {
     // Merge command options with global options
     const options = { ...program.opts(), ...cmdOptions };
-    
-    // Set verbosity level based on options
+      // Set verbosity level based on options
     if (options.quiet) {
       verbosity = VERBOSITY.QUIET;
     } else if (options.debug) {
@@ -174,6 +182,12 @@ program
       verbosity = VERBOSITY.VERBOSE;
     } else {
       verbosity = VERBOSITY.NORMAL;
+    }
+    
+    // Configure file logging if enabled
+    if (options.logFile) {
+      configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
+      log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
     }
     
     // Use the fetchPageContent function imported at the top of the file
@@ -200,8 +214,7 @@ program
   .action((cmdOptions) => {
     // Merge command options with global options
     const options = { ...program.opts(), ...cmdOptions };
-    
-    // Set verbosity level based on options
+      // Set verbosity level based on options
     if (options.quiet) {
       verbosity = VERBOSITY.QUIET;
     } else if (options.debug) {
@@ -212,8 +225,13 @@ program
       verbosity = VERBOSITY.NORMAL;
     }
     
-    generatePromptCommand().catch(err => {
-      console.error(err);
+    // Configure file logging if enabled
+    if (options.logFile) {
+      configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
+      log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
+    }
+      generatePromptCommand().catch(err => {
+      log.error(err);
       process.exit(1);
     });
   });

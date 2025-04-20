@@ -100,15 +100,15 @@ export async function fetchPageContent(options: {
     
     if (pageContent === '') {
       log.verbose(`Page "${pageTitle}" exists but has empty content.`);
-    }
-
-    // Output the content in the requested format
+    }    // Output the content in the requested format
     if (outputFormat === 'json') {
-      // Output the entire page as JSON
-      console.log(JSON.stringify(fullPage, null, 2));
+      // Output the entire page as JSON to stdout (not using log to avoid formatting)
+      process.stdout.write(JSON.stringify(fullPage, null, 2) + '\n');
+      log.debug('Outputting JSON content to stdout');
     } else {
-      // Output just the storage format content (may be empty)
-      console.log(pageContent);
+      // Output just the storage format content (may be empty) to stdout
+      process.stdout.write(pageContent + '\n');
+      log.debug('Outputting storage format content to stdout');
     }
 
     log.success(`Successfully fetched page content.`);

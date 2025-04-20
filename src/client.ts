@@ -10,6 +10,7 @@ import {
   PermissionDeniedError,
   ResourceNotFoundError
 } from './errors';
+import { createLogger, setVerbosityLevel, VERBOSITY } from './logger';
 import {
   ConfluenceAttachment,
   ConfluenceClientConfig,
@@ -28,6 +29,7 @@ export class ConfluenceClient {
   private readonly axiosInstance: AxiosInstance;
   private readonly restApiBase: string;
   private readonly debug: boolean;
+  private readonly logger: ReturnType<typeof createLogger>;
 
   constructor(config: ConfluenceClientConfig) {
     if (!config.baseUrl) {
@@ -48,18 +50,25 @@ export class ConfluenceClient {
     const { baseUrl, axiosConfig = {} } = config;
     this.restApiBase = `${baseUrl.replace(/\/$/, '')}/rest/api`; // Ensure no trailing slash
     this.debug = config.verbose || false;
-
-    // Log authentication details (safely) if in debug mode
+    
+    // Initialize logger with component name
+    this.logger = createLogger(true, 'ConfluenceClient');
+    
+    // Set verbosity based on debug flag
     if (this.debug) {
-      console.log('Initializing ConfluenceClient:');
-      console.log(`- Base URL: ${this.restApiBase}`);
-      console.log(`- Authentication method: Token Authentication`);
-      console.log(`- SSL Verification: ${config.rejectUnauthorized === false ? 'Disabled' : 'Enabled'}`);
-      
-      const truncatedToken = auth.token.substring(0, 5) + '...' + 
-        auth.token.substring(auth.token.length - 5);
-      console.log(`- Token: ${truncatedToken} (${auth.token.length} chars)`);
+      setVerbosityLevel(VERBOSITY.DEBUG);
     }
+
+    // Log authentication details (safely)
+    const truncatedToken = auth.token.substring(0, 5) + '...' + 
+      auth.token.substring(auth.token.length - 5);
+    
+    this.logger.debug('Initializing ConfluenceClient', {
+      baseUrl: this.restApiBase,
+      authMethod: 'Token Authentication',
+      sslVerification: config.rejectUnauthorized === false ? 'Disabled' : 'Enabled',
+      token: `${truncatedToken} (${auth.token.length} chars)`
+    });
 
     // Configure authorization headers based on auth method
     // Use Record<string, string> instead of AxiosRequestHeaders to avoid type issues
@@ -76,9 +85,7 @@ export class ConfluenceClient {
       baseURL: this.restApiBase,
       headers,
       ...axiosConfig, // Spread other custom Axios config
-    };
-
-    // Handle SSL certificate validation
+    };    // Handle SSL certificate validation
     if (config.rejectUnauthorized === false) {
       // Set the environment variable to disable certificate checking
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -95,9 +102,10 @@ export class ConfluenceClient {
         return originalEmitWarning.call(process, warning, ...args);
       };
       
-      if (this.debug) {
-        console.log('WARNING: SSL certificate verification disabled. This is insecure!');
-      }
+      this.logger.warn('SSL certificate verification disabled. This is insecure!', {
+        securityIssue: 'SSL verification disabled',
+        impact: 'Vulnerable to man-in-the-middle attacks'
+      });
     }
 
     this.axiosInstance = axios.create(axiosOptions);
@@ -111,34 +119,54 @@ export class ConfluenceClient {
           const resourcePath = error.config?.url || 'unknown';
           
           // Additional logging for authentication errors
-          if (status === 401 && this.debug) {
-            console.log('Authentication error details:');
-            console.log('- URL attempted:', `${this.restApiBase}${resourcePath}`);
-            console.log('- Headers sent:', JSON.stringify({
-              ...error.config?.headers,
-              Authorization: error.config?.headers?.Authorization ? 
-                `${error.config.headers.Authorization.toString().substring(0, 12)}... (truncated)` : 'None'
-            }, null, 2));
-            console.log('- Response headers:', JSON.stringify(error.response.headers, null, 2));
-            console.log('- Response data:', error.response.data);
-            console.log('Common authentication issues:');
-            console.log('  1. Invalid API token (expired or malformed)');
-            console.log('  2. URL domain issues (e.g., using cloud URL for server instance)');
-            console.log('  3. User lacks permissions for this operation');
-            console.log('  4. Token scopes may not include the required permissions');
+          if (status === 401) {
+            this.logger.error('Authentication failed', {
+              url: `${this.restApiBase}${resourcePath}`,
+              status,
+              statusText: error.response.statusText,
+              headers: error.response.headers,
+              data: error.response.data,
+              possibleCauses: [
+                'Invalid API token (expired or malformed)',
+                'URL domain issues (e.g., using cloud URL for server instance)',
+                'User lacks permissions for this operation',
+                'Token scopes may not include the required permissions'
+              ]
+            });
           }
-          
+            // Log different error types with contextual information
+          const errorContext = {
+            url: `${this.restApiBase}${resourcePath}`,
+            method: error.config?.method?.toUpperCase() || 'GET',
+            status,
+            statusText: error.response.statusText,
+            responseData: error.response.data,
+            requestPath: resourcePath
+          };
+
           // Handle different status codes according to OpenAPI spec
           switch (status) {
             case 400:
+              this.logger.error('Invalid request parameters', errorContext);
               return Promise.reject(new BadRequestError('Invalid request parameters', error));
             case 401:
+              // Authentication errors are already logged above
               return Promise.reject(new AuthenticationError('Authentication credentials are invalid', error));
             case 403:
+              this.logger.error('Permission denied', {
+                ...errorContext,
+                possibleSolutions: [
+                  'Ensure the user has appropriate permissions in Confluence',
+                  'Check space restrictions and page restrictions',
+                  'Verify token has sufficient scopes'
+                ]
+              });
               return Promise.reject(new PermissionDeniedError('You do not have permission to perform this action', error));
             case 404:
+              this.logger.error('Resource not found', errorContext);
               return Promise.reject(new ResourceNotFoundError('Resource', resourcePath, error));
             default:
+              this.logger.error(`API request failed with status ${status}`, errorContext);
               return Promise.reject(new ConfluenceApiError('API request failed', error));
           }
         }
@@ -146,31 +174,35 @@ export class ConfluenceClient {
       }
     );
   }
-
   /** Make a generic request to the Confluence API */
   private async request<T>(config: AxiosRequestConfig): Promise<T> {
     try {
-      // Log the request if debug is enabled
-      if (this.debug) {
-        console.log(`API Request: ${config.method?.toUpperCase() || 'GET'} ${config.url}`);
-        if (config.params && Object.keys(config.params).length > 0) {
-          console.log('Request params:', config.params);
-        }
+      // Log API request details with appropriate verbosity
+      this.logger.debug(`API Request: ${config.method?.toUpperCase() || 'GET'} ${config.url}`, {
+        method: config.method?.toUpperCase() || 'GET',
+        url: config.url,
+        params: config.params || {},
+        hasData: !!config.data,
+        dataType: config.data ? (config.data instanceof FormData ? 'FormData' : typeof config.data) : 'none'
+      });
+      
+      // Log request body at highest verbosity level for non-FormData requests
+      if (config.data && !(config.data instanceof FormData)) {
+        const bodyPreview = typeof config.data === 'string' ? 
+          config.data.substring(0, 500) : JSON.stringify(config.data, null, 2).substring(0, 500);
         
-        // Only log body for non-FormData requests to avoid excessive output
-        if (config.data && !(config.data instanceof FormData)) {
-          console.log('Request body:', typeof config.data === 'string' ? 
-            config.data.substring(0, 500) : JSON.stringify(config.data, null, 2).substring(0, 500));
-        }
+        this.logger.verbose(`Request body preview: ${bodyPreview}`);
       }
       
       const response = await this.axiosInstance.request<T>(config);
       
-      // Log response summary if debug is enabled
-      if (this.debug) {
-        console.log(`API Response: ${response.status} ${response.statusText}`);
-        console.log('Response data type:', typeof response.data);
-      }
+      // Log response details
+      this.logger.debug(`API Response: ${response.status} ${response.statusText}`, {
+        status: response.status,
+        statusText: response.statusText,
+        dataType: typeof response.data,
+        headers: response.headers
+      });
       
       return response.data;
     } catch (error) {
@@ -178,17 +210,26 @@ export class ConfluenceClient {
         // Re-throw custom error already created by interceptor
          throw error;
       }
-      // Wrap other unexpected errors
-      throw new ConfluenceApiError(error instanceof Error ? error.message : 'An unknown error occurred during the request');
+      
+      // Wrap other unexpected errors with contextual information
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred during the request';
+      this.logger.error(`Unexpected error during API request: ${errorMessage}`, {
+        method: config.method?.toUpperCase() || 'GET',
+        url: config.url,
+        errorType: error instanceof Error ? error.constructor.name : typeof error
+      });
+      
+      throw new ConfluenceApiError(errorMessage);
     }
   }
-
   /** Find a page by its title within a specific space */
   async findPageByTitle(spaceKey: string, title: string): Promise<ConfluencePage | null> {
-    // Log the search operation in debug mode
-    if (this.debug) {
-      console.log(`Finding page: "${title}" in space "${spaceKey}"`);
-    }
+    // Log the search operation with contextual information
+    this.logger.debug(`Finding page by title`, {
+      spaceKey,
+      title,
+      operation: 'findPageByTitle'
+    });
     
     try {
       // First try direct CQL search which is more efficient

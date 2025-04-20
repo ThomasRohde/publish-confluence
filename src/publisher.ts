@@ -239,15 +239,26 @@ export async function uploadAttachments(
   for (const file of filesToAttach) {
     const filePath = path.join(process.cwd(), distDir, file);
     log.verbose(`Attaching file: ${file}`);
-    
-    try {
+      try {
       await client.uploadAttachment(
         pageId,
         filePath,
         `Uploaded by publish-confluence at ${new Date().toISOString()}`
       );
     } catch (error) {
-      log.error(`Failed to upload attachment ${file}: ${(error as Error).message}`);
+      log.error(`Failed to upload attachment ${file}`, {
+        error: (error as Error).message,
+        pageId,
+        filePath,
+        fileSize: require('fs').statSync(filePath).size,
+        timestamp: new Date().toISOString(),
+        possibleIssues: [
+          'File size exceeds Confluence attachment limits',
+          'File type is not allowed in Confluence',
+          'Page does not exist or permission issues',
+          'Network connectivity problems'
+        ]
+      });
       // Continue with other files even if one fails
     }
   }
@@ -346,6 +357,74 @@ async function publishPageRecursive(
 }
 
 /**
+ * Determines troubleshooting steps based on the error type and properties
+ * 
+ * @param error - The error object encountered during publishing
+ * @returns An array of troubleshooting steps appropriate for the error type
+ */
+function determineTroubleshootingSteps(error: any): string[] {
+  // Default troubleshooting steps
+  const defaultSteps = [
+    'Check your network connection',
+    'Verify Confluence server is reachable',
+    'Check your authentication credentials'
+  ];
+
+  // Error-specific troubleshooting steps
+  if (error.statusCode === 401 || error.status === 401) {
+    return [
+      'Verify your CONFLUENCE_TOKEN is valid and not expired',
+      'Ensure the token has appropriate permissions for the space',
+      'Check if your Confluence URL is correct (CONFLUENCE_BASE_URL)'
+    ];
+  } else if (error.statusCode === 403 || error.status === 403) {
+    return [
+      'Your account lacks permission to perform this operation',
+      'Verify you have write access to the specified space',
+      'Check if the space or page has restricted permissions'
+    ];
+  } else if (error.statusCode === 404 || error.status === 404) {
+    return [
+      'Verify the space key is correct',
+      'Check if the parent page exists (if specified)',
+      'Ensure the CONFLUENCE_BASE_URL is correct and includes the proper context path'
+    ];
+  } else if (error.message && error.message.includes('ENOTFOUND')) {
+    return [
+      'The Confluence server hostname could not be resolved',
+      'Check your CONFLUENCE_BASE_URL for typos',
+      'Verify your network connection and DNS settings'
+    ];
+  } else if (error.message && error.message.includes('ECONNREFUSED')) {
+    return [
+      'Connection was refused by the Confluence server',
+      'Verify the server is running and accessible',
+      'Check if there are firewall restrictions blocking the connection'
+    ];
+  } else if (error.message && error.message.includes('timeout')) {
+    return [
+      'The request to Confluence timed out',
+      'The server might be under heavy load or experiencing issues',
+      'Try again later or with smaller batches of files'
+    ];
+  } else if (error.message && error.message.includes('files')) {
+    return [
+      'Check that the files in your distDir actually exist',
+      'Verify your include/exclude patterns in publish-confluence.json',
+      'Ensure you\'ve built your project before publishing'
+    ];
+  } else if (error.message && error.message.includes('template')) {
+    return [
+      'Verify that your template files exist and are valid',
+      'Check the templatePath and macroTemplatePath in your config',
+      'Ensure your templates follow Handlebars syntax correctly'
+    ];
+  }
+
+  return defaultSteps;
+}
+
+/**
  * Main function to publish content to Confluence
  * 
  * This function orchestrates the entire publishing process:
@@ -363,13 +442,40 @@ async function publishPageRecursive(
  */
 export async function publishToConfluence(options: PublishOptions): Promise<void> {
   try {
-    const rootConfig = await loadConfiguration();
+    log.verbose('Starting publishing process', { options });
+    
+    const rootConfig = await loadConfiguration();    log.debug('Configuration loaded', { 
+      spaceKey: rootConfig.spaceKey,
+      pageTitle: rootConfig.pageTitle,
+      parentPageTitle: rootConfig.parentPageTitle || 'none',
+      hasChildPages: !!rootConfig.childPages
+    });
+    
     const client = initializeClient(options);
+    log.debug('Confluence client initialized');
+    
     await publishPageRecursive(client, rootConfig);
-    log.success('All pages published successfully.');
-  } catch (error: any) {
-    log.error(`Failed to publish to Confluence: ${error.message}`);
-    log.debug(error.stack || 'No stack trace available');
+    log.success('All pages published successfully.');  } catch (error: any) {
+    // Determine error type and add contextual information
+    const errorType = error.constructor ? error.constructor.name : 'Unknown Error';
+    const errorContext = {
+      errorType,
+      troubleshootingSteps: determineTroubleshootingSteps(error),
+      stack: error.stack || 'No stack trace available',
+      options,
+      timestamp: new Date().toISOString(),
+      // Add error-specific information
+      statusCode: error.statusCode || error.status || null,
+      apiPath: error.path || null,
+      requestInfo: error.request ? {
+        method: error.request.method || null,
+        url: error.request.url || null
+      } : null,
+      // Add troubleshooting guidance based on error type
+      troubleshooting: determineTroubleshootingSteps(error)
+    };
+    
+    log.error(`Failed to publish to Confluence: ${error.message}`, errorContext);
     process.exit(1);
   }
 }

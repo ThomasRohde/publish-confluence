@@ -56,11 +56,10 @@ export async function createProject(log: Logger): Promise<void> {
     } catch (error) {
       log.verbose('No package.json found, will create one');
     }
-    
-    // Project type selection
-    console.log('\nAvailable project types:');
+      // Project type selection
+    log.info('\nAvailable project types:');
     PROJECT_TYPE_CHOICES.forEach(type => 
-      console.log(chalk.cyan(`${type.id}. ${type.name} (${type.description})`))
+      log.info(chalk.cyan(`${type.id}. ${type.name} (${type.description})`))
     );
       let projectTypeInput = await question(rl, `Select project type (1-${PROJECT_TYPE_CHOICES.length})`, '1');
     const projectType = parseInt(projectTypeInput) || 1;
@@ -91,10 +90,9 @@ export async function createProject(log: Logger): Promise<void> {
     
     // Ask for parent page title (always needed regardless of project type)
     const parentPageTitle = await question(rl, 'Enter the parent page title (optional)', '');
-    
-    const distDir = await question(rl, 'Enter the distribution directory', './dist');    
+      const distDir = await question(rl, 'Enter the distribution directory', './dist');    
     // Advanced configuration
-    console.log(chalk.blue('\nAdvanced configuration (press Enter to use defaults):'));
+    log.info(chalk.blue('\nAdvanced configuration (press Enter to use defaults):'));
     const templatePath = await question(rl, 'Path to the page template', './confluence-template.html');
     
     // Only ask for macro template path if not a documentation project

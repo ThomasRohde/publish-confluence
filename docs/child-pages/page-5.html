@@ -29,11 +29,15 @@ publish-confluence [options] [command]
       <td><code>--verbose</code></td>
       <td><code>-v</code></td>
       <td>Enable verbose output, showing more details about the process.</td>
-    </tr>
-    <tr>
+    </tr>    <tr>
       <td><code>--debug</code></td>
       <td><code>-d</code></td>
       <td>Enable debug output, providing extensive details for troubleshooting.</td>
+    </tr>
+    <tr>
+      <td><code>--log-file</code> [path]</td>
+      <td></td>
+      <td>Enable logging to a file for persistent error tracking and debugging. If a path is provided, logs will be written to that file; otherwise, logs will be written to <code>publish-confluence.log</code> in the current directory.</td>
     </tr>
     <tr>
       <td><code>--help</code></td>
