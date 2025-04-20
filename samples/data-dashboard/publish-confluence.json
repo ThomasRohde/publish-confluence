@@ -1,7 +1,7 @@
 {
   "spaceKey": "~thro",
   "pageTitle": "Data Dashboard",
-  "parentPageTitle": "Publishing to Confluence",
+  "parentPageTitle": "8. Samples",
   "templatePath": "./confluence-template.html",
   "macroTemplatePath": "./macro-template.html",
   "distDir": "./dist",

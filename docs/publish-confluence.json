@@ -43,6 +43,11 @@
       "pageTitle": "7. Confluence storage format",
       "templatePath": "./child-pages/page-7.html",
       "macroTemplatePath": null
+    },
+    {
+      "pageTitle": "8. Samples",
+      "templatePath": "./child-pages/page-8.html",
+      "macroTemplatePath": null
     }
   ]
 }
