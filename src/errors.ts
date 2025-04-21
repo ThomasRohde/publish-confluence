@@ -9,6 +9,10 @@ export class ConfluenceApiError extends Error {
   public readonly statusCode?: number;
   public readonly statusText?: string;
   public readonly apiErrorData?: RestError | ConfluenceApiErrorData | Record<string, unknown>; // Support RestError schema
+  public requestPath?: string;
+  public responseData?: any;
+  public url?: string;
+  public method?: string;
 
   constructor(message: string, error?: AxiosError) {
     super(message);

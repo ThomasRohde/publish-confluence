@@ -30,6 +30,7 @@ export class ConfluenceClient {
   private readonly restApiBase: string;
   private readonly debug: boolean;
   private readonly logger: ReturnType<typeof createLogger>;
+  private readonly customErrorHandler?: (error: any) => boolean;
 
   constructor(config: ConfluenceClientConfig) {
     if (!config.baseUrl) {
@@ -51,6 +52,9 @@ export class ConfluenceClient {
     this.restApiBase = `${baseUrl.replace(/\/$/, '')}/rest/api`; // Ensure no trailing slash
     this.debug = config.verbose || false;
     
+    // Store custom error handler if provided
+    this.customErrorHandler = config.customErrorHandler;
+    
     // Initialize logger with component name
     this.logger = createLogger(true, 'ConfluenceClient');
     
@@ -67,7 +71,8 @@ export class ConfluenceClient {
       baseUrl: this.restApiBase,
       authMethod: 'Token Authentication',
       sslVerification: config.rejectUnauthorized === false ? 'Disabled' : 'Enabled',
-      token: `${truncatedToken} (${auth.token.length} chars)`
+      token: `${truncatedToken} (${auth.token.length} chars)`,
+      hasCustomErrorHandler: !!this.customErrorHandler
     });
 
     // Configure authorization headers based on auth method
@@ -85,7 +90,8 @@ export class ConfluenceClient {
       baseURL: this.restApiBase,
       headers,
       ...axiosConfig, // Spread other custom Axios config
-    };    // Handle SSL certificate validation
+    };    
+    // Handle SSL certificate validation
     if (config.rejectUnauthorized === false) {
       // Set the environment variable to disable certificate checking
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -101,11 +107,6 @@ export class ConfluenceClient {
         }
         return originalEmitWarning.call(process, warning, ...args);
       };
-      
-      this.logger.warn('SSL certificate verification disabled. This is insecure!', {
-        securityIssue: 'SSL verification disabled',
-        impact: 'Vulnerable to man-in-the-middle attacks'
-      });
     }
 
     this.axiosInstance = axios.create(axiosOptions);
@@ -134,7 +135,8 @@ export class ConfluenceClient {
               ]
             });
           }
-            // Log different error types with contextual information
+          
+          // Create the error context object
           const errorContext = {
             url: `${this.restApiBase}${resourcePath}`,
             method: error.config?.method?.toUpperCase() || 'GET',
@@ -143,6 +145,22 @@ export class ConfluenceClient {
             responseData: error.response.data,
             requestPath: resourcePath
           };
+
+          // Try to handle the error with the custom error handler if provided
+          if (this.customErrorHandler) {
+            const wrappedError = this.createCustomError(status, errorContext, error);
+            const wasHandled = this.customErrorHandler(wrappedError);
+            if (wasHandled) {
+              // If the custom handler indicates it handled the error, we return the error
+              // but without rejecting the promise, which allows the calling code to continue
+              return Promise.resolve({ 
+                data: { 
+                  _handledError: true,
+                  originalError: wrappedError
+                } 
+              });
+            }
+          }
 
           // Handle different status codes according to OpenAPI spec
           switch (status) {
@@ -174,6 +192,40 @@ export class ConfluenceClient {
       }
     );
   }
+
+  /**
+   * Creates a custom error object based on the status code
+   */
+  private createCustomError(status: number, errorContext: any, originalError: AxiosError): any {
+    // Create the appropriate error type based on status code
+    let error;
+    switch (status) {
+      case 400:
+        error = new BadRequestError('Invalid request parameters', originalError);
+        break;
+      case 401:
+        error = new AuthenticationError('Authentication credentials are invalid', originalError);
+        break;
+      case 403:
+        error = new PermissionDeniedError('You do not have permission to perform this action', originalError);
+        break;
+      case 404:
+        error = new ResourceNotFoundError('Resource', errorContext.requestPath, originalError);
+        break;
+      default:
+        error = new ConfluenceApiError('API request failed', originalError);
+    }
+
+    // Add additional context to the error
+    // We're using non-readonly properties that we added to the class
+    error.requestPath = errorContext.requestPath;
+    error.responseData = errorContext.responseData;
+    error.url = errorContext.url;
+    error.method = errorContext.method;
+
+    return error;
+  }
+
   /** Make a generic request to the Confluence API */
   private async request<T>(config: AxiosRequestConfig): Promise<T> {
     try {
@@ -222,6 +274,8 @@ export class ConfluenceClient {
       throw new ConfluenceApiError(errorMessage);
     }
   }
+
+  // The rest of the class remains unchanged
   /** Find a page by its title within a specific space */
   async findPageByTitle(spaceKey: string, title: string): Promise<ConfluencePage | null> {
     // Log the search operation with contextual information
@@ -567,6 +621,13 @@ export class ConfluenceClient {
     comment?: string
   ): Promise<ConfluenceAttachment> {
     try {
+      // Make sure the file exists before proceeding
+      try {
+        await fs.promises.access(filePath, fs.constants.R_OK);
+      } catch (error) {
+        throw new Error(`File not found or not readable: ${filePath}. Original error: ${(error as Error).message}`);
+      }
+      
       const formData = new FormData();
       
       // Read file content
@@ -619,7 +680,23 @@ export class ConfluenceClient {
       }
       throw new Error('No attachment was created');
     } catch (error) {
-      console.error(`Error uploading attachment to page ${pageId}:`, error);
+      // Get file size using fs.promises for better ESM compatibility
+      let fileSize: string = 'unknown';
+      try {
+        const stats = await fs.promises.stat(filePath);
+        fileSize = `${stats.size} bytes`;
+      } catch {
+        // Ignore errors when getting file size
+      }
+      
+      this.logger.error(`Failed to upload attachment ${path.basename(filePath)} to page ${pageId}`, {
+        error: (error as Error).message,
+        pageId,
+        filePath,
+        fileSize,
+        timestamp: new Date().toISOString()
+      });
+      
       throw error;
     }
   }

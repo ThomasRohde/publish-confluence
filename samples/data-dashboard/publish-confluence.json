@@ -1,7 +1,7 @@
 {
   "spaceKey": "~thro",
   "pageTitle": "Data Dashboard",
-  "parentPageTitle": "8. Samples",
+  "parentPageTitle": "10. Samples",
   "templatePath": "./confluence-template.html",
   "macroTemplatePath": "./macro-template.html",
   "distDir": "./dist",

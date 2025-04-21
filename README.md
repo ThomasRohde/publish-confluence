@@ -6,12 +6,16 @@
 
   **publish-confluence** is a powerful solution for embedding interactive web applications, dashboards, and widgets directly into Confluence. With a single command, you can push your latest build to a Confluence page, complete with all required assets and custom layout. No more manual uploads, brittle macros, or copy-paste workflows.
 
-  Designed for rapid iteration, publish-confluence lets you update your app, rebuild, and immediately publish changes to Confluence—making it ideal for fast feedback, demos, and continuous delivery. The tool’s flexible template system and smart asset management enable you to deliver rich, production-quality experiences inside Confluence, while keeping your workflow simple and repeatable.
+  Designed for rapid iteration, publish-confluence lets you update your app, rebuild, and immediately publish changes to Confluence—making it ideal for fast feedback, demos, and continuous delivery. The tool's flexible template system and smart asset management enable you to deliver rich, production-quality experiences inside Confluence, while keeping your workflow simple and repeatable.
 
-  Whether you’re building data visualizations, internal tools, or documentation widgets, publish-confluence empowers you to:
+  While originally designed for JavaScript applications, publish-confluence has evolved into a comprehensive documentation and content management solution. It now supports complex documentation structures with nested child pages, CI/CD pipeline integration, and powerful template customization using Confluence macros. This makes it perfect for technical documentation, knowledge bases, release notes, and API documentation—all maintained under source control with automated publishing workflows.
+
+  Whether you're building data visualizations, internal tools, documentation widgets, or managing entire documentation sites, publish-confluence empowers you to:
   - Develop locally with your favorite stack and build tools
   - Instantly deploy to Confluence for review or production
   - Automate and standardize your publishing process
+  - Maintain documentation as code with full version control
+  - Integrate with CI/CD pipelines for automatic publishing
 
 ### Key Features
 

@@ -12,16 +12,18 @@ export interface ConfluenceApiCredentials {
  * Configuration for the Confluence client
  */
 export interface ConfluenceClientConfig {
-  /** The base URL of your Confluence instance (e.g., https://your-confluence.com) */
+  /** Base URL for the Confluence instance, e.g., https://your-domain.atlassian.net/wiki */
   baseUrl: string;
   /** Authentication credentials */
   auth: ConfluenceApiCredentials;
-  /** Optional custom Axios configuration */
-  axiosConfig?: import('axios').AxiosRequestConfig;
-  /** Enable verbose logging of API requests and responses */
+  /** Enable verbose logging */
   verbose?: boolean;
-  /** Ignore SSL certificate errors (use with caution for self-signed certificates) */
+  /** Custom Axios configuration */
+  axiosConfig?: any;
+  /** Whether to reject unauthorized SSL certificates (defaults to true) */
   rejectUnauthorized?: boolean;
+  /** Custom error handler function that can suppress specific errors */
+  customErrorHandler?: (error: any) => boolean;
 }
 
 /**

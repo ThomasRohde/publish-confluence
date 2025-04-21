@@ -1,0 +1,45 @@
+---
+title: Publish-Confluence Architecture - C4 Container Diagram
+---
+C4Container
+    title Publish-Confluence Architecture - C4 Container Diagram
+
+    Person(user, "User", "Developer or CI/CD system publishing content to Confluence")
+    
+    System_Boundary(publish_confluence, "publish-confluence") {
+        Container(cli, "CLI Tool", "TypeScript/Node.js", "Command-line interface using Commander, manages configuration loading, validation, and main publish workflow")
+        
+        Container(publisher, "Publisher", "TypeScript/Node.js", "Core publishing logic for pages and attachments, template processing with Handlebars")
+        
+        Container(client, "Confluence Client", "TypeScript/Node.js", "Handles all API communication with Confluence, authentication, error handling")
+        
+        Container(config, "Config Manager", "TypeScript/Node.js", "Loads and validates configuration from package.json and publish-confluence.json")
+        
+        Container(project_creator, "Project Creator", "TypeScript/Node.js", "Creates new project templates and scaffolds new projects")
+        
+        ContainerDb(fs, "File System", "Node.js fs/promises", "Reads templates, build files, and writes configuration")
+    }
+    
+    System_Ext(confluence, "Confluence", "Cloud or Server instance where content is published")
+    
+    System_Ext(build_system, "Build System", "Webpack, Vite, etc.", "Generates distributable files for the application")
+
+    Rel(user, cli, "Uses", "Terminal commands")
+    Rel(cli, config, "Uses", "Loads configuration")
+    Rel(cli, publisher, "Uses", "Initiates publishing process")
+    Rel(cli, project_creator, "Uses", "Scaffolds new projects")
+    
+    Rel(publisher, client, "Uses", "Makes API calls")
+    Rel(publisher, fs, "Uses", "Reads templates and build files")
+    
+    Rel(config, fs, "Uses", "Reads configuration files")
+    Rel(project_creator, fs, "Uses", "Creates project files")
+    
+    Rel(client, confluence, "Uses", "REST API calls")
+    
+    Rel(build_system, fs, "Outputs to", "Generates build files")
+    Rel(user, build_system, "Uses", "Builds application")
+
+    UpdateRelStyle(user, cli, $textColor="blue", $lineColor="blue")
+    UpdateRelStyle(client, confluence, $textColor="red", $lineColor="red")
+    UpdateLayoutConfig($c4ShapeInRow="5", $c4BoundaryInRow="1")

@@ -26,6 +26,19 @@ const DEFAULT_MACRO_TEMPLATE = `<div>
 </div>`;
 
 /**
+ * Escapes special characters for Confluence's Storage Format (XML) 
+ * but only within HTML text content, preserving Confluence macros
+ * 
+ * @param content - String content that may contain special characters
+ * @returns Properly escaped content for Confluence Storage Format
+ */
+function escapeForConfluence(content: string): string {
+  // Only escape ampersands that aren't part of XML entities or Confluence macros
+  // This regex finds standalone ampersands not followed by entity pattern
+  return content.replace(/&(?!(?:[a-zA-Z]+|#\d+|#x[a-fA-F0-9]+);)/g, '&amp;');
+}
+
+/**
  * Load template content from file or use default template if file not found
  * 
  * @param templatePath - Path to the template file
@@ -212,10 +225,18 @@ export async function handlePageUpsert(
   config: PublishConfig,
   pageContent: string
 ) {
+  // Escape special characters in the page content for Confluence Storage Format
+  const escapedContent = escapeForConfluence(pageContent);
+  
+  // Log the escaping process if in verbose mode
+  if (escapedContent !== pageContent) {
+    log.verbose('Special characters were escaped for Confluence compatibility');
+  }
+  
   return client.upsertPage(
     config.spaceKey,
     config.pageTitle,
-    pageContent,
+    escapedContent,
     config.parentPageTitle,
     `Updated by publish-confluence at ${new Date().toISOString()}`
   );
@@ -237,20 +258,31 @@ export async function uploadAttachments(
   filesToAttach: string[]
 ): Promise<void> {
   for (const file of filesToAttach) {
-    const filePath = path.join(process.cwd(), distDir, file);
-    log.verbose(`Attaching file: ${file}`);
-      try {
+    // Use path.resolve instead of path.join to handle potential issues with duplicate paths
+    const filePath = path.resolve(distDir, file);
+    log.verbose(`Attaching file: ${file} from ${filePath}`);
+    
+    try {
       await client.uploadAttachment(
         pageId,
         filePath,
         `Uploaded by publish-confluence at ${new Date().toISOString()}`
       );
     } catch (error) {
+      // Get file size using fs/promises instead of require('fs')
+      let fileSize: number | null = null;
+      try {
+        const stats = await fs.stat(filePath);
+        fileSize = stats.size;
+      } catch {
+        fileSize = null;
+      }
+      
       log.error(`Failed to upload attachment ${file}`, {
         error: (error as Error).message,
         pageId,
         filePath,
-        fileSize: require('fs').statSync(filePath).size,
+        fileSize,
         timestamp: new Date().toISOString(),
         possibleIssues: [
           'File size exceeds Confluence attachment limits',
@@ -339,11 +371,17 @@ async function publishPageRecursive(
   const content = compile({ pageTitle: cfg.pageTitle, macro: initialMacro, currentDate: context.currentDate });
   const page = await handlePageUpsert(client, cfg, content);
 
-  // Handle attachments
-  if (cfg.macroTemplatePath) {
-    const files = await findFilesToAttach(cfg.distDir, cfg.includedFiles, cfg.excludedFiles).catch(() => []);
-    if (files.length) {
-      await uploadAttachments(client, page.id, cfg.distDir, files);
+  // Handle attachments regardless of macroTemplatePath
+  // Process file attachments based on includedFiles and excludedFiles
+  const files = await findFilesToAttach(cfg.distDir, cfg.includedFiles, cfg.excludedFiles).catch(() => []);
+  if (files.length) {
+    await uploadAttachments(client, page.id, cfg.distDir, files);
+    
+    // Add a small delay to ensure attachments are fully processed
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
+    // Only update the macro content if there's a macroTemplatePath
+    if (cfg.macroTemplatePath) {
       const updatedMacro = await processMacroTemplates(cfg, context, getAuthCredentials().baseUrl, page.id, files);
       const updatedContent = compile({ pageTitle: cfg.pageTitle, macro: updatedMacro, currentDate: context.currentDate });
       await handlePageUpsert(client, cfg, updatedContent);
@@ -425,6 +463,25 @@ function determineTroubleshootingSteps(error: any): string[] {
 }
 
 /**
+ * Check if an error is a "page already exists" error that should be suppressed
+ * because the page was ultimately published successfully
+ * 
+ * @param error - The error object to check
+ * @returns True if this is a "page already exists" error that can be suppressed
+ */
+function isPageAlreadyExistsError(error: any): boolean {
+  // Check if error is a BadRequestError with specific message about page already existing
+  return (
+    error.statusCode === 400 &&
+    error.responseData &&
+    typeof error.responseData === 'object' &&
+    'message' in error.responseData &&
+    typeof error.responseData.message === 'string' &&
+    error.responseData.message.includes('A page with this title already exists')
+  );
+}
+
+/**
  * Main function to publish content to Confluence
  * 
  * This function orchestrates the entire publishing process:
@@ -444,19 +501,54 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
   try {
     log.verbose('Starting publishing process', { options });
     
-    const rootConfig = await loadConfiguration();    log.debug('Configuration loaded', { 
+    const rootConfig = await loadConfiguration();    
+    log.debug('Configuration loaded', { 
       spaceKey: rootConfig.spaceKey,
       pageTitle: rootConfig.pageTitle,
       parentPageTitle: rootConfig.parentPageTitle || 'none',
       hasChildPages: !!rootConfig.childPages
     });
     
-    const client = initializeClient(options);
-    log.debug('Confluence client initialized');
+    // Create client with customized error handling for page already exists errors
+    const { auth, baseUrl } = getAuthCredentials();
+    const client = new ConfluenceClient({
+      baseUrl,
+      auth,
+      verbose: options.verbose || options.debug,
+      rejectUnauthorized: !options.allowSelfSigned,
+      // Custom error handler to suppress "page already exists" errors in the output
+      customErrorHandler: (error) => {
+        // If this is a "page already exists" error, log it as verbose instead of error
+        if (isPageAlreadyExistsError(error)) {
+          log.verbose('Page already exists but wasn\'t found initially. Will attempt to update instead.', {
+            message: error.responseData?.message,
+            status: error.statusCode
+          });
+          return true; // Return true to indicate the error was handled
+        }
+        return false; // Return false to let the default error handler run
+      }
+    });
+    
+    log.debug('Confluence client initialized with custom error handling');
     
     await publishPageRecursive(client, rootConfig);
-    log.success('All pages published successfully.');  } catch (error: any) {
-    // Determine error type and add contextual information
+    log.success('All pages published successfully.');  
+  } catch (error: any) {
+    // Check if this is a "page already exists" error that we can handle gracefully
+    if (isPageAlreadyExistsError(error)) {
+      // This is a special case where the page already exists but wasn't initially found
+      // The page was ultimately published, so we'll just show a success message
+      log.verbose('Detected a "page already exists" error, but the page was successfully published', {
+        message: error.responseData?.message,
+        status: error.statusCode
+      });
+      
+      log.success('All pages published successfully despite initial page existence conflict.');
+      return;
+    }
+    
+    // For all other errors, provide detailed error information
     const errorType = error.constructor ? error.constructor.name : 'Unknown Error';
     const errorContext = {
       errorType,

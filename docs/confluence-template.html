@@ -1,8 +1,6 @@
-<h1>{{pageTitle}}</h1>
-
 <h2>Overview</h2>
-<p><strong>Publish-confluence</strong> is a powerful solution for embedding interactive web applications, dashboards, and widgets directly into Confluence. With a single command, you can push your latest build to a Confluence page, complete with all required assets and custom layout. No more manual uploads, brittle macros, or copy-paste workflows.</p>
-<p>Designed for rapid iteration, publish-confluence lets you update your app, rebuild, and immediately publish changes to Confluence—making it ideal for fast feedback, demos, and continuous delivery. The tool’s flexible template system and smart asset management enable you to deliver rich, production-quality experiences inside Confluence, while keeping your workflow simple and repeatable.</p>
+<p><strong>Publish-confluence</strong> is a powerful solution for embedding interactive web applications, dashboards & widgets directly into Confluence. With a single command, you can push your latest build to a Confluence page, complete with all required assets and custom layout. Whether you're publishing interactive dashboards, implementing documentation-as-code, automating API documentation, or creating multi-page documentation structures with nested hierarchies—this tool eliminates manual uploads, brittle macros, and tedious copy-paste workflows.</p>
+<p>Designed for rapid iteration, publish-confluence lets you update your app, rebuild, and immediately publish changes to Confluence—making it ideal for fast feedback, demos, and continuous delivery. The tool's flexible template system and smart asset management enable you to deliver rich, production-quality experiences inside Confluence, while keeping your workflow simple and repeatable.</p>
 
 {{#confluence-layout}}
   {{#layout-section type="two_equal"}}
@@ -17,6 +15,7 @@
         <li><strong>Supports Modern Workflows:</strong> Designed for Vite, Webpack, Rollup, etc.</li>
         <li><strong>Robust CLI Experience:</strong> Includes commands for scaffolding, fetching, and prompt generation.</li>
         <li><strong>Nested Page Publishing:</strong> Manage hierarchical documentation structures.</li>
+        <li><strong>CI/CD Integration:</strong> Automate publishing through GitHub Actions, GitLab CI, Jenkins, or Azure DevOps.</li>
       </ul>
     {{/layout-cell}}
     {{#layout-cell}}
@@ -24,14 +23,107 @@
       <p><strong>Templates:</strong> Control the structure of your Confluence page (`confluence-template.html`) and the embedded HTML macro (`macro-template.html`) using Handlebars.</p>
       <p><strong>Asset Management:</strong> The tool automatically finds your build output (JS, CSS, images), uploads them as attachments, and injects the correct links into your macro template via `{{{scripts}}}` and `{{{styles}}}`.</p>
       <p><strong>Macro Helpers:</strong> Use built-in Handlebars helpers (like <code>\{{#confluence-panel}}</code> or <code>\{{confluence-toc}}</code>) within your page template to generate rich Confluence content alongside your embedded application.</p>
+      <p><strong>Hierarchical Content:</strong> Create and maintain complex documentation structures with nested child pages, all managed through a single configuration file.</p>
 
-      <h3>Use Cases</h3>
+      <h3>Classic Use Cases</h3>
       <ul>
          <li><strong>Interactive Dashboards:</strong> Embed real-time data visualizations (React, Vue, Preact, etc.).</li>
          <li><strong>Training Materials:</strong> Create interactive documentation with live code examples.</li>
          <li><strong>Internal Tools:</strong> Deploy team collaboration tools (planning poker, simple forms) directly in your workspace.</li>
          <li><strong>Documentation Widgets:</strong> Enhance documentation with small, interactive components.</li>
       </ul>
+    {{/layout-cell}}
+  {{/layout-section}}
+{{/confluence-layout}}
+
+<h2>Advanced Use Cases</h2>
+
+{{#confluence-layout}}
+  {{#layout-section type="three_equal"}}
+    {{#layout-cell}}
+      {{#confluence-panel title="Documentation as Code" type="info"}}
+        <p>Store your technical documentation under source control and automatically publish to Confluence. Benefit from:</p>
+        <ul>
+          <li>Version control for all documentation</li>
+          <li>Pull request reviews for content changes</li>
+          <li>Rich formatting with Confluence macros</li>
+          <li>Hierarchical structure with child pages</li>
+          <li>CI/CD integration for automatic updates</li>
+        </ul>
+        <p>Perfect for: Technical documentation, user guides, and knowledge bases.</p>
+      {{/confluence-panel}}
+    {{/layout-cell}}
+    
+    {{#layout-cell}}
+      {{#confluence-panel title="CI/CD Integration" type="info"}}
+        <p>Automate publishing to Confluence as part of your deployment pipeline:</p>
+        <ul>
+          <li>GitHub Actions, GitLab CI, Jenkins, Azure DevOps integration</li>
+          <li>Automatic publishing on content changes</li>
+          <li>Environment-specific configurations</li>
+          <li>Secure credential management</li>
+          <li>Release-triggered documentation updates</li>
+        </ul>
+        <p>Perfect for: Teams with mature DevOps practices who want to treat docs as code.</p>
+      {{/confluence-panel}}
+    {{/layout-cell}}
+    
+    {{#layout-cell}}
+      {{#confluence-panel title="Automated API Documentation" type="info"}}
+        <p>Generate API documentation from your code and publish it to Confluence:</p>
+        <ul>
+          <li>OpenAPI/Swagger integration</li>
+          <li>TypeDoc/JSDoc support</li>
+          <li>Automatically generated diagrams</li>
+          <li>Custom templates for consistent formatting</li>
+          <li>Version history for API evolution</li>
+        </ul>
+        <p>Perfect for: Developer teams maintaining APIs who need up-to-date documentation.</p>
+      {{/confluence-panel}}
+    {{/layout-cell}}
+  {{/layout-section}}
+  
+  {{#layout-section type="three_equal"}}
+    {{#layout-cell}}
+      {{#confluence-panel title="Release Notes Automation" type="info"}}
+        <p>Streamline your release communication workflow:</p>
+        <ul>
+          <li>Generate release notes from commits or PRs</li>
+          <li>Tag-triggered publishing</li>
+          <li>Maintain historical record of releases</li>
+          <li>Consistent formatting across all releases</li>
+          <li>Include changelogs, upgrade guides, and feature highlights</li>
+        </ul>
+        <p>Perfect for: Product teams who need to communicate changes to stakeholders.</p>
+      {{/confluence-panel}}
+    {{/layout-cell}}
+    
+    {{#layout-cell}}
+      {{#confluence-panel title="Multi-Page Documentation" type="info"}}
+        <p>Build comprehensive documentation structures with minimal effort:</p>
+        <ul>
+          <li>Complex, nested page hierarchies</li>
+          <li>Consistent templates across all pages</li>
+          <li>Single command to publish entire documentation set</li>
+          <li>Section-specific templates for different content types</li>
+          <li>Cross-linking between related content</li>
+        </ul>
+        <p>Perfect for: Comprehensive product documentation, technical handbooks, and knowledge bases.</p>
+      {{/confluence-panel}}
+    {{/layout-cell}}
+    
+    {{#layout-cell}}
+      {{#confluence-panel title="Localized Content Management" type="info"}}
+        <p>Manage multilingual documentation seamlessly:</p>
+        <ul>
+          <li>Separate templates and content by language</li>
+          <li>Parallel page structures across languages</li>
+          <li>Automated translation workflow integration</li>
+          <li>Language-specific assets and attachments</li>
+          <li>Consistent branding across all localized content</li>
+        </ul>
+        <p>Perfect for: Global teams supporting customers across multiple languages.</p>
+      {{/confluence-panel}}
     {{/layout-cell}}
   {{/layout-section}}
 {{/confluence-layout}}
