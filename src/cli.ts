@@ -7,7 +7,7 @@ import path from 'path';
 import * as readline from 'readline';
 import { fileURLToPath } from 'url';
 import { fetchPageContent } from './fetch';
-import { createLogger, VERBOSITY, configureFileLogging } from './logger';
+import { configureFileLogging, createLogger, VERBOSITY } from './logger';
 import { registerMacroHelpers } from './macro-helpers';
 import { createProject } from './project-creator';
 import { generatePrompt } from './prompt-generator';
@@ -26,7 +26,7 @@ Handlebars.registerHelper('raw', function(this: any, options: Handlebars.HelperO
 });
 
 // Register all macro helpers
-registerMacroHelpers(Handlebars);
+registerMacroHelpers(Handlebars, program.opts());
 
 // Initialize logger
 const log = createLogger();
@@ -106,6 +106,7 @@ program
   .option('-q, --quiet', 'Suppress all output except errors', false)
   .option('-v, --verbose', 'Enable verbose output', false)
   .option('-d, --debug', 'Enable debug output (includes verbose)', false)
+  .option('-c, --comment', 'Display content with comment flags in info macros', false)
   .option('--log-file [path]', 'Enable logging to file with optional custom path')
   .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
   .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates'); 

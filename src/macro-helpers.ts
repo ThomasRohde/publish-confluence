@@ -9,8 +9,9 @@ import { generateUuid } from './utils';
  * These helpers can be used in templates to create rich content in Confluence pages.
  * 
  * @param handlebars - The Handlebars instance to register helpers with
+ * @param options - Command-line options that might affect helper behavior
  */
-export function registerMacroHelpers(handlebars: typeof Handlebars): void {
+export function registerMacroHelpers(handlebars: typeof Handlebars, options?: any): void {
     /**
    * HTML macro - Embeds HTML content in a Confluence page
    * 
@@ -234,14 +235,25 @@ export function registerMacroHelpers(handlebars: typeof Handlebars): void {
    * {{#confluence-info title="Information"}}
    *   <p>This is an informational note.</p>
    * {{/confluence-info}}
+   * 
+   * {{#confluence-info title="Dev Comment" commentFlag=true}}
+   *   <p>This will only be visible when running with --comment flag.</p>
+   * {{/confluence-info}}
    * ```
    * 
    * @param title - Title of the info box
+   * @param commentFlag - If true, content only appears when --comment flag is used
    */
-  handlebars.registerHelper('confluence-info', function(this: any, options: Handlebars.HelperOptions) {
+  handlebars.registerHelper('confluence-info', function(this: any, helperOptions: Handlebars.HelperOptions) {
     const macroId = generateUuid();
-    const content = options.fn(this);
-    const title = options.hash.title || '';
+    const content = helperOptions.fn(this);
+    const title = helperOptions.hash.title || '';
+    const commentFlag = helperOptions.hash.commentFlag === true;
+    
+    // Skip output if this is a comment macro and the --comment flag is not enabled
+    if (commentFlag && (!options || !options.comment)) {
+      return '';
+    }
     
     return new handlebars.SafeString(
       `<ac:structured-macro ac:name="info" ac:schema-version="1" ac:macro-id="${macroId}">

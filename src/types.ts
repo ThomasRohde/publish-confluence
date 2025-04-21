@@ -62,6 +62,8 @@ export interface PublishOptions {
   debug: boolean;
   /** Allow self-signed SSL certificates */
   allowSelfSigned: boolean;
+  /** Display content with comment flags in info macros */
+  comment?: boolean;
 }
 
 /**

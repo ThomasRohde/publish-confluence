@@ -146,6 +146,7 @@ export function getAuthCredentials(): { auth: ConfluenceApiCredentials, baseUrl:
  * @param baseUrl - The base URL of the Confluence instance
  * @param pageId - The ID of the Confluence page
  * @param attachments - List of file attachments
+ * @param options - Command line options
  * @returns Generated HTML macro content for the page
  */
 export async function processMacroTemplates(
@@ -153,7 +154,8 @@ export async function processMacroTemplates(
   context: any, 
   baseUrl?: string, 
   pageId?: string, 
-  attachments?: string[]
+  attachments?: string[],
+  options?: PublishOptions
 ): Promise<string> {
   // Check if macroTemplatePath is defined
   if (!config.macroTemplatePath) {
@@ -174,6 +176,13 @@ export async function processMacroTemplates(
   } else {
     context.scripts = '';
     context.styles = '';
+  }
+  
+  // Add command-line options to the context for use by helpers
+  if (options) {
+    // Copy the comment flag to the context for use by Handlebars helpers
+    // This allows helpers to check if comment content should be included
+    context.comment = options.comment === true;
   }
   
   // Process HTML macro template
@@ -305,7 +314,8 @@ async function publishChildPages(
   parentConfig: PublishConfig,
   parentTitle: string,
   basePath: string,
-  logger: ReturnType<typeof createLogger>
+  logger: ReturnType<typeof createLogger>,
+  options?: PublishOptions
 ): Promise<void> {
   // No child pages to publish
   if (!parentConfig.childPages || parentConfig.childPages.length === 0) {
@@ -340,7 +350,7 @@ async function publishChildPages(
     }
 
     // Publish the child page
-    await publishPageRecursive(client, mergedConfig);
+    await publishPageRecursive(client, mergedConfig, options);
 
     // Recursively process grandchildren (if any)
     if (childConfig.childPages && childConfig.childPages.length > 0) {
@@ -350,7 +360,8 @@ async function publishChildPages(
         childConfig,
         childConfig.pageTitle,
         basePath,
-        logger
+        logger,
+        options
       );
     }
   }
@@ -361,13 +372,14 @@ async function publishChildPages(
  */
 async function publishPageRecursive(
   client: ConfluenceClient,
-  cfg: PublishConfig
+  cfg: PublishConfig,
+  options?: PublishOptions
 ): Promise<void> {
   // Upsert page
   const context = { pageTitle: cfg.pageTitle, currentDate: new Date().toISOString().split('T')[0] };
   const pageTpl = await loadTemplate(cfg.templatePath, DEFAULT_PAGE_TEMPLATE);
   const compile = Handlebars.compile(pageTpl);
-  const initialMacro = await processMacroTemplates(cfg, context);
+  const initialMacro = await processMacroTemplates(cfg, context, undefined, undefined, undefined, options);
   const content = compile({ pageTitle: cfg.pageTitle, macro: initialMacro, currentDate: context.currentDate });
   const page = await handlePageUpsert(client, cfg, content);
 
@@ -382,7 +394,7 @@ async function publishPageRecursive(
     
     // Only update the macro content if there's a macroTemplatePath
     if (cfg.macroTemplatePath) {
-      const updatedMacro = await processMacroTemplates(cfg, context, getAuthCredentials().baseUrl, page.id, files);
+      const updatedMacro = await processMacroTemplates(cfg, context, getAuthCredentials().baseUrl, page.id, files, options);
       const updatedContent = compile({ pageTitle: cfg.pageTitle, macro: updatedMacro, currentDate: context.currentDate });
       await handlePageUpsert(client, cfg, updatedContent);
     }
@@ -390,7 +402,7 @@ async function publishPageRecursive(
 
   // Recurse into children
   if (cfg.childPages) {
-    await publishChildPages(client, cfg, cfg, cfg.pageTitle, process.cwd(), log);
+    await publishChildPages(client, cfg, cfg, cfg.pageTitle, process.cwd(), log, options);
   }
 }
 
@@ -532,7 +544,7 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
     
     log.debug('Confluence client initialized with custom error handling');
     
-    await publishPageRecursive(client, rootConfig);
+    await publishPageRecursive(client, rootConfig, options);
     log.success('All pages published successfully.');  
   } catch (error: any) {
     // Check if this is a "page already exists" error that we can handle gracefully
