@@ -4,7 +4,7 @@
   "description": "Documentation assets for publish-confluence",
   "private": true,
   "scripts": {
-    "build:diagram": "powershell -Command \"New-Item -ItemType Directory -Force -Path assets; Get-ChildItem -Path mermaid -Filter *.mmd | ForEach-Object { $outputFile = 'assets/' + [System.IO.Path]::GetFileNameWithoutExtension($_.Name) + '.png'; mmdc -i $_.FullName -o $outputFile -w 1024 }\""
+    "build:diagram": "powershell -Command \"New-Item -ItemType Directory -Force -Path assets; Get-ChildItem -Path mermaid -Filter *.mmd | ForEach-Object { $outputFile = 'assets/' + [System.IO.Path]::GetFileNameWithoutExtension($_.Name) + '.png'; mmdc -i $_.FullName -o $outputFile --width 1024 }\""
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^10.9.1"
