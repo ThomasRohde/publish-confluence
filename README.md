@@ -669,11 +669,10 @@ By following these recommendations, you can create performant, maintainable appl
 
 - [ ] Implement page labels/tags support for better organization
 - [ ] Add template validation to catch common errors before publishing
-- [ ] Support for custom HTML macro parameters
 - [ ] Add option to publish without updating attachments (faster updates)
 - [x] Add support for other macro types beyond HTML macro
 - [x] Create a configuration wizard for easier setup
-- [ ] Add support for publishing multiple pages at once. Add 'childPages' to configuration files
+- [x] Add support for publishing multiple pages at once. Add 'childPages' to configuration files
 - [ ] Add testing infrastructure and unit tests
 - [ ] Support for concurrent uploads to improve performance with many attachments
 - [ ] Add a preview mode to see compiled templates without publishing

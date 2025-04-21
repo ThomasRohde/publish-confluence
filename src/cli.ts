@@ -12,6 +12,8 @@ import { registerMacroHelpers } from './macro-helpers';
 import { createProject } from './project-creator';
 import { generatePrompt } from './prompt-generator';
 import { publishToConfluence } from './publisher';
+import pkg from '../package.json';
+const { version } = pkg;
 
 // Get the directory name in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -99,7 +101,7 @@ async function generatePromptCommand(): Promise<void> {
 program
   .name('publish-confluence')
   .description('Publish JavaScript builds and HTML content to Confluence')
-  .version('1.0.0'); 
+  .version(version); 
 
 // Default options for all commands
 program

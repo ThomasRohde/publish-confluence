@@ -1,6 +1,6 @@
 // tsconfig.json
 {
-    "compilerOptions": {
+  "compilerOptions": {
       "target": "ES2020", // Target modern Node.js versions
       "module": "ESNext", // Use modern ES modules
       "lib": ["ES2020", "DOM"], // Include DOM for FormData/Blob if needed, ES2020 for Node
@@ -14,6 +14,7 @@
       "declaration": true, // Generate .d.ts files
       "sourceMap": true, // Generate source maps
       "baseUrl": ".",
+      "resolveJsonModule": true, // Allow importing JSON files
       "paths": {
         "@/*": ["src/*"]
       }
