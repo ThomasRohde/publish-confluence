@@ -1,305 +1,125 @@
-<h1>Sample Projects</h1>
+<h1>Confluence Client (<code>client.ts</code>)</h1>
 
-<p>This section showcases the sample projects included with <code>publish-confluence</code>. These examples demonstrate various ways to use the tool for different use cases, from simple static pages to complex interactive applications.</p>
+<p>
+    The <code>client.ts</code> module is the cornerstone of the publish-confluence tool, 
+    responsible for all direct communication with the Confluence REST API. It encapsulates 
+    the logic for making API calls, handling authentication (via token), managing responses, 
+    and providing robust error handling customized for Confluence API interactions.
+</p>
 
-{{#confluence-children-display}}
-  <p>The samples below demonstrate different approaches and complexity levels for embedding web applications in Confluence.</p>
-{{/confluence-children-display}}
-
-<hr />
-
-<h2>8.1. Available Sample Projects</h2>
-
-<p>The <code>publish-confluence</code> repository includes the following sample projects to help you get started:</p>
-
-{{#confluence-layout}}
-  {{#layout-section type="single"}}
-    {{#layout-cell}}
-
-{{#confluence-expand title="Hello World - Basic JavaScript Application"}}
-  <p>A minimal example that demonstrates the essential features of <code>publish-confluence</code>.</p>
-  
-  <h3>Features</h3>
-  <ul>
-    <li>Simple HTML/CSS/JavaScript structure</li>
-    <li>Basic webpack configuration</li>
-    <li>Minimal configuration with <code>publish-confluence.json</code></li>
-    <li>Standard templates for Confluence page and HTML macro</li>
-  </ul>
-  
-  <h3>Files and Structure</h3>
-  {{#confluence-code language="text" title="Project Structure" linenumbers=false}}
-hello-world/
-├── confluence-template.html    # Confluence page template
-├── macro-template.html         # HTML macro template
-├── package.json                # Dependencies and scripts
-├── publish-confluence.json     # Publishing configuration
-├── webpack.config.js           # Build configuration
-└── src/
-    ├── index.html              # Application entry HTML
-    ├── index.js                # JavaScript entry point
-    └── styles.css              # Application styles
-  {{/confluence-code}}
-  
-  <h3>Configuration</h3>
-  {{#confluence-code language="json" title="publish-confluence.json" linenumbers=true}}
-{
-  "spaceKey": "~thro",
-  "pageTitle": "Hello World",
-  "distDir": "./dist",
-  "templatePath": "./confluence-template.html",
-  "macroTemplatePath": "./macro-template.html",
-  "includedFiles": [
-    "**/*.js",
-    "**/*.css",
-    "**/*.png",
-    "**/*.jpg",
-    "**/*.svg",
-    "**/*.woff",
-    "**/*.woff2",
-    "**/*.ttf",
-    "**/*.eot"
-  ],
-  "excludedFiles": [
-    "**/*.map"
-  ]
-}
-  {{/confluence-code}}
-  
-  <h3>Usage</h3>
-  <p>To use this sample:</p>
-  <ol>
-    <li>Navigate to the hello-world directory</li>
-    <li>Install dependencies: <code>npm install</code></li>
-    <li>Build the application: <code>npm run build</code></li>
-    <li>Publish to Confluence: <code>publish-confluence</code></li>
-  </ol>
-  
-  <h3>Key Learning Points</h3>
-  <ul>
-    <li>Basic setup of a publishable web application</li>
-    <li>Essential configuration options</li>
-    <li>How assets are attached and referenced</li>
-  </ul>
-{{/confluence-expand}}
-
-{{#confluence-expand title="Data Dashboard - Complex React/Preact Application"}}
-  <p>An advanced example showcasing a data visualization dashboard with interactive charts, tables, and controls.</p>
-  
-  <h3>Features</h3>
-  <ul>
-    <li>Interactive charts and visualizations using Chart.js</li>
-    <li>Advanced component architecture with Preact</li>
-    <li>Optimized bundle size with dynamic imports</li>
-    <li>Responsive design that works well in Confluence</li>
-    <li>Error handling and graceful fallbacks</li>
-    <li>Date range filtering and data export features</li>
-    <li>Vite build system for modern web development</li>
-  </ul>
-  
-  <h3>Files and Structure</h3>
-  {{#confluence-code language="text" title="Project Structure" linenumbers=false}}
-data-dashboard/
-├── confluence-template.html    # Confluence page template
-├── macro-template.html         # HTML macro template 
-├── package.json                # Dependencies and scripts
-├── publish-confluence.json     # Publishing configuration
-├── vite.config.js              # Build configuration
-└── src/
-    ├── index.html              # Application entry HTML
-    ├── index.jsx               # Application entry point
-    ├── components/             # UI components
-    │   ├── Controls.jsx
-    │   ├── Dashboard.jsx
-    │   ├── DataTable.jsx
-    │   ├── DistributionChart.jsx
-    │   ├── ErrorBoundary.jsx
-    │   ├── SummaryMetrics.jsx
-    │   └── TrendChart.jsx
-    ├── services/               # Data and API services
-    │   └── dataService.js
-    └── styles/                 # Application styling
-        └── main.css
-  {{/confluence-code}}
-  
-  <h3>Technical Details</h3>
-  <p>This sample demonstrates:</p>
-  <ul>
-    <li><strong>Performance Optimization</strong>: Dynamic imports for Chart.js to reduce initial load time, efficient rendering with Preact's virtual DOM, and pagination for large datasets</li>
-    <li><strong>User Experience</strong>: Loading states for asynchronous operations, error boundaries for graceful error handling, and responsive design for all screen sizes</li>
-    <li><strong>Code Organization</strong>: Component-based architecture, separation of concerns, and service layer for data fetching</li>
-    <li><strong>Confluence Integration</strong>: Namespaced CSS to avoid conflicts, styling that matches Confluence design patterns, and optimization for the Confluence content area width</li>
-  </ul>
-  
-  <h3>Usage</h3>
-  <p>To use this sample:</p>
-  <ol>
-    <li>Navigate to the data-dashboard directory</li>
-    <li>Install dependencies: <code>npm install</code></li>
-    <li>For development: <code>npm run dev</code></li>
-    <li>Build for production: <code>npm run build</code></li>
-    <li>Publish to Confluence: <code>npm run publish</code> or <code>publish-confluence</code></li>
-  </ol>
-{{/confluence-expand}}
-
-{{#confluence-expand title="Macro Showcase - Template and Macro Examples"}}
-  <p>A demonstration of various Confluence macros and template capabilities within <code>publish-confluence</code>.</p>
-  
-  <h3>Features</h3>
-  <ul>
-    <li>Examples of common Confluence macros (panels, expanders, code blocks, etc.)</li>
-    <li>Demonstration of Handlebars template helpers</li>
-    <li>Interactive examples of how macros render in Confluence</li>
-    <li>Built with modern JavaScript and Vite</li>
-  </ul>
-  
-  <h3>Configuration</h3>
-  {{#confluence-code language="json" title="publish-confluence.json" linenumbers=true}}
-{
-  "spaceKey": "~thro",
-  "pageTitle": "Confluence Macro Showcase",
-  "parentPageTitle": "Publishing to Confluence",
-  "templatePath": "./confluence-template.html",
-  "macroTemplatePath": "./macro-template.html",
-  "distDir": "./dist",
-  "includedFiles": [
-    "**/*.js", 
-    "**/*.css", 
-    "**/*.png", 
-    "**/*.jpg", 
-    "**/*.svg"
-  ],
-  "excludedFiles": [
-    "**/*.map"
-  ]
-}
-  {{/confluence-code}}
-  
-  <h3>Key Learning Points</h3>
-  <ul>
-    <li>How to use various Confluence macros in your templates</li>
-    <li>Structuring content for optimal display in Confluence</li>
-    <li>Working with Handlebars template helpers</li>
-    <li>Parent-child page relationships in Confluence</li>
-  </ul>
-{{/confluence-expand}}
-
-    {{/layout-cell}}
-  {{/layout-section}}
-{{/confluence-layout}}
-
-<hr />
-
-<h2>8.2. Using the Sample Projects</h2>
-
-<p>Each sample project demonstrates different aspects of <code>publish-confluence</code> and can be used as a starting point for your own applications. To use these samples:</p>
-
-<ol>
-  <li>
-    <strong>Clone the Repository</strong>
-    {{#confluence-code language="bash" linenumbers=false}}
-git clone https://github.com/ThomasRohde/publish-confluence.git
-cd publish-confluence
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Navigate to a Sample Directory</strong>
-    {{#confluence-code language="bash" linenumbers=false}}
-cd samples/hello-world  # Or any other sample
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Install Dependencies</strong>
-    {{#confluence-code language="bash" linenumbers=false}}
-npm install
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Configure for Your Environment</strong>
-    <p>Edit the <code>publish-confluence.json</code> file in the sample directory to update:</p>
-    <ul>
-      <li>The <code>spaceKey</code> to your target Confluence space</li>
-      <li>The <code>pageTitle</code> to your desired page name</li>
-      <li>The <code>parentPageTitle</code> if you want to nest under an existing page</li>
-    </ul>
-  </li>
-  <li>
-    <strong>Set Up Environment Variables</strong>
-    <p>Create a <code>.env</code> file with your Confluence credentials:</p>
-    {{#confluence-code language="bash" linenumbers=false}}
-CONFLUENCE_BASE_URL=https://your-instance.atlassian.net
-CONFLUENCE_TOKEN=your_api_token_here
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Build the Sample</strong> (if it uses a build system)
-    {{#confluence-code language="bash" linenumbers=false}}
-npm run build
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Publish to Confluence</strong>
-    {{#confluence-code language="bash" linenumbers=false}}
-publish-confluence
-    {{/confluence-code}}
-    <p>Or if the sample has a publish script:</p>
-    {{#confluence-code language="bash" linenumbers=false}}
-npm run publish
-    {{/confluence-code}}
-  </li>
-</ol>
-
-<h2>8.3. Extending the Samples</h2>
-
-<p>These samples are designed to be starting points that you can extend and customize for your own needs:</p>
-
-{{#confluence-panel title="Customization Ideas" type="tip"}}
-  <ul>
-    <li><strong>Add Your Own Data</strong>: Replace the mock data in the data-dashboard sample with your own API integration.</li>
-    <li><strong>Extend Functionality</strong>: Add new features to any sample, such as user authentication, more complex UI interactions, or additional visualization types.</li>
-    <li><strong>Customize Templates</strong>: Modify the Confluence and macro templates to match your organization's branding and style guidelines.</li>
-    <li><strong>Mix and Match</strong>: Take elements from different samples to create a custom solution that meets your specific requirements.</li>
-    <li><strong>Add New Build Tools</strong>: The samples use different build systems (webpack, Vite). You could adapt them to use other tools like Parcel, Rollup, or Snowpack.</li>
-  </ul>
+{{#confluence-panel title="Client Module Overview" type="info"}}
+<p>The ConfluenceClient class provides a comprehensive interface to the Confluence REST API, abstracting away the complexities of authentication, request formatting, and response handling. It includes methods for page operations, content management, space administration, user management, and attachment handling.</p>
 {{/confluence-panel}}
 
-<h2>8.4. Sample Project Comparison</h2>
+<h2>Authentication and Configuration</h2>
 
-<p>The following table provides a comparison of the sample projects to help you choose the right starting point:</p>
-<table>
-  <tr>
-    <th>Sample</th>
-    <th>Complexity</th>
-    <th>Build System</th>
-    <th>Framework</th>
-    <th>Features</th>
-    <th>Best For</th>
-  </tr>
-  <tr>
-    <td>Hello World</td>
-    <td>Low</td>
-    <td>Webpack</td>
-    <td>Vanilla JS</td>
-    <td>Basic HTML/CSS/JS</td>
-    <td>Getting started, static content</td>
-  </tr>
-  <tr>
-    <td>Data Dashboard</td>
-    <td>High</td>
-    <td>Vite</td>
-    <td>Preact</td>
-    <td>Interactive charts, data tables, filters</td>
-    <td>Data visualization, complex UIs</td>
-  </tr>
-  <tr>
-    <td>Macro Showcase</td>
-    <td>Medium</td>
-    <td>Vite</td>
-    <td>React</td>
-    <td>Confluence macro examples</td>
-    <td>Documentation, rich content pages</td>
-  </tr>
-</table>
+<p>The client supports authentication via Atlassian token and provides several configuration options:</p>
+
+{{#confluence-code language="typescript" title="Client Initialization" linenumbers=true}}
+import { ConfluenceClient } from './client';
+
+// Initialize with token authentication
+const client = new ConfluenceClient({
+  baseUrl: 'https://your-confluence.atlassian.net',
+  auth: {
+    token: 'your-api-token'
+  },
+  // Optional configuration
+  verbose: true,                // Enable detailed logging
+  rejectUnauthorized: false,    // For self-signed certificates (use with caution)
+  axiosConfig: {                // Custom Axios configuration
+    timeout: 30000,
+    headers: {
+      'Custom-Header': 'value'
+    }
+  }
+});
+{{/confluence-code}}
+
+<h2>Key Responsibilities</h2>
+
+<h3>Content Management</h3>
+<ul>
+    <li>Finding existing Confluence pages by title, space key, or content ID</li>
+    <li>Creating new Confluence pages with structured content</li>
+    <li>Updating existing Confluence pages with automatic version management</li>
+    <li>"Upserting" pages (creating or updating as appropriate)</li>
+    <li>Managing page hierarchies with parent/child relationships</li>
+    <li>Searching content using the Confluence Query Language (CQL)</li>
+    <li>Handling content versioning and history</li>
+    <li>Fetching specific versions of content</li>
+</ul>
+
+<h3>Attachment Operations</h3>
+<ul>
+    <li>Listing all attachments on a page</li>
+    <li>Uploading new file attachments to pages</li>
+    <li>Updating existing attachments (with automatic deletion and re-upload)</li>
+    <li>Deleting attachments from pages</li>
+    <li>Managing attachment metadata and properties</li>
+</ul>
+
+<h3>Space Administration</h3>
+<ul>
+    <li>Retrieving space information and metadata</li>
+    <li>Finding space homepage IDs</li>
+    <li>Listing all available spaces</li>
+    <li>Creating new spaces</li>
+    <li>Updating space properties</li>
+    <li>Archiving, restoring, and deleting spaces</li>
+</ul>
+
+<h3>User Management</h3>
+<ul>
+    <li>Getting current user information</li>
+    <li>Retrieving user details by username or key</li>
+    <li>Listing all users in the Confluence instance</li>
+    <li>Managing content watchers</li>
+    <li>Adding and removing content watches</li>
+    <li>Checking user group memberships</li>
+</ul>
+
+<h3>Error Handling and Infrastructure</h3>
+<ul>
+    <li>Comprehensive error handling for all Confluence API error types</li>
+    <li>Automatic request retries with exponential backoff</li>
+    <li>Detailed logging with configurable verbosity</li>
+    <li>Support for SSL certificate verification (or bypassing for internal/development use)</li>
+    <li>Custom request formatting and response parsing</li>
+</ul>
+
+<h2>Communication Flow Diagram</h2>
+<p>
+    The following diagram illustrates the typical sequence of API calls made by the client 
+    when publishing content (creating/updating a page and synchronizing attachments):
+</p>
+
+{{confluence-image src="client-communication.png" alt="Client Communication Flow" width="800" align="center" border="true" height="auto"}}
+
+{{#confluence-expand title="API Methods Reference"}}
+  {{#confluence-code language="typescript" title="Key Client Methods" linenumbers=true}}
+// Page Operations
+async findPage(spaceKey: string, title: string): Promise<Page | null>
+async createPage(spaceKey: string, title: string, content: string, parentId?: string): Promise<Page>
+async updatePage(pageId: string, title: string, content: string, version: number): Promise<Page>
+
+// Attachment Operations
+async getAttachments(pageId: string): Promise<Attachment[]>
+async attachFile(pageId: string, filePath: string, filename?: string): Promise<Attachment>
+async updateAttachment(pageId: string, attachmentId: string, filePath: string): Promise<Attachment>
+async deleteAttachment(pageId: string, attachmentId: string): Promise<void>
+  {{/confluence-code}}
+
+  <h3>Error Handling</h3>
+  <p>The client provides custom error handling for common Confluence API errors:</p>
+  <ul>
+    <li><strong>AuthenticationError:</strong> Occurs when API credentials are invalid or expired</li>
+    <li><strong>PermissionError:</strong> Occurs when the authenticated user lacks permissions</li>
+    <li><strong>RateLimitError:</strong> Occurs when API rate limits are exceeded</li>
+    <li><strong>ContentError:</strong> Occurs with invalid content formats</li>
+  </ul>
+{{/confluence-expand}}
+
 <hr />
 
 <p><em>Last updated: {{currentDate}}</em></p>

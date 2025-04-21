@@ -45,19 +45,19 @@
       "macroTemplatePath": null
     },
     {
-      "pageTitle": "8. Samples",
-      "templatePath": "./child-pages/page-8.html",
-      "macroTemplatePath": null
-    },
-    {
-      "pageTitle": "9. Confluence Server API",
+      "pageTitle": "8. Confluence Server API",
       "distDir": "./assets",
-      "templatePath": "./child-pages/page-9.html",
+      "templatePath": "./child-pages/page-8.html",
       "macroTemplatePath": null,
       "includedFiles": ["**/*.html", "**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.gif"],
       "excludedFiles": [
         "**/*.map"
       ]
+    },
+    {
+      "pageTitle": "9. Samples",
+      "templatePath": "./child-pages/page-9.html",
+      "macroTemplatePath": null
     }
   ]
 }
