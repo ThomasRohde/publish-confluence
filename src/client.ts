@@ -102,10 +102,10 @@ export class ConfluenceClient {
         return originalEmitWarning.call(process, warning, ...args);
       };
       
-      this.logger.warn('SSL certificate verification disabled. This is insecure!', {
+/*       this.logger.warn('SSL certificate verification disabled. This is insecure!', {
         securityIssue: 'SSL verification disabled',
         impact: 'Vulnerable to man-in-the-middle attacks'
-      });
+      }); */
     }
 
     this.axiosInstance = axios.create(axiosOptions);
@@ -567,6 +567,13 @@ export class ConfluenceClient {
     comment?: string
   ): Promise<ConfluenceAttachment> {
     try {
+      // Make sure the file exists before proceeding
+      try {
+        await fs.promises.access(filePath, fs.constants.R_OK);
+      } catch (error) {
+        throw new Error(`File not found or not readable: ${filePath}. Original error: ${(error as Error).message}`);
+      }
+      
       const formData = new FormData();
       
       // Read file content
@@ -619,7 +626,23 @@ export class ConfluenceClient {
       }
       throw new Error('No attachment was created');
     } catch (error) {
-      console.error(`Error uploading attachment to page ${pageId}:`, error);
+      // Get file size using fs.promises for better ESM compatibility
+      let fileSize: string = 'unknown';
+      try {
+        const stats = await fs.promises.stat(filePath);
+        fileSize = `${stats.size} bytes`;
+      } catch {
+        // Ignore errors when getting file size
+      }
+      
+      this.logger.error(`Failed to upload attachment ${path.basename(filePath)} to page ${pageId}`, {
+        error: (error as Error).message,
+        pageId,
+        filePath,
+        fileSize,
+        timestamp: new Date().toISOString()
+      });
+      
       throw error;
     }
   }

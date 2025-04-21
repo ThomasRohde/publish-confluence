@@ -79,7 +79,7 @@ const client = new ConfluenceClient({
     <li>Checking user group memberships</li>
 </ul>
 
-<h3>Error Handling & Infrastructure</h3>
+<h3>Error Handling and Infrastructure</h3>
 <ul>
     <li>Comprehensive error handling for all Confluence API error types</li>
     <li>Automatic request retries with exponential backoff</li>
@@ -94,13 +94,7 @@ const client = new ConfluenceClient({
     when publishing content (creating/updating a page and synchronizing attachments):
 </p>
 
-{{#confluence-layout}}
-  {{#layout-section type="single"}}
-    {{#layout-cell}}
-      {{confluence-image src="client-communication.png" alt="Client Communication Flow" width="auto" height="auto"}}
-    {{/layout-cell}}
-  {{/layout-section}}
-{{/confluence-layout}}
+{{confluence-image src="client-communication.png" alt="Client Communication Flow" width="800" align="center" border="true" height="auto"}}
 
 {{#confluence-expand title="API Methods Reference"}}
   {{#confluence-code language="typescript" title="Key Client Methods" linenumbers=true}}

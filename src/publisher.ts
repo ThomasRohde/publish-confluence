@@ -237,20 +237,31 @@ export async function uploadAttachments(
   filesToAttach: string[]
 ): Promise<void> {
   for (const file of filesToAttach) {
-    const filePath = path.join(process.cwd(), distDir, file);
-    log.verbose(`Attaching file: ${file}`);
-      try {
+    // Use path.resolve instead of path.join to handle potential issues with duplicate paths
+    const filePath = path.resolve(distDir, file);
+    log.verbose(`Attaching file: ${file} from ${filePath}`);
+    
+    try {
       await client.uploadAttachment(
         pageId,
         filePath,
         `Uploaded by publish-confluence at ${new Date().toISOString()}`
       );
     } catch (error) {
+      // Get file size using fs/promises instead of require('fs')
+      let fileSize: number | null = null;
+      try {
+        const stats = await fs.stat(filePath);
+        fileSize = stats.size;
+      } catch {
+        fileSize = null;
+      }
+      
       log.error(`Failed to upload attachment ${file}`, {
         error: (error as Error).message,
         pageId,
         filePath,
-        fileSize: require('fs').statSync(filePath).size,
+        fileSize,
         timestamp: new Date().toISOString(),
         possibleIssues: [
           'File size exceeds Confluence attachment limits',
@@ -339,11 +350,14 @@ async function publishPageRecursive(
   const content = compile({ pageTitle: cfg.pageTitle, macro: initialMacro, currentDate: context.currentDate });
   const page = await handlePageUpsert(client, cfg, content);
 
-  // Handle attachments
-  if (cfg.macroTemplatePath) {
-    const files = await findFilesToAttach(cfg.distDir, cfg.includedFiles, cfg.excludedFiles).catch(() => []);
-    if (files.length) {
-      await uploadAttachments(client, page.id, cfg.distDir, files);
+  // Handle attachments regardless of macroTemplatePath
+  // Process file attachments based on includedFiles and excludedFiles
+  const files = await findFilesToAttach(cfg.distDir, cfg.includedFiles, cfg.excludedFiles).catch(() => []);
+  if (files.length) {
+    await uploadAttachments(client, page.id, cfg.distDir, files);
+    
+    // Only update the macro content if there's a macroTemplatePath
+    if (cfg.macroTemplatePath) {
       const updatedMacro = await processMacroTemplates(cfg, context, getAuthCredentials().baseUrl, page.id, files);
       const updatedContent = compile({ pageTitle: cfg.pageTitle, macro: updatedMacro, currentDate: context.currentDate });
       await handlePageUpsert(client, cfg, updatedContent);
