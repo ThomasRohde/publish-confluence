@@ -1,7 +1,7 @@
 {
   "spaceKey": "~thro",
   "pageTitle": "Hello World",
-  "parentPageTitle": "8. Samples",
+  "parentPageTitle": "10. Samples",
   "distDir": "./dist",
   "templatePath": "./confluence-template.html",
   "macroTemplatePath": "./macro-template.html",
