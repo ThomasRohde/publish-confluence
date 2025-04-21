@@ -1,305 +1,272 @@
-<h1>Sample Projects</h1>
+<h1>Using Images and Diagrams in Confluence</h1>
 
-<p>This section showcases the sample projects included with <code>publish-confluence</code>. These examples demonstrate various ways to use the tool for different use cases, from simple static pages to complex interactive applications.</p>
+<p>
+    This guide explains how to incorporate images and diagrams into your Confluence pages using 
+    the publish-confluence tool. You'll learn how to use the <code>\{{confluence-image}}</code> Handlebars helper 
+    and how to generate diagrams from Mermaid syntax for inclusion in your Confluence pages.
+</p>
 
-{{#confluence-children-display}}
-  <p>The samples below demonstrate different approaches and complexity levels for embedding web applications in Confluence.</p>
-{{/confluence-children-display}}
-
-<hr />
-
-<h2>8.1. Available Sample Projects</h2>
-
-<p>The <code>publish-confluence</code> repository includes the following sample projects to help you get started:</p>
-
-{{#confluence-layout}}
-  {{#layout-section type="single"}}
-    {{#layout-cell}}
-
-{{#confluence-expand title="Hello World - Basic JavaScript Application"}}
-  <p>A minimal example that demonstrates the essential features of <code>publish-confluence</code>.</p>
-  
-  <h3>Features</h3>
-  <ul>
-    <li>Simple HTML/CSS/JavaScript structure</li>
-    <li>Basic webpack configuration</li>
-    <li>Minimal configuration with <code>publish-confluence.json</code></li>
-    <li>Standard templates for Confluence page and HTML macro</li>
-  </ul>
-  
-  <h3>Files and Structure</h3>
-  {{#confluence-code language="text" title="Project Structure" linenumbers=false}}
-hello-world/
-├── confluence-template.html    # Confluence page template
-├── macro-template.html         # HTML macro template
-├── package.json                # Dependencies and scripts
-├── publish-confluence.json     # Publishing configuration
-├── webpack.config.js           # Build configuration
-└── src/
-    ├── index.html              # Application entry HTML
-    ├── index.js                # JavaScript entry point
-    └── styles.css              # Application styles
-  {{/confluence-code}}
-  
-  <h3>Configuration</h3>
-  {{#confluence-code language="json" title="publish-confluence.json" linenumbers=true}}
-{
-  "spaceKey": "~thro",
-  "pageTitle": "Hello World",
-  "distDir": "./dist",
-  "templatePath": "./confluence-template.html",
-  "macroTemplatePath": "./macro-template.html",
-  "includedFiles": [
-    "**/*.js",
-    "**/*.css",
-    "**/*.png",
-    "**/*.jpg",
-    "**/*.svg",
-    "**/*.woff",
-    "**/*.woff2",
-    "**/*.ttf",
-    "**/*.eot"
-  ],
-  "excludedFiles": [
-    "**/*.map"
-  ]
-}
-  {{/confluence-code}}
-  
-  <h3>Usage</h3>
-  <p>To use this sample:</p>
-  <ol>
-    <li>Navigate to the hello-world directory</li>
-    <li>Install dependencies: <code>npm install</code></li>
-    <li>Build the application: <code>npm run build</code></li>
-    <li>Publish to Confluence: <code>publish-confluence</code></li>
-  </ol>
-  
-  <h3>Key Learning Points</h3>
-  <ul>
-    <li>Basic setup of a publishable web application</li>
-    <li>Essential configuration options</li>
-    <li>How assets are attached and referenced</li>
-  </ul>
-{{/confluence-expand}}
-
-{{#confluence-expand title="Data Dashboard - Complex React/Preact Application"}}
-  <p>An advanced example showcasing a data visualization dashboard with interactive charts, tables, and controls.</p>
-  
-  <h3>Features</h3>
-  <ul>
-    <li>Interactive charts and visualizations using Chart.js</li>
-    <li>Advanced component architecture with Preact</li>
-    <li>Optimized bundle size with dynamic imports</li>
-    <li>Responsive design that works well in Confluence</li>
-    <li>Error handling and graceful fallbacks</li>
-    <li>Date range filtering and data export features</li>
-    <li>Vite build system for modern web development</li>
-  </ul>
-  
-  <h3>Files and Structure</h3>
-  {{#confluence-code language="text" title="Project Structure" linenumbers=false}}
-data-dashboard/
-├── confluence-template.html    # Confluence page template
-├── macro-template.html         # HTML macro template 
-├── package.json                # Dependencies and scripts
-├── publish-confluence.json     # Publishing configuration
-├── vite.config.js              # Build configuration
-└── src/
-    ├── index.html              # Application entry HTML
-    ├── index.jsx               # Application entry point
-    ├── components/             # UI components
-    │   ├── Controls.jsx
-    │   ├── Dashboard.jsx
-    │   ├── DataTable.jsx
-    │   ├── DistributionChart.jsx
-    │   ├── ErrorBoundary.jsx
-    │   ├── SummaryMetrics.jsx
-    │   └── TrendChart.jsx
-    ├── services/               # Data and API services
-    │   └── dataService.js
-    └── styles/                 # Application styling
-        └── main.css
-  {{/confluence-code}}
-  
-  <h3>Technical Details</h3>
-  <p>This sample demonstrates:</p>
-  <ul>
-    <li><strong>Performance Optimization</strong>: Dynamic imports for Chart.js to reduce initial load time, efficient rendering with Preact's virtual DOM, and pagination for large datasets</li>
-    <li><strong>User Experience</strong>: Loading states for asynchronous operations, error boundaries for graceful error handling, and responsive design for all screen sizes</li>
-    <li><strong>Code Organization</strong>: Component-based architecture, separation of concerns, and service layer for data fetching</li>
-    <li><strong>Confluence Integration</strong>: Namespaced CSS to avoid conflicts, styling that matches Confluence design patterns, and optimization for the Confluence content area width</li>
-  </ul>
-  
-  <h3>Usage</h3>
-  <p>To use this sample:</p>
-  <ol>
-    <li>Navigate to the data-dashboard directory</li>
-    <li>Install dependencies: <code>npm install</code></li>
-    <li>For development: <code>npm run dev</code></li>
-    <li>Build for production: <code>npm run build</code></li>
-    <li>Publish to Confluence: <code>npm run publish</code> or <code>publish-confluence</code></li>
-  </ol>
-{{/confluence-expand}}
-
-{{#confluence-expand title="Macro Showcase - Template and Macro Examples"}}
-  <p>A demonstration of various Confluence macros and template capabilities within <code>publish-confluence</code>.</p>
-  
-  <h3>Features</h3>
-  <ul>
-    <li>Examples of common Confluence macros (panels, expanders, code blocks, etc.)</li>
-    <li>Demonstration of Handlebars template helpers</li>
-    <li>Interactive examples of how macros render in Confluence</li>
-    <li>Built with modern JavaScript and Vite</li>
-  </ul>
-  
-  <h3>Configuration</h3>
-  {{#confluence-code language="json" title="publish-confluence.json" linenumbers=true}}
-{
-  "spaceKey": "~thro",
-  "pageTitle": "Confluence Macro Showcase",
-  "parentPageTitle": "Publishing to Confluence",
-  "templatePath": "./confluence-template.html",
-  "macroTemplatePath": "./macro-template.html",
-  "distDir": "./dist",
-  "includedFiles": [
-    "**/*.js", 
-    "**/*.css", 
-    "**/*.png", 
-    "**/*.jpg", 
-    "**/*.svg"
-  ],
-  "excludedFiles": [
-    "**/*.map"
-  ]
-}
-  {{/confluence-code}}
-  
-  <h3>Key Learning Points</h3>
-  <ul>
-    <li>How to use various Confluence macros in your templates</li>
-    <li>Structuring content for optimal display in Confluence</li>
-    <li>Working with Handlebars template helpers</li>
-    <li>Parent-child page relationships in Confluence</li>
-  </ul>
-{{/confluence-expand}}
-
-    {{/layout-cell}}
-  {{/layout-section}}
-{{/confluence-layout}}
-
-<hr />
-
-<h2>8.2. Using the Sample Projects</h2>
-
-<p>Each sample project demonstrates different aspects of <code>publish-confluence</code> and can be used as a starting point for your own applications. To use these samples:</p>
-
-<ol>
-  <li>
-    <strong>Clone the Repository</strong>
-    {{#confluence-code language="bash" linenumbers=false}}
-git clone https://github.com/ThomasRohde/publish-confluence.git
-cd publish-confluence
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Navigate to a Sample Directory</strong>
-    {{#confluence-code language="bash" linenumbers=false}}
-cd samples/hello-world  # Or any other sample
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Install Dependencies</strong>
-    {{#confluence-code language="bash" linenumbers=false}}
-npm install
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Configure for Your Environment</strong>
-    <p>Edit the <code>publish-confluence.json</code> file in the sample directory to update:</p>
-    <ul>
-      <li>The <code>spaceKey</code> to your target Confluence space</li>
-      <li>The <code>pageTitle</code> to your desired page name</li>
-      <li>The <code>parentPageTitle</code> if you want to nest under an existing page</li>
-    </ul>
-  </li>
-  <li>
-    <strong>Set Up Environment Variables</strong>
-    <p>Create a <code>.env</code> file with your Confluence credentials:</p>
-    {{#confluence-code language="bash" linenumbers=false}}
-CONFLUENCE_BASE_URL=https://your-instance.atlassian.net
-CONFLUENCE_TOKEN=your_api_token_here
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Build the Sample</strong> (if it uses a build system)
-    {{#confluence-code language="bash" linenumbers=false}}
-npm run build
-    {{/confluence-code}}
-  </li>
-  <li>
-    <strong>Publish to Confluence</strong>
-    {{#confluence-code language="bash" linenumbers=false}}
-publish-confluence
-    {{/confluence-code}}
-    <p>Or if the sample has a publish script:</p>
-    {{#confluence-code language="bash" linenumbers=false}}
-npm run publish
-    {{/confluence-code}}
-  </li>
-</ol>
-
-<h2>8.3. Extending the Samples</h2>
-
-<p>These samples are designed to be starting points that you can extend and customize for your own needs:</p>
-
-{{#confluence-panel title="Customization Ideas" type="tip"}}
-  <ul>
-    <li><strong>Add Your Own Data</strong>: Replace the mock data in the data-dashboard sample with your own API integration.</li>
-    <li><strong>Extend Functionality</strong>: Add new features to any sample, such as user authentication, more complex UI interactions, or additional visualization types.</li>
-    <li><strong>Customize Templates</strong>: Modify the Confluence and macro templates to match your organization's branding and style guidelines.</li>
-    <li><strong>Mix and Match</strong>: Take elements from different samples to create a custom solution that meets your specific requirements.</li>
-    <li><strong>Add New Build Tools</strong>: The samples use different build systems (webpack, Vite). You could adapt them to use other tools like Parcel, Rollup, or Snowpack.</li>
-  </ul>
+{{#confluence-panel title="Key Topics" type="info"}}
+<ul>
+    <li>Using the <code>\{{confluence-image}}</code> helper for static images</li>
+    <li>Creating Mermaid diagrams</li>
+    <li>Rendering Mermaid diagrams to SVG/PNG with mermaid-cli</li>
+    <li>Attaching and displaying diagrams in Confluence</li>
+</ul>
 {{/confluence-panel}}
 
-<h2>8.4. Sample Project Comparison</h2>
+<h2>The \{{confluence-image}} Helper</h2>
 
-<p>The following table provides a comparison of the sample projects to help you choose the right starting point:</p>
-<table>
-  <tr>
-    <th>Sample</th>
-    <th>Complexity</th>
-    <th>Build System</th>
-    <th>Framework</th>
-    <th>Features</th>
-    <th>Best For</th>
-  </tr>
-  <tr>
-    <td>Hello World</td>
-    <td>Low</td>
-    <td>Webpack</td>
-    <td>Vanilla JS</td>
-    <td>Basic HTML/CSS/JS</td>
-    <td>Getting started, static content</td>
-  </tr>
-  <tr>
-    <td>Data Dashboard</td>
-    <td>High</td>
-    <td>Vite</td>
-    <td>Preact</td>
-    <td>Interactive charts, data tables, filters</td>
-    <td>Data visualization, complex UIs</td>
-  </tr>
-  <tr>
-    <td>Macro Showcase</td>
-    <td>Medium</td>
-    <td>Vite</td>
-    <td>React</td>
-    <td>Confluence macro examples</td>
-    <td>Documentation, rich content pages</td>
-  </tr>
-</table>
+<p>
+    The <code>\{{confluence-image}}</code> helper allows you to insert images into your Confluence pages. 
+    These images can either be attached to the page (using the <code>distDir</code> and <code>includedFiles</code> 
+    configuration) or referenced from external URLs.
+</p>
+
+{{#confluence-code language="html" title="Basic Image Syntax" linenumbers=true}}
+\{{confluence-image 
+    src="image-filename.png" 
+    alt="Alternative text for accessibility" 
+    width="800" 
+    height="auto"
+    align="center"
+    border="true"
+}}
+{{/confluence-code}}
+
+<h3>Parameters for \{{confluence-image}}</h3>
+
+<p>The helper accepts the following parameters:</p>
+
+<ul>
+    <li><strong>src</strong> (required): The filename of an attached image or a full URL for external images</li>
+    <li><strong>alt</strong>: Alternative text for accessibility (highly recommended)</li>
+    <li><strong>width</strong>: Image width in pixels or percentage</li>
+    <li><strong>height</strong>: Image height (use "auto" to maintain aspect ratio)</li>
+    <li><strong>align</strong>: Image alignment ("left", "center", "right")</li>
+    <li><strong>border</strong>: Whether to display a border around the image (true/false)</li>
+    <li><strong>thumbnail</strong>: Whether to display as a thumbnail that expands on click (true/false)</li>
+    <li><strong>title</strong>: Tooltip text shown on hover</li>
+    <li><strong>class</strong>: Custom CSS class</li>
+    <li><strong>style</strong>: Custom inline CSS styles</li>
+</ul>
+
+<h3>Example: Displaying an Attached Image</h3>
+
+{{#confluence-code language="html" title="Attached Image Example" linenumbers=true}}
+\{{confluence-image 
+    src="sample-image.png" 
+    alt="Sample diagram showing component architecture" 
+    width="800" 
+    align="center" 
+    border="true" 
+    height="auto"
+}}
+{{/confluence-code}}
+
+<p>
+    For this to work, ensure the image file is included in your <code>distDir</code> directory 
+    and that your <code>includedFiles</code> pattern in <code>publish-confluence.json</code> includes the image file type.
+</p>
+
+{{#confluence-code language="json" title="JSON Configuration for Images" linenumbers=true}}
+{
+  "pageTitle": "Page with Images",
+  "distDir": "./assets",
+  "templatePath": "./template.html",
+  "includedFiles": ["**/*.html", "**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.gif"]
+}
+{{/confluence-code}}
+
+<h2>Creating and Using Mermaid Diagrams</h2>
+
+<p>
+    <a href="https://mermaid.js.org/" target="_blank">Mermaid</a> is a popular diagramming and charting tool 
+    that lets you create diagrams using text-based markup. The publish-confluence tool doesn't directly 
+    render Mermaid diagrams in Confluence, but you can use the mermaid-cli tool to convert Mermaid definitions 
+    to SVG or PNG, then attach and display them with the <code>\{{confluence-image}}</code> helper.
+</p>
+
+<h3>Step 1: Install Mermaid CLI</h3>
+
+<p>You can install the Mermaid CLI (mmdc) globally:</p>
+
+{{#confluence-code language="bash" title="Global Installation" linenumbers=true}}
+npm install -g @mermaid-js/mermaid-cli
+{{/confluence-code}}
+
+<p>Or add it as a dev dependency in your documentation project:</p>
+
+{{#confluence-code language="bash" title="Project Installation" linenumbers=true}}
+npm install --save-dev @mermaid-js/mermaid-cli
+{{/confluence-code}}
+
+<h3>Step 2: Create Mermaid Diagram Files</h3>
+
+<p>
+    Create a directory (e.g., <code>mermaid/</code>) to store your Mermaid diagram definitions. 
+    Each diagram should be in a separate file with a <code>.mmd</code> extension.
+</p>
+
+{{#confluence-code language="mermaid" title="Example: client-communication.mmd" linenumbers=true}}
+sequenceDiagram
+    participant Client as ConfluenceClient
+    participant Server as Confluence Server
+
+    Client->>Server: GET /rest/api/content?title={pageTitle}&spaceKey={spaceKey}&expand=version,body.storage
+    alt Page Exists
+        Server-->>Client: 200 OK (Page Data)
+        Client->>Server: PUT /rest/api/content/{pageId} (Update Page Content)
+        Server-->>Client: 200 OK (Updated Page Data)
+    else Page Does Not Exist
+        Server-->>Client: 200 OK (Empty Results)
+        Client->>Server: POST /rest/api/content (Create Page Content)
+        Server-->>Client: 200 OK (New Page Data)
+    end
+
+    Client->>Server: GET /rest/api/content/{pageId}/child/attachment
+    Server-->>Client: 200 OK (List of Attachments)
+
+    loop For each local asset file
+        alt Attachment Exists on Server
+            opt File content differs
+                Client->>Server: POST /rest/api/content/{pageId}/child/attachment/{attachmentId}/data (Update Attachment)
+                Server-->>Client: 200 OK
+            end
+        else Attachment Does Not Exist on Server
+            Client->>Server: POST /rest/api/content/{pageId}/child/attachment (Add Attachment)
+            Server-->>Client: 200 OK
+        end
+    end
+{{/confluence-code}}
+
+<h3>Step 3: Add Build Scripts to Your package.json</h3>
+
+<p>
+    Add scripts to your <code>package.json</code> to convert Mermaid diagrams to SVG or PNG files.
+    Note: When working on Windows, you'll need to use PowerShell commands to ensure proper directory 
+    handling and path separators.
+</p>
+
+{{#confluence-code language="json" title="package.json Scripts for Mermaid" linenumbers=true}}
+{
+  "scripts": {
+    "build:diagram": "powershell -Command \"New-Item -ItemType Directory -Force -Path assets; mmdc -i mermaid/client-communication.mmd -o assets/client-communication.svg -w 1024\"",
+    "build:all-diagrams": "powershell -Command \"New-Item -ItemType Directory -Force -Path assets; Get-ChildItem -Path mermaid/*.mmd | ForEach-Object { mmdc -i $_.FullName -o assets/$($_.BaseName).svg -w 1024 }\""
+  }
+}
+{{/confluence-code}}
+
+<h3>Step 4: Run the Build Script</h3>
+
+<p>Execute the script to generate SVG files from your Mermaid diagrams:</p>
+
+{{#confluence-code language="bash" title="Build Command" linenumbers=true}}
+npm run build:diagram
+# Or for all diagrams:
+# npm run build:all-diagrams
+{{/confluence-code}}
+
+<h3>Step 5: Include the Generated Diagrams in Your Confluence Page</h3>
+
+<p>
+    After running the build script, your diagram files will be in the <code>assets/</code> directory.
+    Use the <code>\{{confluence-image}}</code> helper to include them in your template:
+</p>
+
+{{#confluence-code language="html" title="Including a Mermaid Diagram" linenumbers=true}}
+<h2>Communication Flow Diagram</h2>
+<p>
+    The following diagram illustrates the typical sequence of API calls made by the client 
+    when publishing content (creating/updating a page and synchronizing attachments):
+</p>
+
+\{{confluence-image src="client-communication.svg" alt="Client Communication Flow" width="800" align="center" border="true" height="auto"}}
+{{/confluence-code}}
+
+<h2>Mermaid Diagram Types</h2>
+
+<p>
+    Mermaid supports various diagram types, including:
+</p>
+
+<ul>
+    <li><strong>Flowcharts</strong>: Visualize processes and workflows</li>
+    <li><strong>Sequence Diagrams</strong>: Show interactions between components over time</li>
+    <li><strong>Class Diagrams</strong>: Depict class structures and relationships</li>
+    <li><strong>Entity Relationship Diagrams</strong>: Model database structures</li>
+    <li><strong>State Diagrams</strong>: Illustrate state transitions</li>
+    <li><strong>Gantt Charts</strong>: Visualize project schedules</li>
+    <li><strong>Pie Charts</strong>: Display data proportions</li>
+    <li><strong>User Journey Maps</strong>: Map user interactions with a system</li>
+</ul>
+
+{{#confluence-expand title="Example Mermaid Markup for Different Diagram Types"}}
+  {{#confluence-code language="mermaid" title="Flowchart Example" linenumbers=true}}
+flowchart TD
+    A[Start] --> B{Is it working?}
+    B -->|Yes| C[Great!]
+    B -->|No| D[Debug]
+    D --> B
+  {{/confluence-code}}
+
+  {{#confluence-code language="mermaid" title="Class Diagram Example" linenumbers=true}}
+classDiagram
+    class ConfluenceClient {
+        -string baseUrl
+        -auth: TokenAuth
+        +findPage(spaceKey, title)
+        +createPage(spaceKey, title, content)
+        +updatePage(pageId, title, content, version)
+        +attachFile(pageId, filePath)
+    }
+    class TokenAuth {
+        -string token
+        +getHeaders()
+    }
+    ConfluenceClient --> TokenAuth
+  {{/confluence-code}}
+
+  {{#confluence-code language="mermaid" title="Entity Relationship Diagram Example" linenumbers=true}}
+erDiagram
+    PAGE ||--o{ ATTACHMENT : contains
+    PAGE {
+        string id
+        string title
+        string spaceKey
+        int version
+    }
+    ATTACHMENT {
+        string id
+        string filename
+        string pageId
+        string mediaType
+    }
+  {{/confluence-code}}
+{{/confluence-expand}}
+
+<h2>Best Practices</h2>
+
+<ul>
+    <li>Keep diagrams simple and focused on a single concept</li>
+    <li>Use descriptive alt text for accessibility</li>
+    <li>Set an appropriate width for diagrams (800-1000px often works well)</li>
+    <li>Consider adding diagrams to your build process (e.g., in a CI/CD pipeline)</li>
+    <li>Store diagram source files (.mmd) in version control alongside documentation</li>
+    <li>For complex diagrams, add an explanatory text section below the diagram</li>
+</ul>
+
+<h2>Troubleshooting</h2>
+
+{{#confluence-panel title="Common Issues" type="note"}}
+<ul>
+    <li><strong>Diagram not showing up:</strong> Ensure the image file is included in your <code>distDir</code> and <code>includedFiles</code> pattern.</li>
+    <li><strong>Invalid Mermaid syntax:</strong> Use the <a href="https://mermaid.live" target="_blank">Mermaid Live Editor</a> to validate and debug your diagram syntax.</li>
+    <li><strong>mmdc command not found:</strong> Ensure Mermaid CLI is installed globally or included in your node_modules.</li>
+    <li><strong>SVG rendering issues:</strong> Try using PNG format instead (<code>-o output.png</code> with mmdc).</li>
+</ul>
+{{/confluence-panel}}
+
 <hr />
 
 <p><em>Last updated: {{currentDate}}</em></p>

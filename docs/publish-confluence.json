@@ -55,8 +55,18 @@
       ]
     },
     {
-      "pageTitle": "9. Samples",
+      "pageTitle": "9. Images and Diagrams",
+      "distDir": "./assets",
       "templatePath": "./child-pages/page-9.html",
+      "macroTemplatePath": null,
+      "includedFiles": ["**/*.html", "**/*.svg", "**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.gif"],
+      "excludedFiles": [
+        "**/*.map"
+      ]
+    },
+    {
+      "pageTitle": "10. Samples",
+      "templatePath": "./child-pages/page-10.html",
       "macroTemplatePath": null
     }
   ]

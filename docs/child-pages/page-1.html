@@ -172,3 +172,437 @@ CONFLUENCE_TOKEN=your_api_token_here
     <li>Ensure the API token has the minimum required permissions (page create/edit, attachment add/read) for the target space.</li>
   </ul>
 {{/confluence-panel}}
+
+<hr />
+
+<h2>1.4. Advanced Use Cases</h2>
+<p>While <code>publish-confluence</code> was originally designed for publishing JavaScript applications to Confluence pages, it has evolved into a comprehensive solution for managing various types of content in Confluence. Here are some advanced use cases that showcase the tool's versatility:</p>
+
+<h3>1.4.1. Documentation as Code</h3>
+<p>Keep your technical documentation under source control and automatically publish it to Confluence.</p>
+
+{{#confluence-panel title="Documentation Workflow" type="info"}}
+  <p>Store your documentation as HTML or Markdown files in your repository and use <code>publish-confluence</code> to maintain a synchronized copy in Confluence:</p>
+  <ol>
+    <li>Organize documentation in a structured directory</li>
+    <li>Use templates with Confluence macros for rich formatting</li>
+    <li>Set up CI/CD to publish documentation on changes</li>
+    <li>Use child pages configuration for hierarchical documentation</li>
+  </ol>
+  <p>This approach combines the benefits of source control (versioning, pull requests, reviews) with the collaboration features of Confluence.</p>
+{{/confluence-panel}}
+
+{{#confluence-code language="json" title="Example docs configuration" linenumbers=true}}
+{
+  "spaceKey": "DOCS",
+  "pageTitle": "Project Documentation",
+  "parentPageTitle": "Technical Documentation",
+  "templatePath": "./docs/templates/page-template.html",
+  "distDir": "./docs",
+  "childPages": [
+    {
+      "pageTitle": "Getting Started",
+      "templatePath": "./docs/templates/page-template.html",
+      "distDir": "./docs/getting-started"
+    },
+    {
+      "pageTitle": "API Reference",
+      "templatePath": "./docs/templates/api-template.html",
+      "distDir": "./docs/api",
+      "childPages": [
+        {
+          "pageTitle": "Authentication",
+          "distDir": "./docs/api/auth"
+        },
+        {
+          "pageTitle": "Endpoints",
+          "distDir": "./docs/api/endpoints"
+        }
+      ]
+    }
+  ]
+}
+{{/confluence-code}}
+
+<h3>1.4.2. Interactive Dashboards and Visualizations</h3>
+<p>Embed interactive data visualizations and dashboards directly in Confluence pages.</p>
+
+{{#confluence-panel title="Dashboard Publishing Workflow" type="info"}}
+  <p>Create dashboards with modern web technologies and publish them to Confluence:</p>
+  <ol>
+    <li>Build interactive visualizations with libraries like D3.js, Chart.js, or React-based visualization tools</li>
+    <li>Connect to data sources through secure APIs</li>
+    <li>Publish to Confluence for easy access by stakeholders</li>
+    <li>Update automatically when data or visualization code changes</li>
+  </ol>
+{{/confluence-panel}}
+
+<h3>1.4.3. Knowledge Base and Training Materials</h3>
+<p>Maintain training materials, guides, and knowledge base articles under source control.</p>
+
+{{#confluence-panel title="Knowledge Management Approach" type="info"}}
+  <p>Create a structured knowledge base that combines rich content with interactive elements:</p>
+  <ul>
+    <li>Use Confluence macros for rich formatting (panels, tabs, expanders)</li>
+    <li>Embed interactive tutorials using HTML macros</li>
+    <li>Include diagrams and flowcharts using Mermaid or other visualization tools</li>
+    <li>Organize content in a hierarchical structure using child pages</li>
+  </ul>
+{{/confluence-panel}}
+
+<h3>1.4.4. Integration with CI/CD Pipelines</h3>
+<p><code>publish-confluence</code> can be seamlessly integrated into CI/CD pipelines to automate the publication of content to Confluence. This approach ensures that your Confluence pages always reflect the latest version of your content without manual intervention.</p>
+
+<h4>GitHub Actions Integration</h4>
+{{#confluence-code language="yaml" title=".github/workflows/publish-docs.yml" linenumbers=true}}
+name: Publish Documentation to Confluence
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'src/**'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application or documentation
+        run: npm run build
+      
+      - name: Install publish-confluence
+        run: npm install -g publish-confluence
+      
+      - name: Publish to Confluence
+        env:
+          CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
+          CONFLUENCE_TOKEN: ${{ secrets.CONFLUENCE_TOKEN }}
+        run: publish-confluence
+{{/confluence-code}}
+
+<h4>Azure DevOps Pipelines</h4>
+{{#confluence-code language="yaml" title="azure-pipelines.yml" linenumbers=true}}
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - docs/*
+    - src/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm ci
+    npm run build
+  displayName: 'npm install and build'
+
+- script: |
+    npm install -g publish-confluence
+  displayName: 'Install publish-confluence'
+
+- script: |
+    publish-confluence
+  displayName: 'Publish to Confluence'
+  env:
+    CONFLUENCE_BASE_URL: $(CONFLUENCE_BASE_URL)
+    CONFLUENCE_TOKEN: $(CONFLUENCE_TOKEN)
+{{/confluence-code}}
+
+<h4>Jenkins Pipeline</h4>
+{{#confluence-code language="groovy" title="Jenkinsfile" linenumbers=true}}
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Setup') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+        
+        stage('Publish') {
+            environment {
+                CONFLUENCE_BASE_URL = credentials('confluence-url')
+                CONFLUENCE_TOKEN = credentials('confluence-token')
+            }
+            steps {
+                sh 'npm install -g publish-confluence'
+                sh 'publish-confluence'
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Successfully published to Confluence!'
+        }
+    }
+}
+{{/confluence-code}}
+
+<h4>GitLab CI/CD</h4>
+{{#confluence-code language="yaml" title=".gitlab-ci.yml" linenumbers=true}}
+stages:
+  - build
+  - publish
+
+build:
+  stage: build
+  image: node:20
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+      - publish-confluence.json
+      - confluence-template.html
+      - macro-template.html
+
+publish:
+  stage: publish
+  image: node:20
+  script:
+    - npm install -g publish-confluence
+    - publish-confluence
+  only:
+    - main
+    - tags
+  environment:
+    name: confluence
+  variables:
+    CONFLUENCE_BASE_URL: ${CONFLUENCE_BASE_URL}
+    CONFLUENCE_TOKEN: ${CONFLUENCE_TOKEN}
+{{/confluence-code}}
+
+<h4>CI/CD Best Practices</h4>
+{{#confluence-panel title="CI/CD Integration Tips" type="tip"}}
+  <ul>
+    <li><strong>Use Environment Secret Management:</strong> Store your Confluence credentials as secure secrets/variables in your CI/CD platform.</li>
+    <li><strong>Conditional Publishing:</strong> Set up your pipeline to only publish when relevant files change (e.g., documentation files or application code).</li>
+    <li><strong>Version or Date Stamping:</strong> Consider adding build numbers, git commit hashes, or timestamps to your published content for traceability.</li>
+    <li><strong>Branch-Based Publishing:</strong> Configure different target Confluence spaces or parent pages based on branch (e.g., staging vs. production).</li>
+    <li><strong>Scheduled Publishing:</strong> For dashboards with data visualization, consider scheduled builds and publications to refresh data.</li>
+  </ul>
+{{/confluence-panel}}
+
+<h3>1.4.5. Multi-Page Documentation Structures</h3>
+<p>Create comprehensive documentation structures with nested pages using the <code>childPages</code> configuration option.</p>
+
+{{#confluence-code language="json" title="Complex hierarchy example" linenumbers=true}}
+{
+  "spaceKey": "TEAM",
+  "pageTitle": "Project Documentation",
+  "templatePath": "./templates/main-page.html",
+  "childPages": [
+    {
+      "pageTitle": "Architecture Overview",
+      "templatePath": "./templates/architecture-page.html",
+      "distDir": "./docs/architecture",
+      "childPages": [
+        {
+          "pageTitle": "System Components",
+          "templatePath": "./templates/components-page.html",
+          "distDir": "./docs/architecture/components"
+        },
+        {
+          "pageTitle": "Data Flow",
+          "templatePath": "./templates/dataflow-page.html",
+          "distDir": "./docs/architecture/dataflow"
+        }
+      ]
+    },
+    {
+      "pageTitle": "User Guides",
+      "templatePath": "./templates/guides-page.html",
+      "distDir": "./docs/guides",
+      "childPages": [
+        {
+          "pageTitle": "Administrator Guide",
+          "distDir": "./docs/guides/admin"
+        },
+        {
+          "pageTitle": "End User Guide",
+          "distDir": "./docs/guides/user"
+        }
+      ]
+    }
+  ]
+}
+{{/confluence-code}}
+
+<h3>1.4.6. Release Notes Automation</h3>
+<p>Automatically publish release notes to Confluence when new versions are released.</p>
+
+{{#confluence-panel title="Release Notes Workflow" type="info"}}
+  <p>Connect your release process to Confluence:</p>
+  <ol>
+    <li>Generate release notes based on commits, pull requests, or manually written content</li>
+    <li>Create a template that formats the release notes with appropriate Confluence macros</li>
+    <li>Trigger publication on release creation or tag</li>
+    <li>Maintain a historical record of all releases in a structured format</li>
+  </ol>
+  <p>This automates the documentation aspect of your release process.</p>
+{{/confluence-panel}}
+
+<h3>1.4.7. Integrating with Mermaid Diagrams</h3>
+<p>Create diagrams in your documentation using Mermaid and publish them to Confluence.</p>
+
+{{#confluence-panel title="Using Mermaid with publish-confluence" type="info"}}
+  <p>Publish Mermaid diagrams (flowcharts, sequence diagrams, etc.) to Confluence:</p>
+  <ol>
+    <li>Store .mmd files in your repository</li>
+    <li>Render them to SVG or PNG during your build process</li>
+    <li>Use <code>publish-confluence</code> to attach the rendered diagrams</li>
+    <li>Reference them in your Confluence templates using the image macro</li>
+  </ol>
+  <p>This approach allows you to maintain diagrams as code while displaying them nicely in Confluence.</p>
+{{/confluence-panel}}
+
+{{#confluence-code language="bash" title="Mermaid rendering example" linenumbers=true}}
+# Install mermaid CLI
+npm install -g @mermaid-js/mermaid-cli
+
+# Generate SVGs from .mmd files
+mmdc -i ./docs/diagrams/architecture.mmd -o ./dist/diagrams/architecture.svg -b transparent
+
+# Then publish to Confluence, including the SVG files
+publish-confluence
+{{/confluence-code}}
+
+<h3>1.4.8. Automatically Generated API Documentation</h3>
+<p>Generate API documentation from source code comments or OpenAPI specifications and publish it to Confluence.</p>
+
+{{#confluence-panel title="API Documentation Workflow" type="info"}}
+  <p>Automate API documentation in Confluence:</p>
+  <ol>
+    <li>Use tools like Swagger, TypeDoc, or JSDoc to generate documentation</li>
+    <li>Create custom templates for Confluence that utilize macros for better presentation</li>
+    <li>Configure your build to generate the documentation as part of your CI/CD pipeline</li>
+    <li>Use <code>publish-confluence</code> to publish the generated documentation</li>
+  </ol>
+{{/confluence-panel}}
+
+<h3>1.4.9. Content Localization</h3>
+<p>Manage multilingual documentation with separate Confluence pages for each language.</p>
+
+{{#confluence-panel title="Localization Strategy" type="info"}}
+  <p>Implement multilingual documentation:</p>
+  <ul>
+    <li>Organize content by language in your repository</li>
+    <li>Use language-specific templates</li>
+    <li>Configure parent pages for each language</li>
+    <li>Automate translation processes as part of your documentation pipeline</li>
+  </ul>
+{{/confluence-panel}}
+
+{{#confluence-code language="json" title="Multi-language configuration example" linenumbers=true}}
+{
+  "spaceKey": "DOCS",
+  "pageTitle": "Product Documentation",
+  "templatePath": "./templates/index-template.html",
+  "childPages": [
+    {
+      "pageTitle": "Documentation (English)",
+      "templatePath": "./templates/en/main-template.html",
+      "distDir": "./docs/en",
+      "childPages": [
+        {
+          "pageTitle": "Getting Started",
+          "distDir": "./docs/en/getting-started"
+        }
+      ]
+    },
+    {
+      "pageTitle": "Documentation (Español)",
+      "templatePath": "./templates/es/main-template.html",
+      "distDir": "./docs/es",
+      "childPages": [
+        {
+          "pageTitle": "Primeros Pasos",
+          "distDir": "./docs/es/getting-started"
+        }
+      ]
+    }
+  ]
+}
+{{/confluence-code}}
+
+<hr />
+
+<h2>1.5. Best Practices and Optimization</h2>
+
+<h3>1.5.1. Source Control Integration</h3>
+<p>Effective strategies for managing your Confluence content in source control:</p>
+<ul>
+  <li><strong>Repository Structure:</strong> Organize templates, configuration, and content in a clear directory structure.</li>
+  <li><strong>Version Control:</strong> Track changes to your documentation alongside code changes.</li>
+  <li><strong>Branch Strategy:</strong> Consider using feature branches for significant documentation updates.</li>
+  <li><strong>Pull Request Reviews:</strong> Review documentation changes through pull requests.</li>
+</ul>
+
+<h3>1.5.2. Performance Optimization</h3>
+<p>Tips for optimizing the performance of your publishing process:</p>
+{{#confluence-panel title="Performance Tips" type="tip"}}
+  <ul>
+    <li><strong>Selective Publishing:</strong> Only publish pages that have changed by using content hashing or modification tracking.</li>
+    <li><strong>Asset Optimization:</strong> Compress images and optimize assets before publication to reduce attachment sizes.</li>
+    <li><strong>Batch Processing:</strong> When publishing large documentation sets, consider spreading the publishing process across multiple CI jobs to avoid timeouts.</li>
+    <li><strong>Caching:</strong> Implement caching strategies in your CI/CD pipeline to speed up builds.</li>
+  </ul>
+{{/confluence-panel}}
+
+<h3>1.5.3. Governance and Compliance</h3>
+<p>Maintain documentation standards and compliance requirements:</p>
+<ul>
+  <li><strong>Templates:</strong> Standardize templates to ensure consistent formatting and structure.</li>
+  <li><strong>Approval Workflows:</strong> Implement approval processes through your version control system.</li>
+  <li><strong>Audit Trail:</strong> Maintain a history of documentation changes through commit history.</li>
+  <li><strong>Compliance Checks:</strong> Add automated checks for required sections, legal disclaimers, or sensitive information.</li>
+</ul>
+
+<h3>1.5.4. Team Collaboration</h3>
+<p>Strategies for effective team collaboration:</p>
+{{#confluence-panel title="Team Workflows" type="info"}}
+  <ul>
+    <li><strong>Documentation Ownership:</strong> Assign clear ownership for different documentation areas.</li>
+    <li><strong>Style Guides:</strong> Establish and enforce documentation style guides through templates and reviews.</li>
+    <li><strong>Contribution Guidelines:</strong> Create clear guidelines for team members to contribute to documentation.</li>
+    <li><strong>Feedback Mechanisms:</strong> Set up ways for users to provide feedback on documentation (e.g., through Confluence comments or issue tracking).</li>
+  </ul>
+{{/confluence-panel}}
