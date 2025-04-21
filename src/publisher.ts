@@ -377,6 +377,9 @@ async function publishPageRecursive(
   if (files.length) {
     await uploadAttachments(client, page.id, cfg.distDir, files);
     
+    // Add a small delay to ensure attachments are fully processed
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
     // Only update the macro content if there's a macroTemplatePath
     if (cfg.macroTemplatePath) {
       const updatedMacro = await processMacroTemplates(cfg, context, getAuthCredentials().baseUrl, page.id, files);
