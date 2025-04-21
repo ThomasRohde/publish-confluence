@@ -1,6 +1,6 @@
 {
     "name": "publish-confluence",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "description": "CLI tool to publish JavaScript builds and HTML content to Confluence",
     "type": "module",
     "bin": {
