@@ -1,6 +1,6 @@
 {
     "name": "publish-confluence",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "CLI tool to publish JavaScript builds and HTML content to Confluence",
     "type": "module",
     "bin": {
@@ -16,7 +16,8 @@
     },
     "files": [
         "dist"
-    ],    "scripts": {
+    ],
+    "scripts": {
         "dev": "vite build --watch",
         "build": "tsc --noEmit && vite build",
         "prepublishOnly": "npm run build",
