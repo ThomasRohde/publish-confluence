@@ -26,6 +26,19 @@ const DEFAULT_MACRO_TEMPLATE = `<div>
 </div>`;
 
 /**
+ * Escapes special characters for Confluence's Storage Format (XML) 
+ * but only within HTML text content, preserving Confluence macros
+ * 
+ * @param content - String content that may contain special characters
+ * @returns Properly escaped content for Confluence Storage Format
+ */
+function escapeForConfluence(content: string): string {
+  // Only escape ampersands that aren't part of XML entities or Confluence macros
+  // This regex finds standalone ampersands not followed by entity pattern
+  return content.replace(/&(?!(?:[a-zA-Z]+|#\d+|#x[a-fA-F0-9]+);)/g, '&amp;');
+}
+
+/**
  * Load template content from file or use default template if file not found
  * 
  * @param templatePath - Path to the template file
@@ -212,10 +225,18 @@ export async function handlePageUpsert(
   config: PublishConfig,
   pageContent: string
 ) {
+  // Escape special characters in the page content for Confluence Storage Format
+  const escapedContent = escapeForConfluence(pageContent);
+  
+  // Log the escaping process if in verbose mode
+  if (escapedContent !== pageContent) {
+    log.verbose('Special characters were escaped for Confluence compatibility');
+  }
+  
   return client.upsertPage(
     config.spaceKey,
     config.pageTitle,
-    pageContent,
+    escapedContent,
     config.parentPageTitle,
     `Updated by publish-confluence at ${new Date().toISOString()}`
   );
