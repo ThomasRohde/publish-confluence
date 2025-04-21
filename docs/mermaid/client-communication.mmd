@@ -1,0 +1,34 @@
+sequenceDiagram
+    participant Client as ConfluenceClient
+    participant Server as Confluence Server
+
+    Client->>Server: GET /rest/api/content?title={pageTitle}&spaceKey={spaceKey}&expand=version,body.storage
+    alt Page Exists
+        Server-->>Client: 200 OK (Page Data)
+        Client->>Server: PUT /rest/api/content/{pageId} (Update Page Content)
+        Server-->>Client: 200 OK (Updated Page Data)
+    else Page Does Not Exist
+        Server-->>Client: 200 OK (Empty Results)
+        Client->>Server: POST /rest/api/content (Create Page Content)
+        Server-->>Client: 200 OK (New Page Data)
+    end
+
+    Client->>Server: GET /rest/api/content/{pageId}/child/attachment
+    Server-->>Client: 200 OK (List of Attachments)
+
+    loop For each local asset file
+        alt Attachment Exists on Server
+            opt File content differs
+                Client->>Server: POST /rest/api/content/{pageId}/child/attachment/{attachmentId}/data (Update Attachment)
+                Server-->>Client: 200 OK
+            end
+        else Attachment Does Not Exist on Server
+            Client->>Server: POST /rest/api/content/{pageId}/child/attachment (Add Attachment)
+            Server-->>Client: 200 OK
+        end
+    end
+
+    loop For each server attachment not present locally
+        Client->>Server: DELETE /rest/api/content/{attachmentId} (Delete Attachment)
+        Server-->>Client: 204 No Content
+    end

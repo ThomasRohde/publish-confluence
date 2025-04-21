@@ -1,0 +1,131 @@
+<h1>Confluence Client (<code>client.ts</code>)</h1>
+
+<p>
+    The <code>client.ts</code> module is the cornerstone of the publish-confluence tool, 
+    responsible for all direct communication with the Confluence REST API. It encapsulates 
+    the logic for making API calls, handling authentication (via token), managing responses, 
+    and providing robust error handling customized for Confluence API interactions.
+</p>
+
+{{#confluence-panel title="Client Module Overview" type="info"}}
+<p>The ConfluenceClient class provides a comprehensive interface to the Confluence REST API, abstracting away the complexities of authentication, request formatting, and response handling. It includes methods for page operations, content management, space administration, user management, and attachment handling.</p>
+{{/confluence-panel}}
+
+<h2>Authentication and Configuration</h2>
+
+<p>The client supports authentication via Atlassian token and provides several configuration options:</p>
+
+{{#confluence-code language="typescript" title="Client Initialization" linenumbers=true}}
+import { ConfluenceClient } from './client';
+
+// Initialize with token authentication
+const client = new ConfluenceClient({
+  baseUrl: 'https://your-confluence.atlassian.net',
+  auth: {
+    token: 'your-api-token'
+  },
+  // Optional configuration
+  verbose: true,                // Enable detailed logging
+  rejectUnauthorized: false,    // For self-signed certificates (use with caution)
+  axiosConfig: {                // Custom Axios configuration
+    timeout: 30000,
+    headers: {
+      'Custom-Header': 'value'
+    }
+  }
+});
+{{/confluence-code}}
+
+<h2>Key Responsibilities</h2>
+
+<h3>Content Management</h3>
+<ul>
+    <li>Finding existing Confluence pages by title, space key, or content ID</li>
+    <li>Creating new Confluence pages with structured content</li>
+    <li>Updating existing Confluence pages with automatic version management</li>
+    <li>"Upserting" pages (creating or updating as appropriate)</li>
+    <li>Managing page hierarchies with parent/child relationships</li>
+    <li>Searching content using the Confluence Query Language (CQL)</li>
+    <li>Handling content versioning and history</li>
+    <li>Fetching specific versions of content</li>
+</ul>
+
+<h3>Attachment Operations</h3>
+<ul>
+    <li>Listing all attachments on a page</li>
+    <li>Uploading new file attachments to pages</li>
+    <li>Updating existing attachments (with automatic deletion and re-upload)</li>
+    <li>Deleting attachments from pages</li>
+    <li>Managing attachment metadata and properties</li>
+</ul>
+
+<h3>Space Administration</h3>
+<ul>
+    <li>Retrieving space information and metadata</li>
+    <li>Finding space homepage IDs</li>
+    <li>Listing all available spaces</li>
+    <li>Creating new spaces</li>
+    <li>Updating space properties</li>
+    <li>Archiving, restoring, and deleting spaces</li>
+</ul>
+
+<h3>User Management</h3>
+<ul>
+    <li>Getting current user information</li>
+    <li>Retrieving user details by username or key</li>
+    <li>Listing all users in the Confluence instance</li>
+    <li>Managing content watchers</li>
+    <li>Adding and removing content watches</li>
+    <li>Checking user group memberships</li>
+</ul>
+
+<h3>Error Handling & Infrastructure</h3>
+<ul>
+    <li>Comprehensive error handling for all Confluence API error types</li>
+    <li>Automatic request retries with exponential backoff</li>
+    <li>Detailed logging with configurable verbosity</li>
+    <li>Support for SSL certificate verification (or bypassing for internal/development use)</li>
+    <li>Custom request formatting and response parsing</li>
+</ul>
+
+<h2>Communication Flow Diagram</h2>
+<p>
+    The following diagram illustrates the typical sequence of API calls made by the client 
+    when publishing content (creating/updating a page and synchronizing attachments):
+</p>
+
+{{#confluence-layout}}
+  {{#layout-section type="single"}}
+    {{#layout-cell}}
+      {{confluence-image src="client-communication.png" alt="Client Communication Flow" width="auto" height="auto"}}
+    {{/layout-cell}}
+  {{/layout-section}}
+{{/confluence-layout}}
+
+{{#confluence-expand title="API Methods Reference"}}
+  {{#confluence-code language="typescript" title="Key Client Methods" linenumbers=true}}
+// Page Operations
+async findPage(spaceKey: string, title: string): Promise<Page | null>
+async createPage(spaceKey: string, title: string, content: string, parentId?: string): Promise<Page>
+async updatePage(pageId: string, title: string, content: string, version: number): Promise<Page>
+
+// Attachment Operations
+async getAttachments(pageId: string): Promise<Attachment[]>
+async attachFile(pageId: string, filePath: string, filename?: string): Promise<Attachment>
+async updateAttachment(pageId: string, attachmentId: string, filePath: string): Promise<Attachment>
+async deleteAttachment(pageId: string, attachmentId: string): Promise<void>
+  {{/confluence-code}}
+
+  <h3>Error Handling</h3>
+  <p>The client provides custom error handling for common Confluence API errors:</p>
+  <ul>
+    <li><strong>AuthenticationError:</strong> Occurs when API credentials are invalid or expired</li>
+    <li><strong>PermissionError:</strong> Occurs when the authenticated user lacks permissions</li>
+    <li><strong>RateLimitError:</strong> Occurs when API rate limits are exceeded</li>
+    <li><strong>ContentError:</strong> Occurs with invalid content formats</li>
+  </ul>
+{{/confluence-expand}}
+
+<hr />
+
+<p><em>Last updated: {{currentDate}}</em></p>

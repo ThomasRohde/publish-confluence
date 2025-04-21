@@ -1,0 +1,11 @@
+{
+  "name": "publish-confluence-docs",
+  "version": "1.0.0",
+  "description": "Documentation assets for publish-confluence",
+  "private": true,  "scripts": {
+    "build:diagram": "powershell -Command \"New-Item -ItemType Directory -Force -Path assets; mmdc -i mermaid/client-communication.mmd -o assets/client-communication.svg -w 1024\""
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^10.9.1"
+  }
+}
