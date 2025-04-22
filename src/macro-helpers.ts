@@ -436,4 +436,146 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
     
     return new handlebars.SafeString(imageTag);
   });
+
+  /**
+   * Link macro - Creates links to various Confluence entities or external URLs
+   * 
+   * Usage:
+   * ```handlebars
+   * <!-- Link to another Confluence page -->
+   * {{confluence-link type="page" pageTitle="Target Page" text="Link to page"}}
+   * 
+   * <!-- Link to an attachment -->
+   * {{confluence-link type="attachment" filename="document.pdf" text="View document"}}
+   * 
+   * <!-- Link to an external site -->
+   * {{confluence-link type="url" url="https://example.com" text="External link"}}
+   * 
+   * <!-- Anchor link (same page) -->
+   * {{confluence-link type="anchor" anchor="section-id" text="Jump to section"}}
+   * 
+   * <!-- Anchor link (another page) -->
+   * {{confluence-link type="pageAnchor" pageTitle="Other Page" anchor="section-id" text="Jump to section on other page"}}
+   * 
+   * <!-- Link with an embedded image for the body -->
+   * {{#confluence-link type="page" pageTitle="Image Link Example"}}
+   *   {{confluence-image src="logo.png" width="30"}}
+   * {{/confluence-link}}
+   * ```
+   * 
+   * @param type - Type of link: "page", "attachment", "url", "anchor", "pageAnchor"
+   * @param text - Text to display for the link (required for text links)
+   * @param pageTitle - Title of the target Confluence page (for page and pageAnchor types)
+   * @param filename - Name of the attachment file (for attachment type)
+   * @param url - URL for external links (for url type)
+   * @param anchor - Anchor name/ID to link to (for anchor and pageAnchor types)
+   * @param tooltip - Optional tooltip text that appears on hover
+   */
+  handlebars.registerHelper('confluence-link', function(this: any, options: Handlebars.HelperOptions) {
+    const type = options.hash.type || 'url';
+    const tooltip = options.hash.tooltip || '';
+    
+    // Check if the helper is used as a block (for image links)
+    const isBlock = options.fn && typeof options.fn === 'function';
+    const linkContent = isBlock ? options.fn(this) : '';
+    
+    // For text links, get the text content
+    const text = options.hash.text || '';
+    
+    let result = '';
+    
+    switch (type) {
+      case 'page': {
+        const pageTitle = options.hash.pageTitle || '';
+        if (!pageTitle) {
+          console.warn('Warning: confluence-link with type="page" missing required "pageTitle" parameter');
+          return '';
+        }
+        
+        result = `<ac:link${tooltip ? ` ac:tooltip="${tooltip}"` : ''}>
+          <ri:page ri:content-title="${pageTitle}" />
+          ${isBlock 
+            ? `<ac:link-body>${linkContent}</ac:link-body>` 
+            : `<ac:plain-text-link-body><![CDATA[${text}]]></ac:plain-text-link-body>`
+          }
+        </ac:link>`;
+        break;
+      }
+      
+      case 'attachment': {
+        const filename = options.hash.filename || '';
+        if (!filename) {
+          console.warn('Warning: confluence-link with type="attachment" missing required "filename" parameter');
+          return '';
+        }
+        
+        result = `<ac:link${tooltip ? ` ac:tooltip="${tooltip}"` : ''}>
+          <ri:attachment ri:filename="${filename}" />
+          ${isBlock 
+            ? `<ac:link-body>${linkContent}</ac:link-body>` 
+            : `<ac:plain-text-link-body><![CDATA[${text}]]></ac:plain-text-link-body>`
+          }
+        </ac:link>`;
+        break;
+      }
+      
+      case 'url': {
+        const url = options.hash.url || '';
+        if (!url) {
+          console.warn('Warning: confluence-link with type="url" missing required "url" parameter');
+          return '';
+        }
+        
+        // External URLs use standard HTML anchor tags
+        result = `<a href="${url}"${tooltip ? ` title="${tooltip}"` : ''}>${text}</a>`;
+        break;
+      }
+      
+      case 'anchor': {
+        const anchor = options.hash.anchor || '';
+        if (!anchor) {
+          console.warn('Warning: confluence-link with type="anchor" missing required "anchor" parameter');
+          return '';
+        }
+        
+        result = `<ac:link ac:anchor="${anchor}"${tooltip ? ` ac:tooltip="${tooltip}"` : ''}>
+          ${isBlock 
+            ? `<ac:link-body>${linkContent}</ac:link-body>` 
+            : `<ac:plain-text-link-body><![CDATA[${text}]]></ac:plain-text-link-body>`
+          }
+        </ac:link>`;
+        break;
+      }
+      
+      case 'pageAnchor': {
+        const pageTitle = options.hash.pageTitle || '';
+        const anchor = options.hash.anchor || '';
+        
+        if (!pageTitle) {
+          console.warn('Warning: confluence-link with type="pageAnchor" missing required "pageTitle" parameter');
+          return '';
+        }
+        
+        if (!anchor) {
+          console.warn('Warning: confluence-link with type="pageAnchor" missing required "anchor" parameter');
+          return '';
+        }
+        
+        result = `<ac:link ac:anchor="${anchor}"${tooltip ? ` ac:tooltip="${tooltip}"` : ''}>
+          <ri:page ri:content-title="${pageTitle}"/>
+          ${isBlock 
+            ? `<ac:link-body>${linkContent}</ac:link-body>` 
+            : `<ac:plain-text-link-body><![CDATA[${text}]]></ac:plain-text-link-body>`
+          }
+        </ac:link>`;
+        break;
+      }
+      
+      default:
+        console.warn(`Warning: Unknown confluence-link type: ${type}`);
+        return '';
+    }
+    
+    return new handlebars.SafeString(result);
+  });
 }

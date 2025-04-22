@@ -115,6 +115,12 @@ publish-confluence fetch [options]
       <td>The output format. Options are <code>storage</code> (default, returns XHTML body) or <code>json</code> (returns the full page JSON object).</td>
       <td>No</td>
     </tr>
+    <tr>
+      <td><code>--output</code> &lt;file&gt;</td>
+      <td><code>-o</code> &lt;file&gt;</td>
+      <td>Save the output to a file instead of stdout. Will create directories if they don't exist.</td>
+      <td>No</td>
+    </tr>
   </tbody>
 </table>
 
@@ -128,6 +134,12 @@ publish-confluence fetch -s ~jsmith -p "My Personal Notes"
 
 # Fetch the full page data as JSON
 publish-confluence fetch -s DOCS -p "API Reference" -f json
+
+# Save the page content to a file
+publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" -o ./output/dashboard.html
+
+# Save JSON content to a file
+publish-confluence fetch -s DOCS -p "API Reference" -f json -o ./output/api-reference.json
 
 # Fetch using verbose logging
 publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" -v

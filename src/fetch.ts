@@ -1,6 +1,8 @@
 // src/fetch.ts
 import { program } from 'commander';
 import { config } from 'dotenv';
+import { promises as fs } from 'fs';
+import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { ConfluenceClient } from './client';
 import { createLogger, setVerbosityLevel, VERBOSITY } from './logger';
@@ -39,6 +41,7 @@ export async function fetchPageContent(options: {
   spaceKey: string;
   pageTitle: string;
   outputFormat?: 'storage' | 'json';
+  outputFile?: string;
   quiet?: boolean;
   verbose?: boolean;
   debug?: boolean;
@@ -56,7 +59,7 @@ export async function fetchPageContent(options: {
       setVerbosityLevel(VERBOSITY.NORMAL);
     }
 
-    const { spaceKey, pageTitle, outputFormat = 'storage', allowSelfSigned = true } = options;
+    const { spaceKey, pageTitle, outputFormat = 'storage', outputFile, allowSelfSigned = true } = options;
 
     // Get authentication credentials
     const { auth, baseUrl } = getAuthCredentials();
@@ -100,18 +103,31 @@ export async function fetchPageContent(options: {
     
     if (pageContent === '') {
       log.verbose(`Page "${pageTitle}" exists but has empty content.`);
-    }    // Output the content in the requested format
-    if (outputFormat === 'json') {
-      // Output the entire page as JSON to stdout (not using log to avoid formatting)
-      process.stdout.write(JSON.stringify(fullPage, null, 2) + '\n');
-      log.debug('Outputting JSON content to stdout');
-    } else {
-      // Output just the storage format content (may be empty) to stdout
-      process.stdout.write(pageContent + '\n');
-      log.debug('Outputting storage format content to stdout');
     }
-
-    log.success(`Successfully fetched page content.`);
+    
+    // Determine content to save based on requested format
+    const contentToSave = outputFormat === 'json' 
+      ? JSON.stringify(fullPage, null, 2)
+      : pageContent;
+    
+    // Handle output - either save to file or output to stdout
+    if (outputFile) {
+      // Create directory if it doesn't exist
+      const dir = dirname(resolve(outputFile));
+      await fs.mkdir(dir, { recursive: true });
+      
+      // Write to file
+      await fs.writeFile(outputFile, contentToSave);
+      
+      // Determine file extension for logging
+      const fileType = outputFormat === 'json' ? 'JSON' : 'HTML';
+      log.success(`Successfully saved ${fileType} content to ${outputFile}`);
+    } else {
+      // Output to stdout as before
+      process.stdout.write(contentToSave + '\n');
+      log.debug(`Outputting ${outputFormat} content to stdout`);
+      log.success(`Successfully fetched page content.`);
+    }
   } catch (error) {
     log.error(`Failed to fetch page content: ${(error as Error).message}`);
     log.debug((error as Error).stack || 'No stack trace available');
@@ -130,6 +146,7 @@ if (isMainModule) {
     .requiredOption('-s, --space-key <key>', 'Confluence space key (required)')
     .requiredOption('-p, --page-title <title>', 'Title of the page to fetch (required)')
     .option('-f, --format <format>', 'Output format: "storage" (default) or "json"', 'storage')
+    .option('-o, --output <file>', 'Save output to a file instead of stdout')
     .option('-q, --quiet', 'Suppress all output except errors', false)
     .option('-v, --verbose', 'Enable verbose output', false)
     .option('-d, --debug', 'Enable debug output (includes verbose)', false)
@@ -150,6 +167,7 @@ if (isMainModule) {
     spaceKey: options.spaceKey,
     pageTitle: options.pageTitle,
     outputFormat: options.format,
+    outputFile: options.output,
     quiet: options.quiet,
     verbose: options.verbose,
     debug: options.debug,

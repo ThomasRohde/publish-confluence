@@ -279,6 +279,60 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 
 <hr />
 
+<h2>Link Macro</h2>
+<p>Creates links to various Confluence entities (pages, attachments, anchors) or external URLs.</p>
+<p><strong>Syntax:</strong></p>
+{{#confluence-code language="handlebars" title="Link Macro Syntax"}}
+<!-- Plain text link -->
+\{{confluence-link type="page" pageTitle="Target Page" text="Link to page" tooltip="Optional tooltip"}}
+
+<!-- Block usage with image or other content -->
+\{{#confluence-link type="page" pageTitle="Target Page"}}
+  \{{confluence-image src="logo.png" width="30"}}
+\{{/confluence-link}}
+{{/confluence-code}}
+<p><strong>Parameters:</strong></p>
+<ul>
+    <li><code>type</code> (String, Required): The type of link to create. Valid types:</li>
+    <ul>
+        <li><code>page</code>: Link to another Confluence page</li>
+        <li><code>attachment</code>: Link to an attachment</li>
+        <li><code>url</code>: Link to an external URL</li>
+        <li><code>anchor</code>: Link to an anchor on the current page</li>
+        <li><code>pageAnchor</code>: Link to an anchor on another page</li>
+    </ul>
+    <li><code>text</code> (String, Required for text links): The text to display for the link.</li>
+    <li><code>pageTitle</code> (String, Required for <code>page</code> and <code>pageAnchor</code> types): The title of the target Confluence page.</li>
+    <li><code>filename</code> (String, Required for <code>attachment</code> type): The filename of the attachment to link to.</li>
+    <li><code>url</code> (String, Required for <code>url</code> type): The URL for external links.</li>
+    <li><code>anchor</code> (String, Required for <code>anchor</code> and <code>pageAnchor</code> types): The anchor name/ID to link to.</li>
+    <li><code>tooltip</code> (String, Optional): Tooltip text that appears when hovering over the link.</li>
+</ul>
+<p><strong>Example Usage:</strong></p>
+{{#confluence-code language="handlebars" title="Link Examples"}}
+<!-- Link to another Confluence page -->
+\{{confluence-link type="page" pageTitle="Getting Started" text="View the Getting Started guide"}}
+
+<!-- Link to an attachment -->
+\{{confluence-link type="attachment" filename="report.pdf" text="Download Report" tooltip="PDF document, 2.3MB"}}
+
+<!-- Link to an external site -->
+\{{confluence-link type="url" url="https://example.com" text="Visit Example Website"}}
+
+<!-- Anchor link (same page) -->
+\{{confluence-link type="anchor" anchor="configuration-section" text="Jump to Configuration"}}
+
+<!-- Anchor link (another page) -->
+\{{confluence-link type="pageAnchor" pageTitle="API Reference" anchor="authentication" text="View Authentication API"}}
+
+<!-- Link with an embedded image for the body -->
+\{{#confluence-link type="page" pageTitle="Dashboard"}}
+  \{{confluence-image src="dashboard-icon.png" width="24" height="24"}}
+\{{/confluence-link}}
+{{/confluence-code}}
+
+<hr />
+
 <h2>Other Helpers</h2>
 
 <h3>Divider</h3>

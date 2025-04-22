@@ -171,10 +171,12 @@ program
   .requiredOption('-s, --space-key <key>', 'Confluence space key (required)')
   .requiredOption('-p, --page-title <title>', 'Title of the page to fetch (required)')
   .option('-f, --format <format>', 'Output format: "storage" (default) or "json"', 'storage')
+  .option('-o, --output <file>', 'Save output to a file instead of stdout')
   .action((cmdOptions) => {
     // Merge command options with global options
     const options = { ...program.opts(), ...cmdOptions };
-      // Set verbosity level based on options
+    
+    // Set verbosity level based on options
     if (options.quiet) {
       verbosity = VERBOSITY.QUIET;
     } else if (options.debug) {
@@ -196,6 +198,7 @@ program
       spaceKey: options.spaceKey,
       pageTitle: options.pageTitle,
       outputFormat: options.format,
+      outputFile: options.output,
       quiet: options.quiet,
       verbose: options.verbose,
       debug: options.debug,
