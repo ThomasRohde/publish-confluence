@@ -236,22 +236,22 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
    *   <p>This is an informational note.</p>
    * {{/confluence-info}}
    * 
-   * {{#confluence-info title="Dev Comment" commentFlag=true}}
+   * {{#confluence-info title="Dev Comment" comment=true}}
    *   <p>This will only be visible when running with --comment flag.</p>
    * {{/confluence-info}}
    * ```
    * 
    * @param title - Title of the info box
-   * @param commentFlag - If true, content only appears when --comment flag is used
+   * @param comment - If true, content only appears when --comment flag is used
    */
   handlebars.registerHelper('confluence-info', function(this: any, helperOptions: Handlebars.HelperOptions) {
     const macroId = generateUuid();
     const content = helperOptions.fn(this);
     const title = helperOptions.hash.title || '';
-    const commentFlag = helperOptions.hash.commentFlag === true;
+    const comment = helperOptions.hash.comment === true;
     
     // Skip output if this is a comment macro and the --comment flag is not enabled
-    if (commentFlag && (!options || !options.comment)) {
+    if (comment && (!options || !options.comment)) {
       return '';
     }
     
