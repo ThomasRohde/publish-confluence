@@ -182,15 +182,13 @@ Embeds HTML content, typically used for JavaScript applications:
 
 ### Panel Macro
 
-Creates a Confluence panel with customizable title and type:
+Creates a Confluence panel with customizable appearance:
 
 ```handlebars
-{{#confluence-panel title="Important Information" type="note"}}
+{{#confluence-panel title="Important Information" borderStyle="solid" borderColor="#cccccc" borderWidth="1" bgColor="#f5f5f5" titleBGColor="#e0e0e0" titleColor="#000000" comment=true}}
   <p>This panel contains important information that users should be aware of.</p>
 {{/confluence-panel}}
 ```
-
-Panel types: `note`, `info`, `warning`, `success`, `error`
 
 ### Layout Macros
 
