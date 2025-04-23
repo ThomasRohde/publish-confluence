@@ -44,12 +44,13 @@ Your primary goal is to generate valid HTML files (\`.html\`) that serve as temp
     *   \`{{#confluence-code language="javascript|css|html|etc" title="Optional Title" linenumbers=true|false}} ... {{/confluence-code}}\`: Creates a code block. Content inside is treated as plain text but should be wrapped in \`CDATA\`.
     *   \`{{confluence-toc minLevel=1 maxLevel=6}}\`: Generates a Table of Contents macro.
     *   \`{{confluence-status type="green|yellow|red|blue" text="Status Text"}}\`: Creates a status lozenge.
-    *   \`{{#confluence-info title="Optional Title"}} ... {{/confluence-info}}\`: Info admonition panel.
-    *   \`{{#confluence-note title="Optional Title"}} ... {{/confluence-note}}\`: Note admonition panel.
-    *   \`{{#confluence-warning title="Optional Title"}} ... {{/confluence-warning}}\`: Warning admonition panel.
-    *   \`{{#confluence-tip title="Optional Title"}} ... {{/confluence-tip}}\`: Tip admonition panel.
+    *   \`{{#confluence-info title="Optional Title" comment=true|false}} ... {{/confluence-info}}\`: Info admonition panel. When \`comment=true\`, content only appears when the \`--comment\` flag is used in the CLI.
+    *   \`{{#confluence-note title="Optional Title" comment=true|false}} ... {{/confluence-note}}\`: Note admonition panel. When \`comment=true\`, content only appears when the \`--comment\` flag is used in the CLI.
+    *   \`{{#confluence-warning title="Optional Title" comment=true|false}} ... {{/confluence-warning}}\`: Warning admonition panel. When \`comment=true\`, content only appears when the \`--comment\` flag is used in the CLI.
+    *   \`{{#confluence-tip title="Optional Title" comment=true|false}} ... {{/confluence-tip}}\`: Tip admonition panel. When \`comment=true\`, content only appears when the \`--comment\` flag is used in the CLI.
     *   \`{{#confluence-expand title="Expand Title"}} ... {{/confluence-expand}}\`: Creates expandable content. Content inside must be valid XHTML.
     *   \`{{confluence-image src="filename.png" alt="Alt text" width="300" height="200" align="center" border=true thumbnail=true title="Tooltip text" class="custom-class" style="custom-style"}}\`: Embeds an image. The \`src\` can be a filename for attached images or a full URL for external images.
+    *   \`{{confluence-include file="path/to/include-file.html"}}\`: Includes content from another file. The included file will be processed with Handlebars but cannot contain recursive \`confluence-include\` calls.
     *   \`{{confluence-children}}\`: Displays a list of child pages.
     *   \`{{confluence-divider}}\`: Inserts a horizontal rule (\`<hr />\`).
     *   \`{{confluence-date date="YYYY-MM-DD" format="Optional Format"}}\`: Displays a formatted date.
@@ -75,6 +76,7 @@ When I request a template, I will provide:
 2.  **Content Description:** A description of the desired structure, text content, and layout for the Confluence page or HTML macro.
 3.  **Macros to Use:** Which specific \`publish-confluence\` macro helpers (from the list above) should be included, along with any necessary parameters (like titles, types, languages).
 4.  **Variable Placement:** Where standard variables like \`{{pageTitle}}\`, \`{{{macro}}}\`, \`{{{scripts}}}\`, \`{{{styles}}}\` should be placed, if applicable.
+5.  **Developer Documentation:** Whether to include developer-specific content using the \`comment=true\` parameter in admonition macros.
 
 ## Output Requirements
 
@@ -105,14 +107,16 @@ You will translate my description of desired Confluence page content into a vali
 *   **Strictly adhere** to the provided list of macro helpers and variables. Do not invent new ones.
 *   Ensure **all generated HTML/XHTML is well-formed** and valid according to XHTML rules relevant to Confluence Storage Format.
 *   Use **triple braces \`{{{ }}}\`** ONLY for \`macro\`, \`scripts\`, and \`styles\` variables to prevent HTML escaping. Use double braces \`{{ }}\` for all other variables like \`pageTitle\` and \`currentDate\`.
-*   Use the block form (\`{{#helper}}...{{/helper}}\`) for helpers that contain content (e.g., \`confluence-panel\`, \`layout-cell\`, \`confluence-code\`, \`confluence-expand\`) and the inline form (\`{{helper ...}}\`) for self-contained helpers (e.g., \`confluence-toc\`, \`confluence-status\`).
+*   Use the block form (\`{{#helper}}...{{/helper}}\`) for helpers that contain content (e.g., \`confluence-panel\`, \`layout-cell\`, \`confluence-code\`, \`confluence-expand\`) and the inline form (\`{{helper ...}}\`) for self-contained helpers (e.g., \`{{confluence-toc\`, \`confluence-status\`).
 *   Parameter values for helpers must be correctly quoted (e.g., \`title="My Title"\`, \`type="info"\`). Boolean parameters might not need quotes (e.g., \`linenumbers=true\`).
 *   Content inside block helpers must itself be valid Confluence Storage Format XHTML or appropriately wrapped (e.g., in \`CDATA\` for code blocks).
 *   Respect the required structure for layout macros: \`{{#confluence-layout}}\` must contain \`{{#layout-section}}\`, which must contain \`{{#layout-cell}}\`.
+*   When using \`{{confluence-include}}\`, ensure the referenced file exists and does not contain recursive includes.
+*   For developer-specific content, use the \`comment=true\` parameter in admonition macros (\`confluence-info\`, \`confluence-note\`, \`confluence-warning\`, \`confluence-tip\`).
 
 ## Example Scenario
 
-If I ask for: "Create a **Page Template** that shows the page title, then a two-column layout. The left column should have an info panel titled 'About' with the text 'This is the app.'. The right column should contain the main application macro \`{{{macro}}}\`. Finally, add a horizontal rule and the last updated date."
+If I ask for: "Create a **Page Template** that shows the page title, then a two-column layout. The left column should have an info panel titled 'About' with the text 'This is the app.'. The right column should contain the main application macro \`{{{macro}}}\`. Add a developer note that will only appear with the --comment flag. Finally, add a horizontal rule and the last updated date."
 
 You should generate an HTML file containing something like:
 
@@ -131,6 +135,10 @@ You should generate an HTML file containing something like:
     {{/layout-cell}}
   {{/layout-section}}
 {{/confluence-layout}}
+
+{{#confluence-note title="Developer Note" comment=true}}
+  <p>This note will only be visible when using the --comment flag.</p>
+{{/confluence-note}}
 
 <hr />
 <p><em>Last updated: {{currentDate}}</em></p>

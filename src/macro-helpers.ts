@@ -1,5 +1,7 @@
 // src/macro-helpers.ts
+import fs from 'fs';
 import Handlebars from 'handlebars';
+import path from 'path';
 import { generateUuid } from './utils';
 
 /**
@@ -271,14 +273,25 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
    * {{#confluence-note title="Note"}}
    *   <p>This is a standard note.</p>
    * {{/confluence-note}}
+   * 
+   * {{#confluence-note title="Dev Note" comment=true}}
+   *   <p>This will only be visible when running with --comment flag.</p>
+   * {{/confluence-note}}
    * ```
    * 
    * @param title - Title of the note box
+   * @param comment - If true, content only appears when --comment flag is used
    */
-  handlebars.registerHelper('confluence-note', function(this: any, options: Handlebars.HelperOptions) {
+  handlebars.registerHelper('confluence-note', function(this: any, helperOptions: Handlebars.HelperOptions) {
     const macroId = generateUuid();
-    const content = options.fn(this);
-    const title = options.hash.title || '';
+    const content = helperOptions.fn(this);
+    const title = helperOptions.hash.title || '';
+    const comment = helperOptions.hash.comment === true;
+    
+    // Skip output if this is a comment macro and the --comment flag is not enabled
+    if (comment && (!options || !options.comment)) {
+      return '';
+    }
     
     return new handlebars.SafeString(
       `<ac:structured-macro ac:name="note" ac:schema-version="1" ac:macro-id="${macroId}">
@@ -296,14 +309,25 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
    * {{#confluence-warning title="Warning"}}
    *   <p>This is a warning message.</p>
    * {{/confluence-warning}}
+   * 
+   * {{#confluence-warning title="Dev Warning" comment=true}}
+   *   <p>This will only be visible when running with --comment flag.</p>
+   * {{/confluence-warning}}
    * ```
    * 
    * @param title - Title of the warning box
+   * @param comment - If true, content only appears when --comment flag is used
    */
-  handlebars.registerHelper('confluence-warning', function(this: any, options: Handlebars.HelperOptions) {
+  handlebars.registerHelper('confluence-warning', function(this: any, helperOptions: Handlebars.HelperOptions) {
     const macroId = generateUuid();
-    const content = options.fn(this);
-    const title = options.hash.title || '';
+    const content = helperOptions.fn(this);
+    const title = helperOptions.hash.title || '';
+    const comment = helperOptions.hash.comment === true;
+    
+    // Skip output if this is a comment macro and the --comment flag is not enabled
+    if (comment && (!options || !options.comment)) {
+      return '';
+    }
     
     return new handlebars.SafeString(
       `<ac:structured-macro ac:name="warning" ac:schema-version="1" ac:macro-id="${macroId}">
@@ -321,14 +345,25 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
    * {{#confluence-tip title="Tip"}}
    *   <p>This is a helpful tip.</p>
    * {{/confluence-tip}}
+   * 
+   * {{#confluence-tip title="Dev Tip" comment=true}}
+   *   <p>This will only be visible when running with --comment flag.</p>
+   * {{/confluence-tip}}
    * ```
    * 
    * @param title - Title of the tip box
+   * @param comment - If true, content only appears when --comment flag is used
    */
-  handlebars.registerHelper('confluence-tip', function(this: any, options: Handlebars.HelperOptions) {
+  handlebars.registerHelper('confluence-tip', function(this: any, helperOptions: Handlebars.HelperOptions) {
     const macroId = generateUuid();
-    const content = options.fn(this);
-    const title = options.hash.title || '';
+    const content = helperOptions.fn(this);
+    const title = helperOptions.hash.title || '';
+    const comment = helperOptions.hash.comment === true;
+    
+    // Skip output if this is a comment macro and the --comment flag is not enabled
+    if (comment && (!options || !options.comment)) {
+      return '';
+    }
     
     return new handlebars.SafeString(
       `<ac:structured-macro ac:name="tip" ac:schema-version="1" ac:macro-id="${macroId}">
@@ -577,5 +612,86 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
     }
     
     return new handlebars.SafeString(result);
+  });
+
+  /**
+   * Date macro - Displays a formatted date using the Confluence Date macro
+   * 
+   * Usage:
+   * ```handlebars
+   * {{confluence-date date="2024-03-15" format="dd MMM yyyy"}}
+   * ```
+   * 
+   * @param date - The date in YYYY-MM-DD format
+   * @param format - Optional date format string (e.g., "MMM dd, yyyy")
+   */
+  handlebars.registerHelper('confluence-date', function(this: any, options: Handlebars.HelperOptions) {
+    const macroId = generateUuid();
+    const date = options.hash.date;
+    const format = options.hash.format || '';
+    
+    // Ensure date parameter is provided
+    if (!date) {
+      console.warn('Warning: confluence-date helper called without required "date" parameter');
+      return '';
+    }
+    
+    return new handlebars.SafeString(
+      `<time datetime="${date}" />`
+    );
+  });
+
+  /**
+   * Include macro - Includes content from another file
+   * 
+   * Usage:
+   * ```handlebars
+   * {{confluence-include file="path/to/include-file.html"}}
+   * ```
+   * 
+   * This helper allows you to include content from other files in your templates.
+   * The content of the included file will be processed with Handlebars to handle any variables,
+   * but cannot contain recursive {{confluence-include}} calls.
+   * 
+   * @param file - Path to the file to include, relative to the current working directory
+   */
+  handlebars.registerHelper('confluence-include', function(this: any, helperOptions: Handlebars.HelperOptions) {
+    const filePath = helperOptions.hash.file;
+    
+    // Ensure file parameter is provided
+    if (!filePath) {
+      console.warn('Warning: confluence-include helper called without required "file" parameter');
+      return '';
+    }
+    
+    // Resolve the file path relative to the current working directory
+    const resolvedPath = path.resolve(process.cwd(), filePath);
+    
+    try {
+      // Check if the file exists
+      if (!fs.existsSync(resolvedPath)) {
+        console.warn(`Warning: File not found for confluence-include: ${filePath}`);
+        return '';
+      }
+      
+      // Read the file content
+      const fileContent = fs.readFileSync(resolvedPath, 'utf8');
+      
+      // Check for recursive includes (not allowed)
+      if (fileContent.includes('{{confluence-include') || fileContent.includes('{{#confluence-include')) {
+        console.warn(`Warning: Recursive includes not allowed in: ${filePath}`);
+        return '';
+      }
+      
+      // Compile the content with Handlebars to handle any variables
+      const template = handlebars.compile(fileContent);
+      const processedContent = template(this);
+      
+      // Return the processed content as a SafeString
+      return new handlebars.SafeString(processedContent);
+    } catch (error) {
+      console.error(`Error processing confluence-include for file ${filePath}:`, error);
+      return '';
+    }
   });
 }
