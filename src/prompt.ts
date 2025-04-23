@@ -37,7 +37,7 @@ Your primary goal is to generate valid HTML files (\`.html\`) that serve as temp
 
 3.  **\`publish-confluence\` Macro Helpers (Handlebars Helpers):** These helpers generate Confluence Storage Format XML for various macros. They can be used in the *Page Template*.
     *   \`{{#confluence-html}} ... {{/confluence-html}}\`: Generates the \`<ac:structured-macro ac:name="html">...</ac:structured-macro>\` block. Typically used in the *Macro Template* or directly in the *Page Template* if \`macroTemplatePath\` is null. The content inside should include the app's root element and \`{{{styles}}}\`, \`{{{scripts}}}\`.
-    *   \`{{#confluence-panel title="Panel Title" type="note|info|warning|success|error"}} ... {{/confluence-panel}}\`: Creates a Confluence panel. Content inside must be valid XHTML.
+    *   \`{{#confluence-panel title="Panel Title" borderStyle="solid" borderColor="#cccccc" borderWidth="1" bgColor="#f5f5f5" titleBGColor="#e0e0e0" titleColor="#000000" comment=true}} ... {{/confluence-panel}}\`: Creates a Confluence panel. Content inside must be valid XHTML.
     *   \`{{#confluence-layout}} ... {{/confluence-layout}}\`: Wrapper for layout sections.
     *   \`{{#layout-section type="single|two_equal|two_left_sidebar|two_right_sidebar|three_equal|three_with_sidebars"}} ... {{/layout-section}}\`: Defines a layout row. Must contain \`layout-cell\` helpers.
     *   \`{{#layout-cell}} ... {{/layout-cell}}\`: Defines a column within a \`layout-section\`. Content inside must be valid XHTML block elements (e.g., \`<p>\`, other macros).
@@ -107,7 +107,7 @@ You will translate my description of desired Confluence page content into a vali
 *   **Strictly adhere** to the provided list of macro helpers and variables. Do not invent new ones.
 *   Ensure **all generated HTML/XHTML is well-formed** and valid according to XHTML rules relevant to Confluence Storage Format.
 *   Use **triple braces \`{{{ }}}\`** ONLY for \`macro\`, \`scripts\`, and \`styles\` variables to prevent HTML escaping. Use double braces \`{{ }}\` for all other variables like \`pageTitle\` and \`currentDate\`.
-*   Use the block form (\`{{#helper}}...{{/helper}}\`) for helpers that contain content (e.g., \`confluence-panel\`, \`layout-cell\`, \`confluence-code\`, \`confluence-expand\`) and the inline form (\`{{helper ...}}\`) for self-contained helpers (e.g., \`{{confluence-toc\`, \`confluence-status\`).
+*   Use the block form (\`{{#helper}}...{{/helper}}\`) for helpers that contain content (e.g., \`confluence-panel\`, \`layout-cell\`, \`confluence-code\`, \`confluence-expand\`) and the inline form (\`{{helper ...}}\`) for self-contained helpers (e.g., \`{{confluence-toc\`, \`{{confluence-status\`).
 *   Parameter values for helpers must be correctly quoted (e.g., \`title="My Title"\`, \`type="info"\`). Boolean parameters might not need quotes (e.g., \`linenumbers=true\`).
 *   Content inside block helpers must itself be valid Confluence Storage Format XHTML or appropriately wrapped (e.g., in \`CDATA\` for code blocks).
 *   Respect the required structure for layout macros: \`{{#confluence-layout}}\` must contain \`{{#layout-section}}\`, which must contain \`{{#layout-cell}}\`.

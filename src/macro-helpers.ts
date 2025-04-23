@@ -75,24 +75,52 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
    * 
    * Usage:
    * ```handlebars
-   * {{#confluence-panel title="Important Information" type="note"}}
+   * {{#confluence-panel title="Important Information"}}
    *   <p>This panel contains important information.</p>
+   * {{/confluence-panel}}
+   * 
+   * {{#confluence-panel title="Developer Notes" borderStyle="dashed" borderColor="#FF0000" borderWidth="2" bgColor="#F5F5F5" titleBGColor="#E0E0E0" titleColor="#000000" comment=true}}
+   *   <p>This panel will only be visible when running with the --comment flag.</p>
    * {{/confluence-panel}}
    * ```
    * 
    * @param title - Title of the panel
-   * @param type - Panel type (note, info, warning, success, error)
+   * @param borderStyle - Style of the panel's border (solid, dashed, etc.)
+   * @param borderColor - Color of the panel's border (HTML color name or hex code)
+   * @param borderWidth - Width of the panel's border in pixels (value only)
+   * @param bgColor - Background color of the panel (HTML color name or hex code)
+   * @param titleBGColor - Background color of the title row (HTML color name or hex code)
+   * @param titleColor - Text color of the title row (HTML color name or hex code)
+   * @param comment - If true, content only appears when --comment flag is used
    */
-  handlebars.registerHelper('confluence-panel', function(this: any, options: Handlebars.HelperOptions) {
+  handlebars.registerHelper('confluence-panel', function(this: any, helperOptions: Handlebars.HelperOptions) {
     const macroId = generateUuid();
-    const content = options.fn(this);
-    const title = options.hash.title || '';
-    const type = options.hash.type || 'info';
+    const content = helperOptions.fn(this);
+    const title = helperOptions.hash.title || '';
+    const comment = helperOptions.hash.comment === true;
+    
+    // Skip output if this is a comment macro and the --comment flag is not enabled
+    if (comment && (!options || !options.comment)) {
+      return '';
+    }
+    
+    // Additional style parameters
+    const borderStyle = helperOptions.hash.borderStyle || '';
+    const borderColor = helperOptions.hash.borderColor || '';
+    const borderWidth = helperOptions.hash.borderWidth || '';
+    const bgColor = helperOptions.hash.bgColor || '';
+    const titleBGColor = helperOptions.hash.titleBGColor || '';
+    const titleColor = helperOptions.hash.titleColor || '';
     
     return new handlebars.SafeString(
       `<ac:structured-macro ac:name="panel" ac:schema-version="1" ac:macro-id="${macroId}">
         <ac:parameter ac:name="title">${title}</ac:parameter>
-        <ac:parameter ac:name="panelType">${type}</ac:parameter>
+        ${borderStyle ? `<ac:parameter ac:name="borderStyle">${borderStyle}</ac:parameter>` : ''}
+        ${borderColor ? `<ac:parameter ac:name="borderColor">${borderColor}</ac:parameter>` : ''}
+        ${borderWidth ? `<ac:parameter ac:name="borderWidth">${borderWidth}</ac:parameter>` : ''}
+        ${bgColor ? `<ac:parameter ac:name="bgColor">${bgColor}</ac:parameter>` : ''}
+        ${titleBGColor ? `<ac:parameter ac:name="titleBGColor">${titleBGColor}</ac:parameter>` : ''}
+        ${titleColor ? `<ac:parameter ac:name="titleColor">${titleColor}</ac:parameter>` : ''}
         <ac:rich-text-body>${content}</ac:rich-text-body>
       </ac:structured-macro>`
     );

@@ -29,7 +29,7 @@
 <p>Creates a standard Confluence panel to highlight information.</p>
 <p><strong>Syntax:</strong></p>
 {{#confluence-code language="handlebars" title="Panel Macro Syntax"}}
-\{{#confluence-panel title="Optional Panel Title" type="panel-type"}}
+\{{#confluence-panel title="Optional Panel Title" borderStyle="solid" borderColor="#cccccc" borderWidth="1" bgColor="#f5f5f5" titleBGColor="#e0e0e0" titleColor="#000000" comment=true}}
   <p>Panel content goes here (must be valid XHTML).</p>
   <ul>
     <li>Like lists</li>
@@ -39,16 +39,22 @@
 <p><strong>Parameters:</strong></p>
 <ul>
     <li><code>title</code> (String, Optional): The title displayed in the panel header.</li>
-    <li><code>type</code> (String, Required): The style of the panel. Valid types: <code>note</code>, <code>info</code>, <code>warning</code>, <code>success</code>, <code>error</code>.</li>
+    <li><code>borderStyle</code> (String, Optional): The style of the panel's border (solid, dashed, etc.). Defaults to "solid".</li>
+    <li><code>borderColor</code> (String, Optional): The color of the panel's border. Can be HTML color name or hex code.</li>
+    <li><code>borderWidth</code> (String, Optional): The width of the panel's border in pixels (value only).</li>
+    <li><code>bgColor</code> (String, Optional): The background color of the panel. Can be HTML color name or hex code.</li>
+    <li><code>titleBGColor</code> (String, Optional): The background color of the title row. Can be HTML color name or hex code.</li>
+    <li><code>titleColor</code> (String, Optional): The color of the text in the title row. Can be HTML color name or hex code.</li>
+    <li><code>comment</code> (Boolean, Optional): If true, the panel will only be visible when using the --comment flag.</li>
 </ul>
 <p><strong>Example Usage:</strong></p>
 {{#confluence-code language="handlebars" title="Panel Macro Example"}}
-\{{#confluence-panel title="Important Update" type="info"}}
+\{{#confluence-panel title="Important Update"}}
   <p>Please review the latest project guidelines.</p>
 \{{/confluence-panel}}
 
-\{{#confluence-panel type="warning"}}
-  <p><strong>Caution:</strong> This feature is deprecated.</p>
+\{{#confluence-panel title="Developer Notes" borderStyle="dashed" borderColor="#FF0000" borderWidth="2" bgColor="#F5F5F5" titleBGColor="#E0E0E0" titleColor="#000000" comment=true}}
+  <p>This panel will only be visible when running with the --comment flag.</p>
 \{{/confluence-panel}}
 {{/confluence-code}}
 
