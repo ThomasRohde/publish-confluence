@@ -213,7 +213,7 @@ program
 // Generate prompt command
 program
   .command('generate-prompt')
-  .description('Generate a project prompt for LLM assistance and copy it to clipboard')
+  .description('Generate a project prompt for LLM assistance')
   .option('-f, --file <filepath>', 'Read project idea from a file')
   .action((cmdOptions) => {
     // Merge command options with global options
