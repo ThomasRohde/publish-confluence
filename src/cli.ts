@@ -99,7 +99,7 @@ async function generatePromptCommand(): Promise<void> {
 program
   .name('publish-confluence')
   .description('Publish JavaScript builds and HTML content to Confluence')
-  .version('1.0.5'); 
+  .version('1.0.7'); 
 
 // Default options for all commands
 program

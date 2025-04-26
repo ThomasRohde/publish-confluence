@@ -51,7 +51,7 @@ Your primary goal is to generate valid HTML files (\`.html\`) that serve as temp
     *   \`{{#confluence-expand title="Expand Title"}} ... {{/confluence-expand}}\`: Creates expandable content. Content inside must be valid XHTML.
     *   \`{{confluence-image src="filename.png" alt="Alt text" width="300" height="200" align="center" border=true thumbnail=true title="Tooltip text" class="custom-class" style="custom-style"}}\`: Embeds an image. The \`src\` can be a filename for attached images or a full URL for external images.
     *   \`{{confluence-include file="path/to/include-file.html"}}\`: Includes content from another file. The included file will be processed with Handlebars but cannot contain recursive \`confluence-include\` calls.
-*   `{{confluence-link type="page|attachment|url|anchor|pageAnchor" text="Link text" [pageTitle] [filename] [url] [anchor] [tooltip]}}`: Creates links to Confluence pages, attachments, external URLs, or anchors. Supports inline text or block form for custom content (e.g., images or rich elements).
+    *   \`{{confluence-link type="page|attachment|url|anchor|pageAnchor" text="Link text" [pageTitle] [filename] [url] [anchor] [tooltip]}}\`: Creates links to Confluence pages, attachments, external URLs, or anchors. Supports inline text or block form for custom content (e.g., images or rich elements).
     *   \`{{confluence-children}}\`: Displays a list of child pages.
     *   \`{{confluence-divider}}\`: Inserts a horizontal rule (\`<hr />\`).
     *   \`{{confluence-date date="YYYY-MM-DD" format="Optional Format"}}\`: Displays a formatted date.
