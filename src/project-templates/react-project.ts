@@ -1,20 +1,20 @@
-// src/project-templates/react-preact-project.ts
+// src/project-templates/react-project.ts
 import fs from 'fs/promises';
 import path from 'path';
 import { Logger, ProjectTemplate } from './project-template-interface';
 
 /**
- * React/Preact project template implementation
+ * React project template implementation
  */
-export class ReactPreactProject implements ProjectTemplate {
+export class ReactProject implements ProjectTemplate {
   constructor(private log: Logger) {}
 
   getName(): string {
-    return 'React/Preact Application';
+    return 'React Application';
   }
 
   getDescription(): string {
-    return 'Modern component-based UI';
+    return 'Modern component-based UI with React';
   }
 
   getIncludedFiles(): string[] {
@@ -37,7 +37,7 @@ export class ReactPreactProject implements ProjectTemplate {
     return {
       name: projectName,
       version: "1.0.0",
-      description: "A React/Preact application for Confluence using publish-confluence",
+      description: "A React application for Confluence using publish-confluence",
       main: "src/index.jsx",
       scripts: {
         "dev": "vite",
@@ -46,12 +46,13 @@ export class ReactPreactProject implements ProjectTemplate {
         "publish": "npm run build ; publish-confluence"
       },
       dependencies: {
-        "preact": "^10.18.0"
+        "react": "latest",
+        "react-dom": "latest"
       },
       devDependencies: {
-        "@preact/preset-vite": "^2.5.0",
-        "vite": "^4.5.0",
-        "terser": "^5.39.0",
+        "@vitejs/plugin-react": "latest",
+        "vite": "latest",
+        "terser": "latest",
         "publish-confluence": "file:../../"
       }
     };
@@ -103,25 +104,30 @@ export class ReactPreactProject implements ProjectTemplate {
       // Create index.jsx
       await fs.writeFile(
         path.join(srcDir, 'index.jsx'),
-        `import { render } from 'preact';
+        `import React from 'react';
+import ReactDOM from 'react-dom/client';
 import './styles.css';
 import App from './components/App';
 
-render(<App />, document.getElementById('root'));`,
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);`,
         'utf8'
       );
       
       // Create App.jsx component
       await fs.writeFile(
         path.join(srcDir, 'components', 'App.jsx'),
-        `import { useState } from 'preact/hooks';
+        `import React, { useState } from 'react';
 
 export default function App() {
   const [count, setCount] = useState(0);
   
   return (
     <div className="app">
-      <h1>Hello from Preact!</h1>
+      <h1>Hello from React!</h1>
       <p>This app is published to Confluence using publish-confluence</p>
       
       <div className="card">
@@ -164,9 +170,9 @@ button:hover {
         'utf8'
       );
       
-      this.log.success(`Created React/Preact source files in ${srcDir}`);
+      this.log.success(`Created React source files in ${srcDir}`);
     } catch (error) {
-      this.log.error(`Failed to create React/Preact source files: ${(error as Error).message}`);
+      this.log.error(`Failed to create React source files: ${(error as Error).message}`);
       throw error;
     }
   }
@@ -177,10 +183,10 @@ button:hover {
       await fs.writeFile(
         path.resolve(projectDir, 'vite.config.js'),
         `import { defineConfig } from 'vite';
-import preact from '@preact/preset-vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [preact()],
+  plugins: [react()],
   build: {
     minify: 'terser',
     terserOptions: {

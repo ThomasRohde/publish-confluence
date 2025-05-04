@@ -19,8 +19,8 @@ export const PROJECT_TYPE_CHOICES: ProjectTypeChoice[] = [
   },
   {
     id: 2,
-    name: 'React/Preact Application',
-    description: 'Modern component-based UI'
+    name: 'React Application',
+    description: 'Modern component-based UI with React'
   },
   {
     id: 3,
@@ -36,5 +36,10 @@ export const PROJECT_TYPE_CHOICES: ProjectTypeChoice[] = [
     id: 5,
     name: 'Documentation Project',
     description: 'Pure documentation pages (no JavaScript)'
+  },
+  {
+    id: 6,
+    name: 'Confluence Embeddable Application Scaffold',
+    description: 'TypeScript application that can be embedded in Confluence as an HTML macro'
   }
 ];
