@@ -99,7 +99,7 @@ async function generatePromptCommand(): Promise<void> {
 program
   .name('publish-confluence')
   .description('Publish JavaScript builds and HTML content to Confluence')
-  .version('1.0.5'); 
+  .version('1.0.7'); 
 
 // Default options for all commands
 program
@@ -213,7 +213,7 @@ program
 // Generate prompt command
 program
   .command('generate-prompt')
-  .description('Generate a project prompt for LLM assistance and copy it to clipboard')
+  .description('Generate a project prompt for LLM assistance')
   .option('-f, --file <filepath>', 'Read project idea from a file')
   .action((cmdOptions) => {
     // Merge command options with global options

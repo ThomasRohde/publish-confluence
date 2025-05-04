@@ -1,0 +1,316 @@
+# publish-confluence Handlebars Macros for Confluence XHTML Generation
+
+This document provides context for an LLM to generate Confluence XHTML using the Handlebars macros provided by the `publish-confluence` tool.
+
+## Core Concepts
+
+*   **Confluence Storage Format:** Macros generate XML-based Confluence Storage Format (XHTML).
+*   **Handlebars:** Macros are implemented as Handlebars helpers. Block helpers use `#` (e.g., `{{#confluence-panel}}...{{/confluence-panel}}`), inline helpers don't (e.g., `{{confluence-status}}`).
+*   **Parameters:** Helpers accept parameters via hash arguments (e.g., `title="My Title"`).
+*   **Content:** Block helpers process the content between their opening and closing tags.
+*   **UUIDs:** Most macros automatically generate unique `ac:macro-id` attributes.
+*   **CDATA:** Plain text content within macros is often wrapped in `<![CDATA[...]]>`. Rich text content uses `<ac:rich-text-body>`.
+*   **Comments:** Some macros support a `comment=true` parameter. Their output is skipped unless the `publish-confluence` tool is run with the `--comment` flag.
+
+## Available Macros
+
+### 1. `confluence-html` (Block Helper)
+
+*   **Purpose:** Embeds raw HTML content, typically used for JavaScript applications. Essential for including `{{{scripts}}}` and `{{{styles}}}` placeholders which are replaced by the tool with `<script>` and `<link>` tags for attached assets.
+*   **XHTML Structure:**
+    ```xml
+    <ac:structured-macro ac:name="html" ac:schema-version="1" ac:macro-id="[uuid]">
+      <ac:plain-text-body><![CDATA[...HTML content...]]></ac:plain-text-body>
+    </ac:structured-macro>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{#confluence-html}}
+      <div id="app"></div>
+      {{{styles}}}  <!-- Placeholder for CSS links -->
+      {{{scripts}}} <!-- Placeholder for JS scripts -->
+    {{/confluence-html}}
+    ```
+
+### 2. `confluence-panel` (Block Helper)
+
+*   **Purpose:** Creates a styled panel with an optional title and customizable appearance.
+*   **Parameters:**
+    *   `title` (String): Panel title.
+    *   `borderStyle` (String): CSS border style (e.g., "solid", "dashed").
+    *   `borderColor` (String): CSS color name or hex code.
+    *   `borderWidth` (String): Border width in pixels (e.g., "1").
+    *   `bgColor` (String): CSS color name or hex code for panel background.
+    *   `titleBGColor` (String): CSS color name or hex code for title background.
+    *   `titleColor` (String): CSS color name or hex code for title text.
+    *   `comment` (Boolean): If true, only renders when `--comment` flag is used.
+*   **XHTML Structure:**
+    ```xml
+    <ac:structured-macro ac:name="panel" ac:schema-version="1" ac:macro-id="[uuid]">
+      <ac:parameter ac:name="title">[title]</ac:parameter>
+      <!-- Optional style parameters -->
+      <ac:rich-text-body>...Panel content...</ac:rich-text-body>
+    </ac:structured-macro>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{#confluence-panel title="Important Info" bgColor="#f0f0f0"}}
+      <p>This is the panel content.</p>
+    {{/confluence-panel}}
+    ```
+
+### 3. Layout Macros (`confluence-layout`, `layout-section`, `layout-cell`) (Block Helpers)
+
+*   **Purpose:** Creates multi-column page layouts.
+*   **Structure:** `confluence-layout` > `layout-section` > `layout-cell`.
+*   **`layout-section` Parameters:**
+    *   `type` (String): Column layout type. Options: `single`, `two_equal`, `two_left_sidebar`, `two_right_sidebar`, `three_equal`. Default: `single`.
+*   **XHTML Structure:**
+    ```xml
+    <ac:layout>
+      <ac:layout-section ac:type="[type]">
+        <ac:layout-cell>...Cell 1 content...</ac:layout-cell>
+        <ac:layout-cell>...Cell 2 content...</ac:layout-cell>
+        <!-- More cells depending on type -->
+      </ac:layout-section>
+      <!-- More sections -->
+    </ac:layout>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{#confluence-layout}}
+      {{#layout-section type="two_equal"}}
+        {{#layout-cell}} Left Column {{/layout-cell}}
+        {{#layout-cell}} Right Column {{/layout-cell}}
+      {{/layout-section}}
+    {{/confluence-layout}}
+    ```
+
+### 4. `confluence-code` (Block Helper)
+
+*   **Purpose:** Displays a block of code with syntax highlighting.
+*   **Parameters:**
+    *   `language` (String): Programming language for highlighting (e.g., "javascript", "python", "xml").
+    *   `title` (String): Optional title for the code block.
+    *   `linenumbers` (Boolean): Show line numbers. Default: `false`.
+*   **XHTML Structure:**
+    ```xml
+    <ac:structured-macro ac:name="code" ac:schema-version="1" ac:macro-id="[uuid]">
+      <ac:parameter ac:name="language">[language]</ac:parameter>
+      <ac:parameter ac:name="title">[title]</ac:parameter>
+      <ac:parameter ac:name="linenumbers">[true/false]</ac:parameter>
+      <ac:plain-text-body><![CDATA[...code content...]]></ac:plain-text-body>
+    </ac:structured-macro>
+    ```
+    *Note: Handles escaping of `]]>` within the code content.*
+*   **Usage:**
+    ```handlebars
+    {{#confluence-code language="javascript" title="Example" linenumbers=true}}
+    function greet() {
+      console.log("Hello!");
+    }
+    {{/confluence-code}}
+    ```
+
+### 5. `confluence-toc` (Inline Helper)
+
+*   **Purpose:** Generates a Table of Contents based on headings on the page.
+*   **Parameters:**
+    *   `minLevel` (Number): Minimum heading level (1-7). Default: 1.
+    *   `maxLevel` (Number): Maximum heading level (1-7). Default: 7.
+*   **XHTML Structure:**
+    ```xml
+    <ac:structured-macro ac:name="toc" ac:schema-version="1" ac:macro-id="[uuid]">
+      <ac:parameter ac:name="minLevel">[minLevel]</ac:parameter>
+      <ac:parameter ac:name="maxLevel">[maxLevel]</ac:parameter>
+    </ac:structured-macro>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{confluence-toc minLevel=2 maxLevel=4}}
+    ```
+
+### 6. `confluence-status` (Inline Helper)
+
+*   **Purpose:** Displays a colored status lozenge.
+*   **Parameters:**
+    *   `type` (String): Color of the status. Options: `grey`, `red`, `yellow`, `green`, `blue`. (Maps to `colour` parameter). Default: `info` (often grey or blue depending on Confluence version).
+    *   `text` (String): Text to display within the status. (Maps to `title` parameter).
+*   **XHTML Structure:**
+    ```xml
+    <ac:structured-macro ac:name="status" ac:schema-version="1" ac:macro-id="[uuid]">
+      <ac:parameter ac:name="colour">[type]</ac:parameter>
+      <ac:parameter ac:name="title">[text]</ac:parameter>
+    </ac:structured-macro>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{confluence-status type="green" text="Completed"}}
+    ```
+
+### 7. Admonition Macros (`confluence-info`, `confluence-note`, `confluence-warning`, `confluence-tip`) (Block Helpers)
+
+*   **Purpose:** Creates styled admonition boxes (Info, Note, Warning, Tip).
+*   **Parameters:**
+    *   `title` (String): Optional title for the box.
+    *   `comment` (Boolean): If true, only renders when `--comment` flag is used.
+*   **XHTML Structure (Example for `info`):**
+    ```xml
+    <ac:structured-macro ac:name="info" ac:schema-version="1" ac:macro-id="[uuid]">
+      <ac:parameter ac:name="title">[title]</ac:parameter>
+      <ac:rich-text-body>...Admonition content...</ac:rich-text-body>
+    </ac:structured-macro>
+    ```
+*   **Usage (Example for `warning`):**
+    ```handlebars
+    {{#confluence-warning title="Caution"}}
+      <p>Be careful with this setting.</p>
+    {{/confluence-warning}}
+    ```
+
+### 8. `confluence-expand` (Block Helper)
+
+*   **Purpose:** Creates a collapsible section of content.
+*   **Parameters:**
+    *   `title` (String): Text displayed on the expander link. Default: "Click to expand".
+*   **XHTML Structure:**
+    ```xml
+    <ac:structured-macro ac:name="expand" ac:schema-version="1" ac:macro-id="[uuid]">
+      <ac:parameter ac:name="title">[title]</ac:parameter>
+      <ac:rich-text-body>...Collapsible content...</ac:rich-text-body>
+    </ac:structured-macro>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{#confluence-expand title="Show Details"}}
+      <p>Here are the details.</p>
+    {{/confluence-expand}}
+    ```
+
+### 9. `confluence-image` (Inline Helper)
+
+*   **Purpose:** Embeds an image, either attached to the page or from an external URL.
+*   **Parameters:**
+    *   `src` (String): **Required.** Image source (filename for attachments, URL for external).
+    *   `alt` (String): Alternative text.
+    *   `title` (String): Tooltip text on hover.
+    *   `width` (String): Image width (e.g., "200", "50%").
+    *   `height` (String): Image height (e.g., "150", "auto").
+    *   `align` (String): Alignment (`left`, `center`, `right`).
+    *   `border` (Boolean): Display a border.
+    *   `thumbnail` (Boolean): Render as a thumbnail.
+    *   `class` (String): CSS class.
+    *   `style` (String): Inline CSS styles.
+*   **XHTML Structure (Attachment):**
+    ```xml
+    <ac:image ac:alt="..." ac:title="..." ...other attributes...>
+      <ri:attachment ri:filename="[src]" />
+    </ac:image>
+    ```
+*   **XHTML Structure (External URL):**
+    ```xml
+    <ac:image ac:alt="..." ac:title="..." ...other attributes...>
+      <ri:url ri:value="[src]" />
+    </ac:image>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{confluence-image src="logo.png" alt="Logo" width="100"}}
+    {{confluence-image src="https://example.com/image.jpg" title="External" border=true}}
+    ```
+
+### 10. `confluence-link` (Inline or Block Helper)
+
+*   **Purpose:** Creates links to Confluence pages, attachments, anchors, or external URLs. Can be used inline (with `text` parameter) or as a block helper (wrapping content like an image).
+*   **Parameters:**
+    *   `type` (String): **Required.** Link type: `page`, `attachment`, `url`, `anchor`, `pageAnchor`. Default: `url`.
+    *   `text` (String): Link text (for inline usage).
+    *   `pageTitle` (String): Target page title (for `page`, `pageAnchor`). **Required** for these types.
+    *   `filename` (String): Target attachment filename (for `attachment`). **Required** for this type.
+    *   `url` (String): Target URL (for `url`). **Required** for this type.
+    *   `anchor` (String): Target anchor name (for `anchor`, `pageAnchor`). **Required** for these types.
+    *   `tooltip` (String): Optional hover text.
+*   **XHTML Structure (Example for `page` link, inline):**
+    ```xml
+    <ac:link ac:tooltip="[tooltip]">
+      <ri:page ri:content-title="[pageTitle]" />
+      <ac:plain-text-link-body><![CDATA[[text]]]></ac:plain-text-link-body>
+    </ac:link>
+    ```
+*   **XHTML Structure (Example for `page` link, block):**
+    ```xml
+    <ac:link ac:tooltip="[tooltip]">
+      <ri:page ri:content-title="[pageTitle]" />
+      <ac:link-body>...wrapped content (e.g., image)...</ac:link-body>
+    </ac:link>
+    ```
+*   **XHTML Structure (Example for `url` link):**
+    ```html
+    <a href="[url]" title="[tooltip]">[text]</a>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{confluence-link type="page" pageTitle="My Other Page" text="See other page"}}
+    {{confluence-link type="attachment" filename="report.pdf" text="Download Report"}}
+    {{confluence-link type="url" url="https://google.com" text="Go to Google"}}
+    {{confluence-link type="anchor" anchor="section-2" text="Jump to Section 2"}}
+    {{#confluence-link type="page" pageTitle="Home"}}
+      {{confluence-image src="home-icon.png" alt="Home"}}
+    {{/confluence-link}}
+    ```
+
+### 11. `confluence-date` (Inline Helper)
+
+*   **Purpose:** Displays a date using Confluence's `<time>` element, allowing Confluence to format it based on user preferences.
+*   **Parameters:**
+    *   `date` (String): **Required.** Date in `YYYY-MM-DD` format.
+    *   `format` (String): *Currently ignored by the helper implementation, but was intended for Confluence formatting.*
+*   **XHTML Structure:**
+    ```xml
+    <time datetime="[date]" />
+    ```
+*   **Usage:**
+    ```handlebars
+    Page last reviewed on: {{confluence-date date="2024-07-21"}}
+    ```
+
+### 12. `confluence-children` (Inline Helper)
+
+*   **Purpose:** Displays a list of child pages for the current page.
+*   **Parameters:**
+    *   `sortBy` (String): Field to sort by (`title`, `created`, `modified`).
+    *   `reverse` (Boolean): Reverse sort order.
+    *   `includeLabels` (String): Comma-separated labels to include.
+    *   `excludeLabels` (String): Comma-separated labels to exclude.
+    *   `mode` (String): Display mode (e.g., `list`, `pages`).
+*   **XHTML Structure:**
+    ```xml
+    <ac:structured-macro ac:name="children" ac:schema-version="2" ac:macro-id="[uuid]">
+      <!-- Optional parameters for sorting, filtering, mode -->
+    </ac:structured-macro>
+    ```
+*   **Usage:**
+    ```handlebars
+    {{confluence-children sortBy="title" reverse=true}}
+    ```
+
+### 13. `confluence-include` (Inline Helper)
+
+*   **Purpose:** Includes content from another file relative to the project's working directory. The included content is processed by Handlebars, but *cannot* contain nested `confluence-include` calls.
+*   **Parameters:**
+    *   `file` (String): **Required.** Path to the file to include.
+*   **XHTML Structure:** The raw, Handlebars-processed content of the included file.
+*   **Usage:**
+    ```handlebars
+    {{confluence-include file="docs/shared-section.html"}}
+    ```
+
+## Template Variables
+
+These are standard variables available in the Handlebars context:
+
+*   `{{pageTitle}}`: The title of the Confluence page being generated.
+*   `{{{macro}}}`: Placeholder typically used in the main page template (`confluence-template.html`). It gets replaced by the rendered content of the macro template (`macro-template.html`). Use triple braces `{{{}}}` to prevent HTML escaping.
+*   `{{{scripts}}}`: Placeholder used *inside* the `confluence-html` macro (usually in `macro-template.html`). Replaced with `<script>` tags for attached JS files. Use triple braces.
+*   `{{{styles}}}`: Placeholder used *inside* the `confluence-html` macro (usually in `macro-template.html`). Replaced with `<link>` tags for attached CSS files. Use triple braces.
+*   `{{currentDate}}`: Current date in `YYYY-MM-DD` format.

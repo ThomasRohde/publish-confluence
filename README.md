@@ -239,6 +239,25 @@ Display a status indicator:
 
 Status types: `green`, `yellow`, `red`, `blue`
 
+### Link Macro
+
+Create links to Confluence pages, attachments, external URLs, or anchors:
+
+```handlebars
+{{confluence-link type="page" pageTitle="Target Page" text="Link to page" tooltip="Optional tooltip"}}
+```
+
+Link types: `page`, `attachment`, `url`, `anchor`, `pageAnchor`
+
+Parameters:
+
+- `type`: one of `page`, `attachment`, `url`, `anchor`, `pageAnchor` (required)
+- `text`: link text (required for inline use)
+- `pageTitle`: title of the Confluence page (required for `page`/`pageAnchor`)
+- `filename`: name of the attachment file (required for `attachment`)
+- `url`: external URL (required for `url`)
+- `anchor`: anchor name/ID (required for `anchor`/`pageAnchor`)
+- `tooltip`: optional hover text
 ### Image Macro
 
 Embed images in your Confluence pages with customizable attributes:
