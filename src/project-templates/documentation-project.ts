@@ -140,7 +140,7 @@ export class DocumentationProject implements ProjectTemplate {
     }
   }
 
-  async createConfigFiles(projectDir: string, projectName: string): Promise<void> {
+  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string): Promise<void> {
     // Documentation project doesn't need additional config files
     return;
   }

@@ -4,7 +4,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import * as readline from 'readline';
 import { getProjectTemplate, Logger } from './project-templates';
-import { DocumentationProject } from './project-templates/documentation-project';
 import { PROJECT_TYPE_CHOICES } from './project-templates/project-type-choices';
 import { PROMPT_TEXT } from './prompt';
 
@@ -232,7 +231,7 @@ CONFLUENCE_TOKEN=your-api-token`;
     await template.createSourceFiles(srcDir, projectName);
     
     // Create additional configuration files
-    await template.createConfigFiles(process.cwd(), projectName);
+    await template.createConfigFiles(process.cwd(), projectName, spaceKey, parentPageTitle);
     
     log.success(`\nProject created successfully!`);
     log.info(`\nNext steps:

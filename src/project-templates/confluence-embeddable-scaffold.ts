@@ -111,7 +111,7 @@ export class ConfluenceEmbeddableScaffold implements ProjectTemplate {
       Loading application...
     </div>
   </div>
-  <script type="module" src="/src/main.ts"></script>
+  <script type="module" src="./main.ts"></script>
 </body>
 </html>`,
         'utf8'
@@ -303,7 +303,7 @@ export async function fetchData(url: string): Promise<any> {
     }
   }
 
-  async createConfigFiles(projectDir: string, projectName: string): Promise<void> {
+  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string): Promise<void> {
     try {
       // Create tsconfig.json
       await fs.writeFile(
@@ -334,10 +334,13 @@ export async function fetchData(url: string): Promise<any> {
       await fs.writeFile(
         path.resolve(projectDir, 'vite.config.ts'),
         `import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
+  root: 'src',
   build: {
-    outDir: 'dist',
+    outDir: '../dist',
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks: undefined
@@ -345,6 +348,37 @@ export default defineConfig({
     }
   }
 });`,
+        'utf8'
+      );
+
+      // Use provided values or defaults
+      const configSpaceKey = spaceKey || "MYSPACE";
+      const configParentPageTitle = parentPageTitle || "Apps";
+
+      // Create publish-confluence.json
+      await fs.writeFile(
+        path.resolve(projectDir, 'publish-confluence.json'),
+        `{
+  "spaceKey": "${configSpaceKey}",
+  "pageTitle": "${projectName}",
+  "parentPageTitle": "${configParentPageTitle}",
+  "templatePath": "./confluence-template.html",
+  "macroTemplatePath": "./macro-template.html",
+  "distDir": "./dist",
+  "includedFiles": [
+    "**/*.js",
+    "**/*.css",
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.svg",
+    "**/*.json",
+    "**/*.woff",
+    "**/*.woff2"
+  ],
+  "excludedFiles": [
+    "**/*.map"
+  ]
+}`,
         'utf8'
       );
       

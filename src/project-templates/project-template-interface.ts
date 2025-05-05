@@ -56,6 +56,8 @@ export interface ProjectTemplate {
    * Create additional configuration files
    * @param projectDir The root directory of the project
    * @param projectName The name of the project
+   * @param spaceKey The Confluence space key
+   * @param parentPageTitle The parent page title
    */
-  createConfigFiles(projectDir: string, projectName: string): Promise<void>;
+  createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string): Promise<void>;
 }
