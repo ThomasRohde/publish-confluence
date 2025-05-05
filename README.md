@@ -1,6 +1,7 @@
 # publish-confluence
 
   A TypeScript/Node.js CLI tool for instantly publishing modern JavaScript and TypeScript applications to Confluence pages—streamlining your development, testing, and deployment cycles.
+  
 
   ## Overview
 
