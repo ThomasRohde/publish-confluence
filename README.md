@@ -259,6 +259,7 @@ Parameters:
 - `url`: external URL (required for `url`)
 - `anchor`: anchor name/ID (required for `anchor`/`pageAnchor`)
 - `tooltip`: optional hover text
+
 ### Image Macro
 
 Embed images in your Confluence pages with customizable attributes:
@@ -307,6 +308,30 @@ Create various admonition blocks:
   <p>This is a helpful tip.</p>
 {{/confluence-tip}}
 ```
+
+### Tabs Macros
+
+Create tabbed content sections with multiple tabs:
+
+```handlebars
+{{#confluence-tabs disposition="horizontal" outline=true color="#FF5630"}}
+  {{#confluence-tab name="Tab 1" icon="icon-sp-lock"}}
+    <p>Content for Tab 1</p>
+  {{/confluence-tab}}
+  {{#confluence-tab name="Tab 2" icon="icon-sp-flag"}}
+    <p>Content for Tab 2</p>
+  {{/confluence-tab}}
+{{/confluence-tabs}}
+```
+
+| Parameter      | Description                                            |
+|----------------|--------------------------------------------------------|
+| `disposition`  | Tab orientation: "horizontal" or "vertical"            |
+| `outline`      | Whether to show a border around the tabs (true/false)  |
+| `color`        | Accent color for the tabs (HTML color code)            |
+| `name`         | Display name of the tab (for confluence-tab)           |
+| `icon`         | Optional icon for the tab (e.g., "icon-sp-lock")       |
+| `anchor`       | Optional anchor ID for the tab (auto-generated if not provided) |
 
 ### Expand Macro
 

@@ -118,6 +118,73 @@
 
 <hr />
 
+<h2>Tabs Macros</h2>
+<p>Used together to create tabbed content sections on the Confluence page.</p>
+
+<h3>Tabs Group</h3>
+<p>The main container for a set of tabs.</p>
+<p><strong>Syntax:</strong></p>
+{{#confluence-code language="handlebars" title="Tabs Group Syntax"}}
+\{{#confluence-tabs disposition="horizontal" outline=true color="#FF5630"}}
+  <!-- confluence-tab helpers go here -->
+\{{/confluence-tabs}}
+{{/confluence-code}}
+<p><strong>Parameters:</strong></p>
+<ul>
+    <li><code>disposition</code> (String, Optional): The orientation of the tabs. Valid values: <code>horizontal</code> (default) or <code>vertical</code>.</li>
+    <li><code>outline</code> (Boolean, Optional): Whether to show a border around the tabs. Defaults to <code>false</code>.</li>
+    <li><code>color</code> (String, Optional): Accent color for the tabs. Can be HTML color name or hex code.</li>
+</ul>
+
+<h3>Tab Pane</h3>
+<p>Defines an individual tab within a tabs group.</p>
+<p><strong>Syntax:</strong></p>
+{{#confluence-code language="handlebars" title="Tab Pane Syntax"}}
+\{{#confluence-tab name="Tab Name" icon="icon-name" anchor="optional-id"}}
+  <p>Content for this tab (must be valid XHTML block content).</p>
+  <p>Can include text, images, or other macros.</p>
+\{{/confluence-tab}}
+{{/confluence-code}}
+<p><strong>Parameters:</strong></p>
+<ul>
+    <li><code>name</code> (String, Required): The display name of the tab that users will see.</li>
+    <li><code>icon</code> (String, Optional): An icon to display alongside the tab name. Common icons include <code>icon-sp-lock</code>, <code>icon-sp-flag</code>, <code>icon-sp-star</code>, etc.</li>
+    <li><code>anchor</code> (String, Optional): A unique ID for the tab, which can be used for linking directly to the tab. If not provided, a random ID is generated.</li>
+</ul>
+
+<p><strong>Example Usage:</strong></p>
+{{#confluence-code language="handlebars" title="Tabs Example"}}
+\{{#confluence-tabs disposition="horizontal" outline=true color="#FF5630"}}
+  \{{#confluence-tab name="Overview" icon="icon-sp-star"}}
+    <h3>Project Overview</h3>
+    <p>This is the main project description.</p>
+  \{{/confluence-tab}}
+  
+  \{{#confluence-tab name="Installation" icon="icon-sp-wrench"}}
+    <h3>Installation Instructions</h3>
+    <p>Follow these steps to install the application:</p>
+    <ol>
+      <li>Download the package</li>
+      <li>Run the installer</li>
+      <li>Configure settings</li>
+    </ol>
+  \{{/confluence-tab}}
+  
+  \{{#confluence-tab name="API Reference" icon="icon-sp-lock"}}
+    <h3>API Documentation</h3>
+    <p>Here's the API reference information.</p>
+    \{{#confluence-code language="javascript" title="Example API Call"}}
+    fetch('/api/data')
+      .then(response => response.json())
+      .then(data => console.log(data));
+    \{{/confluence-code}}
+  \{{/confluence-tab}}
+\{{/confluence-tabs}}
+{{/confluence-code}}
+<p><em>Note: The tabs container must include at least one tab pane. You can nest other macros within tab panes.</em></p>
+
+<hr />
+
 <h2>Code Block Macro</h2>
 <p>Displays code snippets with syntax highlighting.</p>
 <p><strong>Syntax:</strong></p>

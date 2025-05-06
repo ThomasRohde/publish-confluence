@@ -168,6 +168,69 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
     const content = options.fn(this);
     return new handlebars.SafeString(`<ac:layout-cell>${content}</ac:layout-cell>`);
   });
+
+  /**
+   * Tabs group macro - Creates a tabbed content container
+   * 
+   * Usage:
+   * ```handlebars
+   * {{#confluence-tabs disposition="horizontal" outline=true color="#FF5630"}}
+   *   {{#confluence-tab name="Tab 1" icon="icon-sp-lock"}}
+   *     <p>Content for Tab 1</p>
+   *   {{/confluence-tab}}
+   *   {{#confluence-tab name="Tab 2" icon="icon-sp-flag"}}
+   *     <p>Content for Tab 2</p>
+   *   {{/confluence-tab}}
+   * {{/confluence-tabs}}
+   * ```
+   * 
+   * @param disposition - Tab orientation: "horizontal" or "vertical"
+   * @param outline - Whether to show a border around the tabs (true/false)
+   * @param color - Accent color for the tabs (HTML color name or hex code)
+   */
+  handlebars.registerHelper('confluence-tabs', function(this: any, options: Handlebars.HelperOptions) {
+    const macroId = generateUuid();
+    const content = options.fn(this);
+    const disposition = options.hash.disposition || 'horizontal';
+    const outline = options.hash.outline === true ? 'true' : 'false';
+    const color = options.hash.color || '';
+    
+    return new handlebars.SafeString(
+      `<ac:structured-macro ac:name="tabs-group" ac:schema-version="1" ac:macro-id="${macroId}">
+        <ac:parameter ac:name="disposition">${disposition}</ac:parameter>
+        <ac:parameter ac:name="outline">${outline}</ac:parameter>
+        ${color ? `<ac:parameter ac:name="color">${color}</ac:parameter>` : ''}
+        <ac:rich-text-body>${content}</ac:rich-text-body>
+      </ac:structured-macro>`
+    );
+  });
+  
+  /**
+   * Tab pane macro - Defines an individual tab within a tabs group
+   * 
+   * Usage: See confluence-tabs example above
+   * 
+   * @param name - Display name of the tab
+   * @param icon - Optional icon for the tab (e.g., "icon-sp-lock", "icon-sp-flag")
+   * @param anchor - Optional anchor ID for the tab (auto-generated if not provided)
+   */
+  handlebars.registerHelper('confluence-tab', function(this: any, options: Handlebars.HelperOptions) {
+    const macroId = generateUuid();
+    const content = options.fn(this);
+    const name = options.hash.name || 'Tab';
+    const icon = options.hash.icon || '';
+    // Generate a random anchor ID if not provided
+    const anchor = options.hash.anchor || Math.floor(Math.random() * 100000000);
+    
+    return new handlebars.SafeString(
+      `<ac:structured-macro ac:name="tab-pane" ac:schema-version="1" ac:macro-id="${macroId}">
+        <ac:parameter ac:name="anchor">${anchor}</ac:parameter>
+        ${icon ? `<ac:parameter ac:name="icon">${icon}</ac:parameter>` : ''}
+        <ac:parameter ac:name="name">${name}</ac:parameter>
+        <ac:rich-text-body>${content}</ac:rich-text-body>
+      </ac:structured-macro>`
+    );
+  });
   
   /**
    * Code block macro - Displays code with syntax highlighting

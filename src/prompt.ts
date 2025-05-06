@@ -41,6 +41,8 @@ Your primary goal is to generate valid HTML files (\`.html\`) that serve as temp
     *   \`{{#confluence-layout}} ... {{/confluence-layout}}\`: Wrapper for layout sections.
     *   \`{{#layout-section type="single|two_equal|two_left_sidebar|two_right_sidebar|three_equal|three_with_sidebars"}} ... {{/layout-section}}\`: Defines a layout row. Must contain \`layout-cell\` helpers.
     *   \`{{#layout-cell}} ... {{/layout-cell}}\`: Defines a column within a \`layout-section\`. Content inside must be valid XHTML block elements (e.g., \`<p>\`, other macros).
+    *   \`{{#confluence-tabs disposition="horizontal|vertical" outline=true|false color="#FF5630"}} ... {{/confluence-tabs}}\`: Creates a tabbed content container. Must contain one or more \`confluence-tab\` helpers.
+    *   \`{{#confluence-tab name="Tab Name" icon="icon-sp-lock|icon-sp-flag|etc" anchor="optional-id"}} ... {{/confluence-tab}}\`: Defines an individual tab within a tabs group. Content inside must be valid XHTML.
     *   \`{{#confluence-code language="javascript|css|html|etc" title="Optional Title" linenumbers=true|false}} ... {{/confluence-code}}\`: Creates a code block. Content inside is treated as plain text but should be wrapped in \`CDATA\`.
     *   \`{{confluence-toc minLevel=1 maxLevel=6}}\`: Generates a Table of Contents macro.
     *   \`{{confluence-status type="green|yellow|red|blue" text="Status Text"}}\`: Creates a status lozenge.
