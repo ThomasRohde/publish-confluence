@@ -1,5 +1,3 @@
-import './styles.css';
-
 document.addEventListener('DOMContentLoaded', () => {
   // Create app elements
   const app = document.getElementById('app');
