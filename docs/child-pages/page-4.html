@@ -463,6 +463,26 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 Contact \{{confluence-user key="jsmith"}} for details.
     {{/confluence-code}}
 
+    <h3>Include</h3>
+    <p>Includes content from another file, useful for breaking up templates into modular components.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Include Syntax"}}
+\{{confluence-include file="path/to/include-file.html"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>file</code> (String, Required): Path to the file to include, relative to the current working directory.</li>
+    </ul>
+    <p><strong>Example:</strong></p>
+    {{#confluence-code language="handlebars" title="Include Example"}}
+<!-- Include a reusable footer -->
+\{{confluence-include file="./templates/footer.html"}}
+
+<!-- Include a component with dynamic content -->
+\{{confluence-include file="./templates/metrics-panel.html"}}
+    {{/confluence-code}}
+    <p><em>Note: The content of the included file will be processed with Handlebars to handle any variables, but cannot contain recursive <code>{{confluence-include}}</code> calls.</em></p>
+
     <h3>Raw</h3>
     <p>Outputs the content within the block without any Handlebars processing or HTML escaping. Use with extreme caution.</p>
     <p><strong>Syntax:</strong></p>
