@@ -7,10 +7,11 @@ This document outlines the architecture for supporting MermaidJS diagrams in Con
 ## Requirements
 
 1. Support a new Handlebars helper: `{{confluence-mermaid}}` for embedding Mermaid diagrams
-2. Upload MermaidJS script and icon packs to Confluence page attachments only once per page
+2. Leverage the user's own Mermaid JS files included in their project's distribution directory
 3. Ensure diagrams render correctly in Confluence's HTML macro
 4. Allow configuration of Mermaid rendering options
 5. Support both inline Mermaid diagram text and file references
+6. Track Mermaid assets in a publishing run to avoid duplicate code inclusion
 
 ## Architecture
 
@@ -28,21 +29,22 @@ graph TD
 
 ### Implementation Architecture
 
-1. **Mermaid Assets Management**
-   - Package the required Mermaid JS files with the publish-confluence tool
-   - Include the core Mermaid script and icon packs
-   - Version the assets to allow updating
+1. **User-Managed Mermaid Assets**
+   - Users include Mermaid JS files in their project's build output directory
+   - Standard pattern: `/dist/mermaid/mermaid.min.js` (and any required icon packs)
+   - User's build process is responsible for placing these files correctly
 
-2. **Asset Upload Logic**
-   - Before rendering the page, check if Mermaid assets exist on the page
-   - Upload assets only if they don't exist or if versions differ
-   - Track uploaded assets to prevent duplicate uploads in the same session
+2. **Attachment Reuse Strategy**
+   - Leverage the existing attachment framework in `publisher.ts`
+   - Ensure Mermaid scripts are included in the `includedFiles` patterns in `publish-confluence.json`
+   - Example pattern: `"mermaid/**/*.js"` and `"mermaid/**/*.json"` for icon packs
 
 3. **Helper Implementation**
    - Register a new `confluence-mermaid` helper in `macro-helpers.ts`
    - Support both block and non-block (file reference) syntax
    - Process diagram content or load from referenced file
    - Generate unique IDs for each diagram
+   - Track Mermaid assets already included on the page to avoid duplicates
 
 4. **HTML Generation**
    - Generate HTML structure with a container div for the diagram
@@ -55,49 +57,75 @@ graph TD
    - Support toggling icons and other Mermaid rendering options
    - Allow customization of diagram CSS
 
-## Asset Management Implementation
+## Implementation Details
 
-### 1. Adding Mermaid Dependencies
+### 1. User Setup for Mermaid Integration
 
-Add MermaidJS and icon pack dependencies to the project's package.json:
+Users need to include Mermaid in their project:
 
 ```json
 "dependencies": {
   // ...existing dependencies
-  "mermaid": "^10.8.0",
-  "uuid": "^9.0.1"
+  "mermaid": "^10.8.0" 
 }
 ```
 
-### 2. Asset Structure
-
-Create a dedicated assets directory for Mermaid files within the project:
-
-```
-/assets
-  /mermaid
-    mermaid.min.js       # Minified Mermaid library
-    icons-logos.json     # Icon pack - logos
-    icons-mdi.json       # Icon pack - Material Design Icons
-    icons-fa.json        # Icon pack - Font Awesome
-    asset-manifest.json  # Version info for assets
-```
-
-### 3. Build Process Integration
-
-Add a build step to copy and prepare Mermaid assets:
-
-1. Create a build script that:
-   - Copies the necessary Mermaid files from node_modules
-   - Extracts and optimizes icon packs
-   - Generates an asset manifest with version information
-
-2. Add a script to package.json to run this during build:
+And ensure their build process copies Mermaid files to the dist directory:
 
 ```json
 "scripts": {
-  "prepare-mermaid-assets": "ts-node src/scripts/prepare-mermaid-assets.ts",
-  "build": "tsc --noEmit && vite build && npm run prepare-mermaid-assets"
+  "prebuild": "mkdir -p dist/mermaid",
+  "build": "vite build",
+  "postbuild": "cp node_modules/mermaid/dist/mermaid.min.js dist/mermaid/"
+}
+```
+
+### 2. Asset Configuration
+
+In the `publish-confluence.json` file, users need to include Mermaid files in the attachment patterns:
+
+```json
+{
+  "spaceKey": "DOCS",
+  "pageTitle": "Project Documentation",
+  "distDir": "./dist",
+  "includedFiles": [
+    "**/*.js", 
+    "**/*.css",
+    "**/*.png",
+    "mermaid/**/*"
+  ],
+  "excludedFiles": [
+    "**/*.map"
+  ]
+}
+```
+
+### 3. Mermaid Helper Implementation Strategy
+
+The helper will maintain a cache of included Mermaid assets during a publishing run:
+
+```typescript
+// Track Mermaid initialization across one publishing run
+let mermaidInitialized = false;
+const generatedDiagramIds = new Set<string>();
+
+export function registerMermaidHelper(handlebars: HandlebarsInstance): void {
+  handlebars.registerHelper('confluence-mermaid', function(this: any, options: any) {
+    const uniqueId = `mermaid-${generateUuid()}`;
+    generatedDiagramIds.add(uniqueId);
+    
+    // Generate initialization code only once per page
+    const initScript = !mermaidInitialized 
+      ? generateMermaidInitScript(options.hash)
+      : '';
+    
+    // Track that we've included initialization
+    mermaidInitialized = true;
+    
+    // Generate HTML structure
+    // ...
+  });
 }
 ```
 
@@ -135,42 +163,6 @@ const escapedDefinition = diagramDefinition
   .replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&#039;');
-```
-
-### 5. Helper Implementation
-
-The Mermaid helper implementation should:
-
-1. Extract diagram content from block content or file
-2. Generate a unique ID for the diagram
-3. Wrap the diagram in a properly structured Confluence HTML macro
-4. Include initialization JavaScript within CDATA section
-5. Track used icon packs for asset uploading
-
-```typescript
-// src/mermaid-helper.ts
-export function registerMermaidHelper(handlebars: HandlebarsInstance): void {
-  handlebars.registerHelper('confluence-mermaid', function(this: any, options: any) {
-    // Process options and get diagram definition...
-    
-    // Generate HTML structure with proper CDATA wrapping
-    const htmlContent = `
-      <div id="${diagramId}" class="mermaid">
-        ${escapedDefinition}
-      </div>
-      <script><!--
-        // Mermaid initialization code
-      //--></script>
-    `;
-    
-    // Wrap in Confluence HTML macro
-    return new handlebars.SafeString(`
-      <ac:structured-macro ac:name="html" ac:schema-version="1" ac:macro-id="${macroId}">
-        <ac:plain-text-body><![CDATA[${htmlContent}]]></ac:plain-text-body>
-      </ac:structured-macro>
-    `);
-  });
-}
 ```
 
 ## Integration Testing
