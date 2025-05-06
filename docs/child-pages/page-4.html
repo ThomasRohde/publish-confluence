@@ -1,18 +1,20 @@
 <p>This page provides a reference guide for all the custom Handlebars helper functions available in <code>publish-confluence</code>. These helpers allow you to easily generate Confluence macros within your page templates (<code>confluence-template.html</code>).</p>
-<h2>HTML Macro</h2>
-<p>Generates the Confluence HTML macro, typically used to embed your JavaScript application. This is often used within the <code>macro-template.html</code> or directly in the page template if a separate macro template isn't used.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="HTML Macro Syntax"}}
+{{#confluence-tabs disposition="vertical" outline=true color="#0052CC"}}
+  {{#confluence-tab name="HTML Macro" icon="icon-sp-globe"}}
+    <h2>HTML Macro</h2>
+    <p>Generates the Confluence HTML macro, typically used to embed your JavaScript application. This is often used within the <code>macro-template.html</code> or directly in the page template if a separate macro template isn't used.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="HTML Macro Syntax"}}
 \{{#confluence-html}}
   <!-- HTML content for the macro -->
   <div id="app">Loading...</div>
   \{{{styles}}}  <!-- Placeholder for CSS links -->
   \{{{scripts}}} <!-- Placeholder for JS scripts -->
 \{{/confluence-html}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong> None</p>
-<p><strong>Example Usage (in macro-template.html):</strong></p>
-{{#confluence-code language="handlebars" title="HTML Macro Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong> None</p>
+    <p><strong>Example Usage (in macro-template.html):</strong></p>
+    {{#confluence-code language="handlebars" title="HTML Macro Example"}}
 <div class="my-app-wrapper">
   <div id="app">
     <!-- Application will mount here -->
@@ -20,35 +22,35 @@
   \{{{styles}}}
   \{{{scripts}}}
 </div>
-{{/confluence-code}}
-<p><em>Note: The content inside <code>confluence-html</code> is the direct body of the HTML macro. Remember to include <code>\{{{styles}}}</code> and <code>\{{{scripts}}}</code> if you are using a <code>macroTemplatePath</code>.</em></p>
+    {{/confluence-code}}
+    <p><em>Note: The content inside <code>confluence-html</code> is the direct body of the HTML macro. Remember to include <code>\{{{styles}}}</code> and <code>\{{{scripts}}}</code> if you are using a <code>macroTemplatePath</code>.</em></p>
+  {{/confluence-tab}}
 
-<hr />
-
-<h2>Panel Macro</h2>
-<p>Creates a standard Confluence panel to highlight information.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Panel Macro Syntax"}}
+  {{#confluence-tab name="Panel Macro" icon="icon-sp-sitemap"}}
+    <h2>Panel Macro</h2>
+    <p>Creates a standard Confluence panel to highlight information.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Panel Macro Syntax"}}
 \{{#confluence-panel title="Optional Panel Title" borderStyle="solid" borderColor="#cccccc" borderWidth="1" bgColor="#f5f5f5" titleBGColor="#e0e0e0" titleColor="#000000" comment=true}}
   <p>Panel content goes here (must be valid XHTML).</p>
   <ul>
     <li>Like lists</li>
   </ul>
 \{{/confluence-panel}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>title</code> (String, Optional): The title displayed in the panel header.</li>
-    <li><code>borderStyle</code> (String, Optional): The style of the panel's border (solid, dashed, etc.). Defaults to "solid".</li>
-    <li><code>borderColor</code> (String, Optional): The color of the panel's border. Can be HTML color name or hex code.</li>
-    <li><code>borderWidth</code> (String, Optional): The width of the panel's border in pixels (value only).</li>
-    <li><code>bgColor</code> (String, Optional): The background color of the panel. Can be HTML color name or hex code.</li>
-    <li><code>titleBGColor</code> (String, Optional): The background color of the title row. Can be HTML color name or hex code.</li>
-    <li><code>titleColor</code> (String, Optional): The color of the text in the title row. Can be HTML color name or hex code.</li>
-    <li><code>comment</code> (Boolean, Optional): If true, the panel will only be visible when using the --comment flag.</li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Panel Macro Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>title</code> (String, Optional): The title displayed in the panel header.</li>
+        <li><code>borderStyle</code> (String, Optional): The style of the panel's border (solid, dashed, etc.). Defaults to "solid".</li>
+        <li><code>borderColor</code> (String, Optional): The color of the panel's border. Can be HTML color name or hex code.</li>
+        <li><code>borderWidth</code> (String, Optional): The width of the panel's border in pixels (value only).</li>
+        <li><code>bgColor</code> (String, Optional): The background color of the panel. Can be HTML color name or hex code.</li>
+        <li><code>titleBGColor</code> (String, Optional): The background color of the title row. Can be HTML color name or hex code.</li>
+        <li><code>titleColor</code> (String, Optional): The color of the text in the title row. Can be HTML color name or hex code.</li>
+        <li><code>comment</code> (Boolean, Optional): If true, the panel will only be visible when using the --comment flag.</li>
+    </ul>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Panel Macro Example"}}
 \{{#confluence-panel title="Important Update"}}
   <p>Please review the latest project guidelines.</p>
 \{{/confluence-panel}}
@@ -56,49 +58,49 @@
 \{{#confluence-panel title="Developer Notes" borderStyle="dashed" borderColor="#FF0000" borderWidth="2" bgColor="#F5F5F5" titleBGColor="#E0E0E0" titleColor="#000000" comment=true}}
   <p>This panel will only be visible when running with the --comment flag.</p>
 \{{/confluence-panel}}
-{{/confluence-code}}
+    {{/confluence-code}}
+  {{/confluence-tab}}
 
-<hr />
+  {{#confluence-tab name="Layout Macros" icon="icon-sp-database"}}
+    <h2>Layout Macros</h2>
+    <p>Used together to create multi-column layouts on the Confluence page.</p>
 
-<h2>Layout Macros</h2>
-<p>Used together to create multi-column layouts on the Confluence page.</p>
-
-<h3>Layout Container</h3>
-<p>The main wrapper for all layout sections.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Layout Container Syntax"}}
+    <h3>Layout Container</h3>
+    <p>The main wrapper for all layout sections.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Layout Container Syntax"}}
 \{{#confluence-layout}}
   <!-- layout-section helpers go here -->
 \{{/confluence-layout}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong> None</p>
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong> None</p>
 
-<h3>Layout Section</h3>
-<p>Defines a row within the layout container, specifying the column structure.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Layout Section Syntax"}}
+    <h3>Layout Section</h3>
+    <p>Defines a row within the layout container, specifying the column structure.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Layout Section Syntax"}}
 \{{#layout-section type="section-type"}}
   <!-- layout-cell helpers go here -->
 \{{/layout-section}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>type</code> (String, Required): The column layout type. Valid types: <code>single</code>, <code>two_equal</code>, <code>two_left_sidebar</code>, <code>two_right_sidebar</code>, <code>three_equal</code>, <code>three_with_sidebars</code>.</li>
-</ul>
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>type</code> (String, Required): The column layout type. Valid types: <code>single</code>, <code>two_equal</code>, <code>two_left_sidebar</code>, <code>two_right_sidebar</code>, <code>three_equal</code>, <code>three_with_sidebars</code>.</li>
+    </ul>
 
-<h3>Layout Cell</h3>
-<p>Defines a single column (cell) within a layout section. The number of cells must match the parent section's type.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Layout Cell Syntax"}}
+    <h3>Layout Cell</h3>
+    <p>Defines a single column (cell) within a layout section. The number of cells must match the parent section's type.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Layout Cell Syntax"}}
 \{{#layout-cell}}
   <p>Content for this column (must be valid XHTML block content).</p>
   <p>Can include text, images, or other macros.</p>
 \{{/layout-cell}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong> None</p>
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong> None</p>
 
-<p><strong>Example Usage (Two Equal Columns):</strong></p>
-{{#confluence-code language="handlebars" title="Layout Example"}}
+    <p><strong>Example Usage (Two Equal Columns):</strong></p>
+    {{#confluence-code language="handlebars" title="Layout Example"}}
 \{{#confluence-layout}}
   \{{#layout-section type="two_equal"}}
     \{{#layout-cell}}
@@ -114,46 +116,46 @@
     \{{/layout-cell}}
   \{{/layout-section}}
 \{{/confluence-layout}}
-{{/confluence-code}}
+    {{/confluence-code}}
+  {{/confluence-tab}}
 
-<hr />
+  {{#confluence-tab name="Tabs Macros" icon="icon-sp-folder"}}
+    <h2>Tabs Macros</h2>
+    <p>Used together to create tabbed content sections on the Confluence page.</p>
 
-<h2>Tabs Macros</h2>
-<p>Used together to create tabbed content sections on the Confluence page.</p>
-
-<h3>Tabs Group</h3>
-<p>The main container for a set of tabs.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Tabs Group Syntax"}}
+    <h3>Tabs Group</h3>
+    <p>The main container for a set of tabs.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Tabs Group Syntax"}}
 \{{#confluence-tabs disposition="horizontal" outline=true color="#FF5630"}}
   <!-- confluence-tab helpers go here -->
 \{{/confluence-tabs}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>disposition</code> (String, Optional): The orientation of the tabs. Valid values: <code>horizontal</code> (default) or <code>vertical</code>.</li>
-    <li><code>outline</code> (Boolean, Optional): Whether to show a border around the tabs. Defaults to <code>false</code>.</li>
-    <li><code>color</code> (String, Optional): Accent color for the tabs. Can be HTML color name or hex code.</li>
-</ul>
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>disposition</code> (String, Optional): The orientation of the tabs. Valid values: <code>horizontal</code> (default) or <code>vertical</code>.</li>
+        <li><code>outline</code> (Boolean, Optional): Whether to show a border around the tabs. Defaults to <code>false</code>.</li>
+        <li><code>color</code> (String, Optional): Accent color for the tabs. Can be HTML color name or hex code.</li>
+    </ul>
 
-<h3>Tab Pane</h3>
-<p>Defines an individual tab within a tabs group.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Tab Pane Syntax"}}
+    <h3>Tab Pane</h3>
+    <p>Defines an individual tab within a tabs group.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Tab Pane Syntax"}}
 \{{#confluence-tab name="Tab Name" icon="icon-name" anchor="optional-id"}}
   <p>Content for this tab (must be valid XHTML block content).</p>
   <p>Can include text, images, or other macros.</p>
 \{{/confluence-tab}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>name</code> (String, Required): The display name of the tab that users will see.</li>
-    <li><code>icon</code> (String, Optional): An icon to display alongside the tab name. Common icons include <code>icon-sp-lock</code>, <code>icon-sp-flag</code>, <code>icon-sp-star</code>, etc.</li>
-    <li><code>anchor</code> (String, Optional): A unique ID for the tab, which can be used for linking directly to the tab. If not provided, a random ID is generated.</li>
-</ul>
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>name</code> (String, Required): The display name of the tab that users will see.</li>
+        <li><code>icon</code> (String, Optional): An icon to display alongside the tab name. Common icons include <code>icon-sp-lock</code>, <code>icon-sp-flag</code>, <code>icon-sp-star</code>, etc.</li>
+        <li><code>anchor</code> (String, Optional): A unique ID for the tab, which can be used for linking directly to the tab. If not provided, a random ID is generated.</li>
+    </ul>
 
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Tabs Example"}}
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Tabs Example"}}
 \{{#confluence-tabs disposition="horizontal" outline=true color="#FF5630"}}
   \{{#confluence-tab name="Overview" icon="icon-sp-star"}}
     <h3>Project Overview</h3>
@@ -180,129 +182,129 @@
     \{{/confluence-code}}
   \{{/confluence-tab}}
 \{{/confluence-tabs}}
-{{/confluence-code}}
-<p><em>Note: The tabs container must include at least one tab pane. You can nest other macros within tab panes.</em></p>
+    {{/confluence-code}}
+    <p><em>Note: The tabs container must include at least one tab pane. You can nest other macros within tab panes.</em></p>
+  {{/confluence-tab}}
 
-<hr />
-
-<h2>Code Block Macro</h2>
-<p>Displays code snippets with syntax highlighting.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Code Block Syntax"}}
+  {{#confluence-tab name="Code Block" icon="icon-sp-powerpoint"}}
+    <h2>Code Block Macro</h2>
+    <p>Displays code snippets with syntax highlighting.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Code Block Syntax"}}
 \{{#confluence-code language="lang" title="Optional Title" linenumbers=true|false theme="Optional Theme"}}
 // Your code snippet here
 function example() {
   return true;
 }
 \{{/confluence-code}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>language</code> (String, Optional): The language for syntax highlighting (e.g., <code>javascript</code>, <code>java</code>, <code>python</code>, <code>xml</code>, <code>sql</code>, <code>none</code>). Defaults to <code>none</code>.</li>
-    <li><code>title</code> (String, Optional): A title displayed above the code block.</li>
-    <li><code>linenumbers</code> (Boolean, Optional): Set to <code>true</code> to show line numbers. Defaults to <code>false</code>.</li>
-    <li><code>theme</code> (String, Optional): The Confluence code block theme (e.g., <code>Confluence</code>, <code>DJango</code>, <code>Eclipse</code>, etc.). Defaults to Confluence default.</li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Code Block Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>language</code> (String, Optional): The language for syntax highlighting (e.g., <code>javascript</code>, <code>java</code>, <code>python</code>, <code>xml</code>, <code>sql</code>, <code>none</code>). Defaults to <code>none</code>.</li>
+        <li><code>title</code> (String, Optional): A title displayed above the code block.</li>
+        <li><code>linenumbers</code> (Boolean, Optional): Set to <code>true</code> to show line numbers. Defaults to <code>false</code>.</li>
+        <li><code>theme</code> (String, Optional): The Confluence code block theme (e.g., <code>Confluence</code>, <code>DJango</code>, <code>Eclipse</code>, etc.). Defaults to Confluence default.</li>
+    </ul>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Code Block Example"}}
 \{{#confluence-code language="javascript" title="Example Function" linenumbers=true}}
 function greet(name) {
   console.log(`Hello, ${name}!`);
 }
 greet('World');
 \{{/confluence-code}}
-{{/confluence-code}}
-<p><em>Note: The content inside the <code>confluence-code</code> block is automatically wrapped in CDATA.</em></p>
+    {{/confluence-code}}
+    <p><em>Note: The content inside the <code>confluence-code</code> block is automatically wrapped in CDATA.</em></p>
+  {{/confluence-tab}}
 
-<hr />
-
-<h2>Table of Contents Macro</h2>
-<p>Generates a table of contents based on the headings (h1-h6) on the page.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="TOC Syntax"}}
+  {{#confluence-tab name="TOC & Status" icon="icon-sp-menu"}}
+    <h2>Table of Contents Macro</h2>
+    <p>Generates a table of contents based on the headings (h1-h6) on the page.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="TOC Syntax"}}
 \{{confluence-toc minLevel=1 maxLevel=6 type="list|flat" outline="true|false" style="disc|circle|square|decimal|lower-alpha|lower-roman|upper-alpha|upper-roman"}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>minLevel</code> (Number, Optional): The minimum heading level to include (1-6). Defaults to 1.</li>
-    <li><code>maxLevel</code> (Number, Optional): The maximum heading level to include (1-6). Defaults to 6.</li>
-    <li><code>type</code> (String, Optional): <code>list</code> (default) or <code>flat</code>.</li>
-    <li><code>outline</code> (Boolean, Optional): Indent items based on heading level. Defaults to <code>true</code>.</li>
-    <li><code>style</code> (String, Optional): List style type (CSS list-style-type values). Defaults to Confluence default.</li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="TOC Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>minLevel</code> (Number, Optional): The minimum heading level to include (1-6). Defaults to 1.</li>
+        <li><code>maxLevel</code> (Number, Optional): The maximum heading level to include (1-6). Defaults to 6.</li>
+        <li><code>type</code> (String, Optional): <code>list</code> (default) or <code>flat</code>.</li>
+        <li><code>outline</code> (Boolean, Optional): Indent items based on heading level. Defaults to <code>true</code>.</li>
+        <li><code>style</code> (String, Optional): List style type (CSS list-style-type values). Defaults to Confluence default.</li>
+    </ul>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="TOC Example"}}
 \{{confluence-toc minLevel=2 maxLevel=4 style="decimal"}}
-{{/confluence-code}}
+    {{/confluence-code}}
 
-<hr />
+    <hr />
 
-<h2>Status Macro</h2>
-<p>Displays a colored status lozenge.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Status Syntax"}}
+    <h2>Status Macro</h2>
+    <p>Displays a colored status lozenge.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Status Syntax"}}
 \{{confluence-status type="color" text="Status Text" subtle="true|false"}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>type</code> (String, Required): The color of the lozenge. Valid types: <code>grey</code> (default), <code>red</code>, <code>yellow</code>, <code>green</code>, <code>blue</code>, <code>purple</code>.</li>
-    <li><code>text</code> (String, Required): The text displayed inside the lozenge.</li>
-    <li><code>subtle</code> (Boolean, Optional): Use a subtle style. Defaults to <code>false</code>.</li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Status Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>type</code> (String, Required): The color of the lozenge. Valid types: <code>grey</code> (default), <code>red</code>, <code>yellow</code>, <code>green</code>, <code>blue</code>, <code>purple</code>.</li>
+        <li><code>text</code> (String, Required): The text displayed inside the lozenge.</li>
+        <li><code>subtle</code> (Boolean, Optional): Use a subtle style. Defaults to <code>false</code>.</li>
+    </ul>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Status Example"}}
 Task Status: \{{confluence-status type="green" text="Completed"}}
 Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
-{{/confluence-code}}
+    {{/confluence-code}}
+  {{/confluence-tab}}
 
-<hr />
-
-<h2>Image Macro</h2>
-<p>Embeds images in your Confluence pages with customizable attributes.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Image Syntax"}}
+  {{#confluence-tab name="Image Macro" icon="icon-sp-picture"}}
+    <h2>Image Macro</h2>
+    <p>Embeds images in your Confluence pages with customizable attributes.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Image Syntax"}}
 \{{confluence-image src="path/to/image.png" alt="Alternative text" width="300" height="200" align="center" border=true thumbnail=true title="Tooltip text" class="custom-class" style="custom-style"}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>src</code> (String, Required): Image source. Can be a filename for attached images or a full URL for external images.</li>
-    <li><code>alt</code> (String, Optional): Alternative text for accessibility.</li>
-    <li><code>title</code> (String, Optional): Tooltip text displayed on hover.</li>
-    <li><code>width</code> (String, Optional): Desired width of the image (e.g., "200", "50%").</li>
-    <li><code>height</code> (String, Optional): Desired height of the image (e.g., "150", "auto").</li>
-    <li><code>align</code> (String, Optional): Alignment of the image (left, center, right).</li>
-    <li><code>border</code> (Boolean, Optional): Whether to display a border around the image. Defaults to <code>false</code>.</li>
-    <li><code>thumbnail</code> (Boolean, Optional): Whether to render the image as a thumbnail. Defaults to <code>false</code>.</li>
-    <li><code>class</code> (String, Optional): CSS class for custom styling.</li>
-    <li><code>style</code> (String, Optional): Inline CSS styles.</li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Image Examples"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>src</code> (String, Required): Image source. Can be a filename for attached images or a full URL for external images.</li>
+        <li><code>alt</code> (String, Optional): Alternative text for accessibility.</li>
+        <li><code>title</code> (String, Optional): Tooltip text displayed on hover.</li>
+        <li><code>width</code> (String, Optional): Desired width of the image (e.g., "200", "50%").</li>
+        <li><code>height</code> (String, Optional): Desired height of the image (e.g., "150", "auto").</li>
+        <li><code>align</code> (String, Optional): Alignment of the image (left, center, right).</li>
+        <li><code>border</code> (Boolean, Optional): Whether to display a border around the image. Defaults to <code>false</code>.</li>
+        <li><code>thumbnail</code> (Boolean, Optional): Whether to render the image as a thumbnail. Defaults to <code>false</code>.</li>
+        <li><code>class</code> (String, Optional): CSS class for custom styling.</li>
+        <li><code>style</code> (String, Optional): Inline CSS styles.</li>
+    </ul>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Image Examples"}}
 <!-- Attached image example -->
 \{{confluence-image src="logo.png" alt="Company Logo" width="300" height="200" align="center"}}
 
 <!-- External image example -->
 \{{confluence-image src="https://example.com/image.jpg" title="External Image" border=true thumbnail=true}}
-{{/confluence-code}}
-<p><em>Note: For attached images, the filename specified in <code>src</code> must match a file in your project's <code>distDir</code> that is included by the <code>includedFiles</code> setting.</em></p>
+    {{/confluence-code}}
+    <p><em>Note: For attached images, the filename specified in <code>src</code> must match a file in your project's <code>distDir</code> that is included by the <code>includedFiles</code> setting.</em></p>
+  {{/confluence-tab}}
 
-<hr />
-
-<h2>Admonition Macros</h2>
-<p>Creates styled blocks for specific types of information (Info, Note, Warning, Tip). These are essentially pre-configured Panel macros.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Admonition Syntax"}}
+  {{#confluence-tab name="Admonitions" icon="icon-sp-tag"}}
+    <h2>Admonition Macros</h2>
+    <p>Creates styled blocks for specific types of information (Info, Note, Warning, Tip). These are essentially pre-configured Panel macros.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Admonition Syntax"}}
 \{{#confluence-info title="Optional Title"}}<p>Information content.</p>\{{/confluence-info}}
 \{{#confluence-note title="Optional Title"}}<p>Note content.</p>\{{/confluence-note}}
 \{{#confluence-warning title="Optional Title"}}<p>Warning content.</p>\{{/confluence-warning}}
 \{{#confluence-tip title="Optional Title"}}<p>Tip content.</p>\{{/confluence-tip}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>title</code> (String, Optional): The title displayed in the admonition header.</li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Admonition Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>title</code> (String, Optional): The title displayed in the admonition header.</li>
+    </ul>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Admonition Example"}}
 \{{#confluence-warning title="Security Alert"}}
   <p>Do not share your API token publicly.</p>
 \{{/confluence-warning}}
@@ -310,52 +312,52 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 \{{#confluence-tip}}
   <p>Use the <code>--debug</code> flag for detailed logs.</p>
 \{{/confluence-tip}}
-{{/confluence-code}}
+    {{/confluence-code}}
+  {{/confluence-tab}}
 
-<hr />
-
-<h2>Expand Macro</h2>
-<p>Creates a collapsible section of content.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Expand Syntax"}}
+  {{#confluence-tab name="Expand & Children" icon="icon-sp-list"}}
+    <h2>Expand Macro</h2>
+    <p>Creates a collapsible section of content.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Expand Syntax"}}
 \{{#confluence-expand title="Title for the Expand Section"}}
   <p>This content is initially hidden.</p>
   <p>It can contain any valid XHTML.</p>
 \{{/confluence-expand}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>title</code> (String, Required): The text displayed for the expand trigger.</li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Expand Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>title</code> (String, Required): The text displayed for the expand trigger.</li>
+    </ul>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Expand Example"}}
 \{{#confluence-expand title="Click to view Advanced Settings"}}
   <p>Setting 1: Enable feature X.</p>
   <p>Setting 2: Configure parameter Y.</p>
 \{{/confluence-expand}}
-{{/confluence-code}}
+    {{/confluence-code}}
 
-<hr />
+    <hr />
 
-<h2>Children Display Macro</h2>
-<p>Displays a list of child pages under the current page.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Children Display Syntax"}}
+    <h2>Children Display Macro</h2>
+    <p>Displays a list of child pages under the current page.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Children Display Syntax"}}
 \{{confluence-children}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong> None (at the moment, uses Confluence defaults)</p>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Children Display Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong> None (at the moment, uses Confluence defaults)</p>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Children Display Example"}}
 <h3>Sub-topics:</h3>
 \{{confluence-children}}
-{{/confluence-code}}
+    {{/confluence-code}}
+  {{/confluence-tab}}
 
-<hr />
-
-<h2>Link Macro</h2>
-<p>Creates links to various Confluence entities (pages, attachments, anchors) or external URLs.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Link Macro Syntax"}}
+  {{#confluence-tab name="Link Macro" icon="icon-sp-link"}}
+    <h2>Link Macro</h2>
+    <p>Creates links to various Confluence entities (pages, attachments, anchors) or external URLs.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Link Macro Syntax"}}
 <!-- Plain text link -->
 \{{confluence-link type="page" pageTitle="Target Page" text="Link to page" tooltip="Optional tooltip"}}
 
@@ -363,26 +365,26 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 \{{#confluence-link type="page" pageTitle="Target Page"}}
   \{{confluence-image src="logo.png" width="30"}}
 \{{/confluence-link}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>type</code> (String, Required): The type of link to create. Valid types:</li>
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
     <ul>
-        <li><code>page</code>: Link to another Confluence page</li>
-        <li><code>attachment</code>: Link to an attachment</li>
-        <li><code>url</code>: Link to an external URL</li>
-        <li><code>anchor</code>: Link to an anchor on the current page</li>
-        <li><code>pageAnchor</code>: Link to an anchor on another page</li>
+        <li><code>type</code> (String, Required): The type of link to create. Valid types:</li>
+        <ul>
+            <li><code>page</code>: Link to another Confluence page</li>
+            <li><code>attachment</code>: Link to an attachment</li>
+            <li><code>url</code>: Link to an external URL</li>
+            <li><code>anchor</code>: Link to an anchor on the current page</li>
+            <li><code>pageAnchor</code>: Link to an anchor on another page</li>
+        </ul>
+        <li><code>text</code> (String, Required for text links): The text to display for the link.</li>
+        <li><code>pageTitle</code> (String, Required for <code>page</code> and <code>pageAnchor</code> types): The title of the target Confluence page.</li>
+        <li><code>filename</code> (String, Required for <code>attachment</code> type): The filename of the attachment to link to.</li>
+        <li><code>url</code> (String, Required for <code>url</code> type): The URL for external links.</li>
+        <li><code>anchor</code> (String, Required for <code>anchor</code> and <code>pageAnchor</code> types): The anchor name/ID to link to.</li>
+        <li><code>tooltip</code> (String, Optional): Tooltip text that appears when hovering over the link.</li>
     </ul>
-    <li><code>text</code> (String, Required for text links): The text to display for the link.</li>
-    <li><code>pageTitle</code> (String, Required for <code>page</code> and <code>pageAnchor</code> types): The title of the target Confluence page.</li>
-    <li><code>filename</code> (String, Required for <code>attachment</code> type): The filename of the attachment to link to.</li>
-    <li><code>url</code> (String, Required for <code>url</code> type): The URL for external links.</li>
-    <li><code>anchor</code> (String, Required for <code>anchor</code> and <code>pageAnchor</code> types): The anchor name/ID to link to.</li>
-    <li><code>tooltip</code> (String, Optional): Tooltip text that appears when hovering over the link.</li>
-</ul>
-<p><strong>Example Usage:</strong></p>
-{{#confluence-code language="handlebars" title="Link Examples"}}
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="Link Examples"}}
 <!-- Link to another Confluence page -->
 \{{confluence-link type="page" pageTitle="Getting Started" text="View the Getting Started guide"}}
 
@@ -402,76 +404,78 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 \{{#confluence-link type="page" pageTitle="Dashboard"}}
   \{{confluence-image src="dashboard-icon.png" width="24" height="24"}}
 \{{/confluence-link}}
-{{/confluence-code}}
+    {{/confluence-code}}
+  {{/confluence-tab}}
 
-<hr />
+  {{#confluence-tab name="Other Helpers" icon="icon-sp-more"}}
+    <h2>Other Helpers</h2>
 
-<h2>Other Helpers</h2>
-
-<h3>Divider</h3>
-<p>Inserts a horizontal rule.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Divider Syntax"}}
+    <h3>Divider</h3>
+    <p>Inserts a horizontal rule.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Divider Syntax"}}
 \{{confluence-divider}}
-{{/confluence-code}}
+    {{/confluence-code}}
 
-<h3>Date</h3>
-<p>Displays a formatted date using the Confluence Date macro.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Date Syntax"}}
+    <h3>Date</h3>
+    <p>Displays a formatted date using the Confluence Date macro.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Date Syntax"}}
 \{{confluence-date date="YYYY-MM-DD" format="Optional Format"}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>date</code> (String, Required): The date in YYYY-MM-DD format.</li>
-    <li><code>format</code> (String, Optional): A date format string (e.g., <code>MMM dd, yyyy</code>). Defaults to Confluence default.</li>
-</ul>
-<p><strong>Example:</strong></p>
-{{#confluence-code language="handlebars" title="Date Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>date</code> (String, Required): The date in YYYY-MM-DD format.</li>
+        <li><code>format</code> (String, Optional): A date format string (e.g., <code>MMM dd, yyyy</code>). Defaults to Confluence default.</li>
+    </ul>
+    <p><strong>Example:</strong></p>
+    {{#confluence-code language="handlebars" title="Date Example"}}
 \{{confluence-date date="2024-03-15" format="dd MMM yyyy"}}
-{{/confluence-code}}
+    {{/confluence-code}}
 
-<h3>Anchor</h3>
-<p>Creates a named anchor point on the page.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Anchor Syntax"}}
+    <h3>Anchor</h3>
+    <p>Creates a named anchor point on the page.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Anchor Syntax"}}
 \{{confluence-anchor name="anchor-name"}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>name</code> (String, Required): The unique name for the anchor.</li>
-</ul>
-<p><strong>Example:</strong></p>
-{{#confluence-code language="handlebars" title="Anchor Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>name</code> (String, Required): The unique name for the anchor.</li>
+    </ul>
+    <p><strong>Example:</strong></p>
+    {{#confluence-code language="handlebars" title="Anchor Example"}}
 \{{confluence-anchor name="installation-section"}}
-{{/confluence-code}}
+    {{/confluence-code}}
 
-<h3>User Mention</h3>
-<p>Mentions a Confluence user, creating a link to their profile.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="User Mention Syntax"}}
+    <h3>User Mention</h3>
+    <p>Mentions a Confluence user, creating a link to their profile.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="User Mention Syntax"}}
 \{{confluence-user key="user-key"}}
-{{/confluence-code}}
-<p><strong>Parameters:</strong></p>
-<ul>
-    <li><code>key</code> (String, Required): The Confluence user key (often the username or a unique ID).</li>
-</ul>
-<p><strong>Example:</strong></p>
-{{#confluence-code language="handlebars" title="User Mention Example"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>key</code> (String, Required): The Confluence user key (often the username or a unique ID).</li>
+    </ul>
+    <p><strong>Example:</strong></p>
+    {{#confluence-code language="handlebars" title="User Mention Example"}}
 Contact \{{confluence-user key="jsmith"}} for details.
-{{/confluence-code}}
+    {{/confluence-code}}
 
-<h3>Raw</h3>
-<p>Outputs the content within the block without any Handlebars processing or HTML escaping. Use with extreme caution.</p>
-<p><strong>Syntax:</strong></p>
-{{#confluence-code language="handlebars" title="Raw Syntax"}}
+    <h3>Raw</h3>
+    <p>Outputs the content within the block without any Handlebars processing or HTML escaping. Use with extreme caution.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="Raw Syntax"}}
 \{{#raw}}
   <!-- Content here is output exactly as is -->
   <custom-tag data-attr="\{{not a variable}}">
     This will appear literally.
   </custom-tag>
 \{{/raw}}
-{{/confluence-code}}
+    {{/confluence-code}}
+  {{/confluence-tab}}
+{{/confluence-tabs}}
 
 <hr />
 <p><em>End of Macro Helper Reference. Last updated: {{currentDate}}</em></p>
