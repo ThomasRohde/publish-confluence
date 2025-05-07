@@ -275,7 +275,6 @@ export class ConfluenceClient {
     }
   }
 
-  // The rest of the class remains unchanged
   /** Find a page by its title within a specific space */
   async findPageByTitle(spaceKey: string, title: string): Promise<ConfluencePage | null> {
     // Log the search operation with contextual information
@@ -286,26 +285,54 @@ export class ConfluenceClient {
     });
     
     try {
-      // First try direct CQL search which is more efficient
+      // Try direct API approach first - this is more reliable than CQL search
+      this.logger.debug(`Using direct API approach to find page`, {
+        method: 'GET',
+        endpoint: '/content',
+        params: { spaceKey, title }
+      });
+      
+      const directResults = await this.request<ConfluenceContentArray<ConfluencePage>>({
+        method: 'GET',
+        url: '/content',
+        params: {
+          spaceKey,
+          title,
+          expand: 'version',
+          status: 'current'
+        }
+      });
+
+      if (directResults.results && directResults.results.length > 0) {
+        // Page found with direct API method
+        if (this.debug) {
+          console.log(`Page found via direct API: "${title}" (ID: ${directResults.results[0].id})`);
+        }
+        return directResults.results[0];
+      }
+      
+      // If direct API approach didn't find the page, try CQL search as fallback
+      this.logger.debug(`Direct API approach found no results, trying CQL search as fallback`);
       const searchParams = {
         cql: `type=page AND space.key="${spaceKey}" AND title="${title.replace(/"/g, '\\"')}"`,
       };
       
-      const results = await this.request<ConfluenceContentArray<ConfluencePage>>({
+      const cqlResults = await this.request<ConfluenceContentArray<ConfluencePage>>({
         method: 'GET',
         url: '/content/search',
         params: searchParams
       });
 
-      if (results.results && results.results.length > 0) {
-        // Page found
+      if (cqlResults.results && cqlResults.results.length > 0) {
+        // Page found with CQL search
         if (this.debug) {
-          console.log(`Page found: "${title}" (ID: ${results.results[0].id})`);
+          console.log(`Page found via CQL search: "${title}" (ID: ${cqlResults.results[0].id})`);
         }
-        return results.results[0];
+        return cqlResults.results[0];
       }
       
-      // If no results, return null
+      // If no results with either approach, return null
+      this.logger.debug(`Page not found with either approach: "${title}" in space "${spaceKey}"`);
       if (this.debug) {
         console.log(`Page not found: "${title}" in space "${spaceKey}"`);
       }
@@ -449,8 +476,15 @@ export class ConfluenceClient {
 
   /**
    * Updates an existing page
+   * 
+   * @param pageId - The ID of the page to update
+   * @param title - The title of the page
+   * @param bodyContent - The content of the page in Confluence Storage Format
+   * @param version - The current version number of the page
+   * @param updateMessage - Optional message for the page history
+   * @returns The updated page
    */
-  private async updatePage(
+  async updatePage(
     pageId: string,
     title: string,
     bodyContent: string,

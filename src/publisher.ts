@@ -375,28 +375,180 @@ async function publishPageRecursive(
   cfg: PublishConfig,
   options?: PublishOptions
 ): Promise<void> {
-  // Upsert page
+  // Initial context setup for templates
   const context = { pageTitle: cfg.pageTitle, currentDate: new Date().toISOString().split('T')[0] };
+  
+  // Load page template
   const pageTpl = await loadTemplate(cfg.templatePath, DEFAULT_PAGE_TEMPLATE);
   const compile = Handlebars.compile(pageTpl);
-  const initialMacro = await processMacroTemplates(cfg, context, undefined, undefined, undefined, options);
-  const content = compile({ pageTitle: cfg.pageTitle, macro: initialMacro, currentDate: context.currentDate });
-  const page = await handlePageUpsert(client, cfg, content);
-
-  // Handle attachments regardless of macroTemplatePath
-  // Process file attachments based on includedFiles and excludedFiles
+  
+  // First, search for existing page to determine if this is create or update
+  log.debug(`Searching for existing page "${cfg.pageTitle}" in space "${cfg.spaceKey}"`);
+  let existingPage = await client.findPageByTitle(cfg.spaceKey, cfg.pageTitle);
+  
+  // Find attachments regardless of page exists or not - we'll need them either way
+  log.debug(`Finding files to attach from directory: ${cfg.distDir}`);
   const files = await findFilesToAttach(cfg.distDir, cfg.includedFiles, cfg.excludedFiles).catch(() => []);
-  if (files.length) {
-    await uploadAttachments(client, page.id, cfg.distDir, files);
+  
+  // Track whether we need to do a final page update (for resolved attachment links)
+  let needsFinalUpdate = false;
+  let pageId: string | undefined;
+  
+  // HANDLE EXISTING OR NEW PAGE
+  if (existingPage) {
+    // PAGE EXISTS FLOW
+    log.debug(`Found existing page with ID ${existingPage.id}`);
+    pageId = existingPage.id;
     
-    // Add a small delay to ensure attachments are fully processed
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // Generate initial macro content with attachment links
+    const initialMacro = await processMacroTemplates(
+      cfg, 
+      context, 
+      getAuthCredentials().baseUrl, 
+      pageId, 
+      files, 
+      options
+    );
     
-    // Only update the macro content if there's a macroTemplatePath
-    if (cfg.macroTemplatePath) {
-      const updatedMacro = await processMacroTemplates(cfg, context, getAuthCredentials().baseUrl, page.id, files, options);
-      const updatedContent = compile({ pageTitle: cfg.pageTitle, macro: updatedMacro, currentDate: context.currentDate });
-      await handlePageUpsert(client, cfg, updatedContent);
+    // Update the page content with macro containing proper attachment links
+    const content = compile({ 
+      pageTitle: cfg.pageTitle, 
+      macro: initialMacro, 
+      currentDate: context.currentDate 
+    });
+    
+    // Update the page
+    log.debug(`Updating existing page with ID ${pageId}`);
+    await client.updatePage(
+      pageId,
+      cfg.pageTitle,
+      escapeForConfluence(content),
+      existingPage.version?.number ?? 1,
+      `Updated by publish-confluence at ${new Date().toISOString()}`
+    );
+  } else {
+    // PAGE DOESN'T EXIST FLOW - try to create new page
+    log.debug(`No existing page found, will create new page`);
+    
+    // Generate initial macro content without attachment links (they'll be added later)
+    const initialMacro = await processMacroTemplates(cfg, context, undefined, undefined, undefined, options);
+    const content = compile({ 
+      pageTitle: cfg.pageTitle, 
+      macro: initialMacro, 
+      currentDate: context.currentDate 
+    });
+    
+    try {
+      // Try to create the page
+      log.debug(`Creating new page with title "${cfg.pageTitle}" in space "${cfg.spaceKey}"`);
+      const page = await handlePageUpsert(client, cfg, content);
+      pageId = page.id;
+      log.debug(`Successfully created new page with ID ${pageId}`);
+      
+      if (files.length > 0 && cfg.macroTemplatePath) {
+        needsFinalUpdate = true; // We'll need to update the page with attachment links
+      }
+    } catch (error: any) {
+      // Check if this is a "page already exists" error
+      if (isPageAlreadyExistsError(error)) {
+        log.debug(`Caught "page already exists" error. Searching again for the page.`);
+        
+        // The page exists but we couldn't find it earlier - try again with retries and backoff
+        for (let attempt = 0; attempt < 3; attempt++) {
+          // Add exponential backoff between retries
+          const backoffTime = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+          log.debug(`Waiting ${backoffTime}ms before retry attempt ${attempt + 1}...`);
+          await new Promise(resolve => setTimeout(resolve, backoffTime));
+          
+          // Try to find the page again with a fresh search
+          existingPage = await client.findPageByTitle(cfg.spaceKey, cfg.pageTitle);
+          
+          if (existingPage) {
+            log.debug(`Found existing page on retry attempt ${attempt + 1} with ID ${existingPage.id}`);
+            pageId = existingPage.id;
+            
+            // Generate macro content with proper attachment links
+            const updatedMacro = await processMacroTemplates(
+              cfg, 
+              context, 
+              getAuthCredentials().baseUrl, 
+              pageId, 
+              files, 
+              options
+            );
+            
+            const updatedContent = compile({ 
+              pageTitle: cfg.pageTitle, 
+              macro: updatedMacro, 
+              currentDate: context.currentDate 
+            });
+            
+            // Update the page with proper content
+            log.debug(`Updating existing page with ID ${pageId} (found after create attempt)`);
+            await client.updatePage(
+              pageId,
+              cfg.pageTitle,
+              escapeForConfluence(updatedContent),
+              existingPage.version?.number ?? 1,
+              `Updated by publish-confluence at ${new Date().toISOString()}`
+            );
+            
+            // We've already updated the page with attachment links, so no need for final update
+            needsFinalUpdate = false;
+            break;
+          }
+        }
+        
+        if (!existingPage || !pageId) {
+          throw new Error(`Could not find page "${cfg.pageTitle}" after multiple retries, despite Confluence reporting it exists.`);
+        }
+      } else {
+        // Not a "page already exists" error, so re-throw
+        throw error;
+      }
+    }
+  }
+  
+  // Ensure we have a valid pageId before proceeding with attachments
+  if (!pageId) {
+    throw new Error(`Failed to get a valid page ID for "${cfg.pageTitle}" after create/update attempts.`);
+  }
+  
+  // HANDLE ATTACHMENTS - At this point we should always have a valid pageId
+  if (files.length > 0) {
+    log.info(`Uploading ${files.length} attachments to ${existingPage ? 'existing' : 'new'} page ${pageId}`);
+    await uploadAttachments(client, pageId, cfg.distDir, files);
+    
+    // Only update the macro content again if there's a macroTemplatePath and we need a final update
+    if (cfg.macroTemplatePath && needsFinalUpdate) {
+      // Add a small delay to ensure attachments are fully processed
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Generate updated macro content with attachment links
+      const updatedMacro = await processMacroTemplates(
+        cfg, 
+        context, 
+        getAuthCredentials().baseUrl, 
+        pageId, 
+        files, 
+        options
+      );
+      
+      const updatedContent = compile({ 
+        pageTitle: cfg.pageTitle, 
+        macro: updatedMacro, 
+        currentDate: context.currentDate 
+      });
+      
+      // Update the page with attachment links resolved
+      log.debug(`Updating page ${pageId} with resolved attachment links`);
+      await client.updatePage(
+        pageId,
+        cfg.pageTitle,
+        escapeForConfluence(updatedContent),
+        existingPage?.version?.number ? existingPage.version.number + 1 : 1,
+        `Updated attachments by publish-confluence at ${new Date().toISOString()}`
+      );
     }
   }
 
