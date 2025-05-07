@@ -173,6 +173,10 @@ export async function processMacroTemplates(
   if (baseUrl && pageId && attachments && attachments.length > 0) {
     context.scripts = generateScriptTags(attachments, baseUrl, pageId);
     context.styles = generateStyleTags(attachments, baseUrl, pageId);
+    // Add pageId to the context for use in confluence-url helper
+    context.pageId = pageId;
+    // Add baseUrl to the context for use in confluence-url helper
+    context.baseUrl = baseUrl;
   } else {
     context.scripts = '';
     context.styles = '';
@@ -375,8 +379,22 @@ async function publishPageRecursive(
   cfg: PublishConfig,
   options?: PublishOptions
 ): Promise<void> {
-  // Initial context setup for templates
-  const context = { pageTitle: cfg.pageTitle, currentDate: new Date().toISOString().split('T')[0] };
+  // Create a context interface to define the expected properties
+  interface TemplateContext {
+    pageTitle: string;
+    currentDate: string;
+    pageId?: string;
+    baseUrl?: string;
+    scripts?: string;
+    styles?: string;
+    comment?: boolean;
+  }
+  
+  // Initial context setup for templates with proper typing
+  const context: TemplateContext = { 
+    pageTitle: cfg.pageTitle, 
+    currentDate: new Date().toISOString().split('T')[0]
+  };
   
   // Load page template
   const pageTpl = await loadTemplate(cfg.templatePath, DEFAULT_PAGE_TEMPLATE);
@@ -400,6 +418,10 @@ async function publishPageRecursive(
     log.debug(`Found existing page with ID ${existingPage.id}`);
     pageId = existingPage.id;
     
+    // Add pageId and baseUrl to the context for use in confluence-url helper in both templates
+    context.pageId = pageId;
+    context.baseUrl = getAuthCredentials().baseUrl;
+    
     // Generate initial macro content with attachment links
     const initialMacro = await processMacroTemplates(
       cfg, 
@@ -414,7 +436,9 @@ async function publishPageRecursive(
     const content = compile({ 
       pageTitle: cfg.pageTitle, 
       macro: initialMacro, 
-      currentDate: context.currentDate 
+      currentDate: context.currentDate,
+      pageId: pageId,
+      baseUrl: getAuthCredentials().baseUrl
     });
     
     // Update the page
@@ -445,6 +469,10 @@ async function publishPageRecursive(
       pageId = page.id;
       log.debug(`Successfully created new page with ID ${pageId}`);
       
+      // Add pageId and baseUrl to the context now that we have them
+      context.pageId = pageId;
+      context.baseUrl = getAuthCredentials().baseUrl;
+      
       if (files.length > 0 && cfg.macroTemplatePath) {
         needsFinalUpdate = true; // We'll need to update the page with attachment links
       }
@@ -467,6 +495,10 @@ async function publishPageRecursive(
             log.debug(`Found existing page on retry attempt ${attempt + 1} with ID ${existingPage.id}`);
             pageId = existingPage.id;
             
+            // Add pageId and baseUrl to the context now that we have them
+            context.pageId = pageId;
+            context.baseUrl = getAuthCredentials().baseUrl;
+            
             // Generate macro content with proper attachment links
             const updatedMacro = await processMacroTemplates(
               cfg, 
@@ -480,7 +512,9 @@ async function publishPageRecursive(
             const updatedContent = compile({ 
               pageTitle: cfg.pageTitle, 
               macro: updatedMacro, 
-              currentDate: context.currentDate 
+              currentDate: context.currentDate,
+              pageId: pageId,
+              baseUrl: getAuthCredentials().baseUrl
             });
             
             // Update the page with proper content
@@ -524,6 +558,10 @@ async function publishPageRecursive(
       // Add a small delay to ensure attachments are fully processed
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // Make sure context has pageId and baseUrl
+      context.pageId = pageId;
+      context.baseUrl = getAuthCredentials().baseUrl;
+      
       // Generate updated macro content with attachment links
       const updatedMacro = await processMacroTemplates(
         cfg, 
@@ -537,7 +575,9 @@ async function publishPageRecursive(
       const updatedContent = compile({ 
         pageTitle: cfg.pageTitle, 
         macro: updatedMacro, 
-        currentDate: context.currentDate 
+        currentDate: context.currentDate,
+        pageId: pageId,
+        baseUrl: getAuthCredentials().baseUrl
       });
       
       // Update the page with attachment links resolved

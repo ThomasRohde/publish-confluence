@@ -38,6 +38,55 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
   });
   
   /**
+   * URL helper - Generates a standard URL reference to an attached file
+   * 
+   * This helper generates a standard URL reference for a file attached to a Confluence page.
+   * It uses the Confluence download URL format which works in all contexts (scripts, stylesheets, img tags).
+   * 
+   * Usage:
+   * ```handlebars
+   * <script src="{{confluence-url file="script.js"}}"></script>
+   * <link rel="stylesheet" href="{{confluence-url file="styles.css"}}">
+   * <img src="{{confluence-url file="image.png"}}">
+   * ```
+   * 
+   * @param file - Name of the attached file
+   */
+  handlebars.registerHelper('confluence-url', function(this: any, options: Handlebars.HelperOptions) {
+    const filename = options.hash.file;
+    
+    // Ensure filename parameter is provided
+    if (!filename) {
+      console.warn('Warning: confluence-url helper called without required "file" parameter');
+      return '';
+    }
+    
+    // Access pageId and baseUrl from the current context
+    // In Handlebars, 'this' refers to the current context data
+    const pageId = this.pageId || '';
+    const baseUrl = this.baseUrl || '';
+    
+    // Build the complete URL path
+    let fullUrl = '';
+    
+    // If we have baseUrl, use it to build the absolute URL
+    if (baseUrl) {
+      // Ensure baseUrl doesn't have a trailing slash before appending the path
+      const baseUrlNormalized = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+      fullUrl = `${baseUrlNormalized}/download/attachments/${pageId}/${filename}`;
+    } else {
+      // Fallback to relative URL if baseUrl is not available, but always include the pageId
+      fullUrl = `/download/attachments/${pageId}/${filename}`;
+    }
+    
+    if (!pageId) {
+      console.warn(`Warning: confluence-url used without pageId in context. File: ${filename}`);
+    }
+    
+    return new handlebars.SafeString(fullUrl);
+  });
+
+  /**
    * Children macro - Displays a list of child pages
    * 
    * Usage:
@@ -180,8 +229,7 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
    *   {{/confluence-tab}}
    *   {{#confluence-tab name="Tab 2" icon="icon-sp-flag"}}
    *     <p>Content for Tab 2</p>
-   *   {{/confluence-tab}}
-   * {{/confluence-tabs}}
+   *   {{/confluence-tabs}}
    * ```
    * 
    * @param disposition - Tab orientation: "horizontal" or "vertical"

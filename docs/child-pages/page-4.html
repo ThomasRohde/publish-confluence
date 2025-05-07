@@ -26,6 +26,35 @@
     <p><em>Note: The content inside <code>confluence-html</code> is the direct body of the HTML macro. Remember to include <code>\{{{styles}}}</code> and <code>\{{{scripts}}}</code> if you are using a <code>macroTemplatePath</code>.</em></p>
   {{/confluence-tab}}
 
+  {{#confluence-tab name="URL Helper" icon="icon-sp-link"}}
+    <h2>URL Helper</h2>
+    <p>Generates a standard URL reference to a file attached to a Confluence page. This is useful for creating links to scripts, stylesheets, and images that have been attached to the page.</p>
+    <p><strong>Syntax:</strong></p>
+    {{#confluence-code language="handlebars" title="URL Helper Syntax"}}
+\{{confluence-url file="filename.ext"}}
+    {{/confluence-code}}
+    <p><strong>Parameters:</strong></p>
+    <ul>
+        <li><code>file</code> (String, Required): The name of the attached file to reference.</li>
+    </ul>
+    <p><strong>Example Usage:</strong></p>
+    {{#confluence-code language="handlebars" title="URL Helper Examples"}}
+<!-- In a script tag -->
+<script src="\{{confluence-url file="app.js"}}"></script>
+
+<!-- In a stylesheet link -->
+<link rel="stylesheet" href="\{{confluence-url file="styles.css"}}">
+
+<!-- In an image source -->
+<img src="\{{confluence-url file="logo.png"}}" alt="Logo">
+
+<!-- To create a download link -->
+<a href="\{{confluence-url file="document.pdf"}}">Download PDF</a>
+    {{/confluence-code}}
+    <p><em>Note: The helper automatically builds the correct Confluence attachment URL format using the current page's <code>pageId</code> and <code>baseUrl</code> from the context.</em></p>
+    <p><em>If <code>baseUrl</code> is available in the context, the helper generates an absolute URL (e.g., <code>https://example.atlassian.net/download/attachments/123456/file.js</code>). Otherwise, it falls back to a relative URL (e.g., <code>/download/attachments/123456/file.js</code>).</em></p>
+  {{/confluence-tab}}
+
   {{#confluence-tab name="Panel Macro" icon="icon-sp-sitemap"}}
     <h2>Panel Macro</h2>
     <p>Creates a standard Confluence panel to highlight information.</p>

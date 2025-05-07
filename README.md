@@ -181,6 +181,21 @@ Embeds HTML content, typically used for JavaScript applications:
 {{/confluence-html}}
 ```
 
+### URL Helper
+
+Generates a standard URL reference to a file attached to a Confluence page:
+
+```handlebars
+<script src="{{confluence-url file="script.js"}}"></script>
+<link rel="stylesheet" href="{{confluence-url file="styles.css"}}">
+<img src="{{confluence-image src="image.png"}}">
+```
+
+Parameters:
+- `file`: Name of the attached file (required)
+
+The helper automatically builds the correct Confluence attachment URL format using the current page's `pageId` and `baseUrl` from the context.
+
 ### Panel Macro
 
 Creates a Confluence panel with customizable appearance:

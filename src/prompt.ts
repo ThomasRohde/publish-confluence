@@ -37,6 +37,7 @@ Your primary goal is to generate valid HTML files (\`.html\`) that serve as temp
 
 3.  **\`publish-confluence\` Macro Helpers (Handlebars Helpers):** These helpers generate Confluence Storage Format XML for various macros. They can be used in the *Page Template*.
     *   \`{{#confluence-html}} ... {{/confluence-html}}\`: Generates the \`<ac:structured-macro ac:name="html">...</ac:structured-macro>\` block. Typically used in the *Macro Template* or directly in the *Page Template* if \`macroTemplatePath\` is null. The content inside should include the app's root element and \`{{{styles}}}\`, \`{{{scripts}}}\`.
+    *   \`{{confluence-url file="filename.js"}}\`: Generates a standard URL reference to a file attached to the Confluence page. Useful for script sources, stylesheets, or image references. Works in all contexts (scripts, stylesheets, img tags).
     *   \`{{#confluence-panel title="Panel Title" borderStyle="solid" borderColor="#cccccc" borderWidth="1" bgColor="#f5f5f5" titleBGColor="#e0e0e0" titleColor="#000000" comment=true}} ... {{/confluence-panel}}\`: Creates a Confluence panel. Content inside must be valid XHTML.
     *   \`{{#confluence-layout}} ... {{/confluence-layout}}\`: Wrapper for layout sections.
     *   \`{{#layout-section type="single|two_equal|two_left_sidebar|two_right_sidebar|three_equal|three_with_sidebars"}} ... {{/layout-section}}\`: Defines a layout row. Must contain \`layout-cell\` helpers.
@@ -115,36 +116,4 @@ You will translate my description of desired Confluence page content into a vali
 *   Content inside block helpers must itself be valid Confluence Storage Format XHTML or appropriately wrapped (e.g., in \`CDATA\` for code blocks).
 *   Respect the required structure for layout macros: \`{{#confluence-layout}}\` must contain \`{{#layout-section}}\`, which must contain \`{{#layout-cell}}\`.
 *   When using \`{{confluence-include}}\`, ensure the referenced file exists and does not contain recursive includes.
-*   For developer-specific content, use the \`comment=true\` parameter in admonition macros (\`confluence-info\`, \`confluence-note\`, \`confluence-warning\`, \`confluence-tip\`).
-
-## Example Scenario
-
-If I ask for: "Create a **Page Template** that shows the page title, then a two-column layout. The left column should have an info panel titled 'About' with the text 'This is the app.'. The right column should contain the main application macro \`{{{macro}}}\`. Add a developer note that will only appear with the --comment flag. Finally, add a horizontal rule and the last updated date."
-
-You should generate an HTML file containing something like:
-
-\`\`\`html
-<h1>{{pageTitle}}</h1>
-
-{{#confluence-layout}}
-  {{#layout-section type="two_equal"}}
-    {{#layout-cell}}
-      {{#confluence-panel title="About" type="info"}}
-        <p>This is the app.</p>
-      {{/confluence-panel}}
-    {{/layout-cell}}
-    {{#layout-cell}}
-      {{{macro}}}
-    {{/layout-cell}}
-  {{/layout-section}}
-{{/confluence-layout}}
-
-{{#confluence-note title="Developer Note" comment=true}}
-  <p>This note will only be visible when using the --comment flag.</p>
-{{/confluence-note}}
-
-<hr />
-<p><em>Last updated: {{currentDate}}</em></p>
-\`\`\`
-
-Now, await my request for a template generation.`;
+*   For developer-specific content, use the \`comment=true\` parameter in admonition macros (\`confluence-info\`, \`confluence-note\`, \`confluence-warning\`, \`confluence-tip\`).`;
