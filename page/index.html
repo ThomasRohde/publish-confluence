@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>publish-confluence: Revolutionize Your Confluence Workflow</title>
+    <style>
+        :root {
+            --bg-color: #1e1e2f; /* Dark blue-purple */
+            --card-bg-color: #2a2a3f; /* Slightly lighter card background */
+            --text-color: #e0e0e0;
+            --heading-color: #ffffff;
+            --primary-accent: #3498db; /* Bright Blue */
+            --secondary-accent: #1abc9c; /* Teal/Green */
+            --code-bg-color: #2d2d2d;
+            --code-text-color: #d4d4d4;
+            --border-color: #44445a;
+            --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        header#navbar {
+            background-color: var(--card-bg-color);
+            color: var(--heading-color);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header#navbar .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-accent);
+        }
+
+        header#navbar nav ul {
+            list-style: none;
+            display: flex;
+        }
+
+        header#navbar nav ul li {
+            margin-left: 1.5rem;
+        }
+
+        header#navbar nav ul li a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        header#navbar nav ul li a:hover,
+        header#navbar nav ul li a:focus {
+            color: var(--primary-accent);
+        }
+        
+        /* Hide nav on smaller screens for simplicity, could be a burger menu with JS */
+        @media (max-width: 768px) {
+            header#navbar nav {
+                display: none;
+            }
+        }
+
+
+        main {
+            padding-top: 80px; /* Adjust based on navbar height */
+        }
+
+        section {
+            padding: 4rem 2rem;
+            min-height: 80vh;
+            border-bottom: 1px solid var(--border-color);
+        }
+        section:last-child {
+            border-bottom: none;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            color: var(--heading-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+        section h2::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-accent);
+            margin: 0.5rem auto 0;
+            border-radius: 2px;
+        }
+        
+        section h3 {
+            font-size: 1.8rem;
+            color: var(--secondary-accent);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p, li {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        ul, ol {
+            margin-left: 1.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            text-align: center;
+            padding-top: 6rem;
+            padding-bottom: 6rem;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--heading-color);
+            margin-bottom: 1rem;
+        }
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary-accent);
+            color: var(--heading-color);
+            padding: 0.8rem 1.8rem;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .cta-button:hover {
+            background-color: #2980b9; /* Darker blue */
+            transform: translateY(-2px);
+        }
+        .cta-button.secondary {
+            background-color: transparent;
+            border: 2px solid var(--secondary-accent);
+            color: var(--secondary-accent);
+        }
+        .cta-button.secondary:hover {
+            background-color: var(--secondary-accent);
+            color: var(--heading-color);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .feature-card {
+            background-color: var(--card-bg-color);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .feature-card .icon {
+            font-size: 2.5rem;
+            color: var(--primary-accent);
+            margin-bottom: 1rem;
+        }
+        .feature-card h4 {
+            font-size: 1.4rem;
+            color: var(--secondary-accent);
+            margin-bottom: 0.5rem;
+        }
+
+        pre, code {
+            font-family: var(--font-mono);
+            font-size: 0.95em;
+        }
+        pre {
+            background-color: var(--code-bg-color);
+            color: var(--code-text-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+        }
+        code:not(pre > code) { /* Inline code */
+            background-color: var(--code-bg-color);
+            color: var(--secondary-accent);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            border-collapse: collapse;
+            background-color: var(--card-bg-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        th, td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: #3a3a4f; /* Darker header for table */
+            color: var(--heading-color);
+            font-weight: bold;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:nth-child(even) {
+            background-color: #2f2f44; /* Slightly different for even rows */
+        }
+
+        .workflow-steps {
+            list-style: none;
+            padding-left: 0;
+            counter-reset: workflow-counter;
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+        .workflow-steps li {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        .workflow-steps li::before {
+            counter-increment: workflow-counter;
+            content: counter(workflow-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1.8rem;
+            height: 1.8rem;
+            background-color: var(--primary-accent);
+            color: var(--heading-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* Macro Showcase Tabs */
+        .macro-showcase {
+            max-width: 900px;
+            margin: 2rem auto;
+            background-color: var(--card-bg-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .tabs input[type="radio"] {
+            display: none;
+        }
+        .tabs label {
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text-color);
+            border-bottom: 3px solid transparent;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .tabs label:hover {
+            color: var(--primary-accent);
+        }
+        .tabs input[type="radio"]:checked + label {
+            color: var(--primary-accent);
+            border-bottom-color: var(--primary-accent);
+        }
+        .tab-content {
+            display: none;
+            padding-top: 1rem;
+        }
+        .tabs input[type="radio"]:checked + label + .tab-content {
+            display: block;
+        }
+        .tab-content h4 {
+            color: var(--secondary-accent);
+            margin-bottom: 0.5rem;
+        }
+        .tab-content .params {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: #aaa;
+        }
+        .tab-content .output-example {
+            border: 1px dashed var(--border-color);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            background-color: var(--bg-color);
+        }
+        .output-example p {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .output-example .status-green { color: #27ae60; font-weight: bold; }
+        .output-example .status-blue { color: #2980b9; font-weight: bold; }
+        .output-example .panel { border-left: 3px solid var(--primary-accent); padding-left: 10px; background: #333; margin: 5px 0; }
+        .output-example .code-block { background: #111; padding: 10px; border-radius: 4px; color: #ccc; font-family: var(--font-mono); white-space: pre-wrap;}
+
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        footer a {
+            color: var(--primary-accent);
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    <header id="navbar">
+        <div class="logo">publish-confluence</div>
+        <nav>
+            <ul>
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#quick-start">Quick Start</a></li>
+                <li><a href="#macros">Macros</a></li>
+                <li><a href="#cli">CLI</a></li>
+                <li><a href="#cta">Get Started</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="hero">
+            <div class="container">
+                <h1>Publish-Confluence</h1>
+                <p class="subtitle">Instantly deploy modern JavaScript & TypeScript applications and rich documentation directly to your Confluence pages. Streamline development, testing, and deployment cycles with one simple command.</p>
+                <a href="#quick-start" class="cta-button">Get Started Quickly</a>
+                <a href="https://github.com/thomasrohde/publish-confluence" target="_blank" class="cta-button secondary" style="margin-left: 1rem;">View on GitHub</a>
+            </div>
+        </section>
+
+        <section id="challenge">
+            <div class="container">
+                <h2>The Challenge: Manual Confluence Updates are Tedious</h2>
+                <p>Keeping Confluence pages up-to-date with your latest web applications, interactive dashboards, or even complex technical documentation can be a real pain. Manual uploads, copy-pasting HTML, wrestling with brittle macros, and ensuring all assets are correctly linked often leads to:</p>
+                <ul>
+                    <li>Time-consuming and error-prone processes.</li>
+                    <li>Outdated information and applications on Confluence.</li>
+                    <li>Inconsistent presentation and broken user experiences.</li>
+                    <li>Difficulty in maintaining documentation-as-code and version control.</li>
+                </ul>
+                <p>You need a way to bridge the gap between your modern development workflow and Confluence's content management capabilities seamlessly.</p>
+            </div>
+        </section>
+
+        <section id="solution">
+            <div class="container">
+                <h2>The Solution: Publish-Confluence</h2>
+                <p><strong>publish-confluence</strong> is a powerful CLI tool designed to eliminate these frustrations. It empowers you to embed interactive web applications, dynamic dashboards, and comprehensive documentation sites directly into Confluence with a single command.</p>
+                <p>Develop locally using your favorite stack (React, Vue, Svelte, Vanilla JS, etc.), build your project, and then let <code>publish-confluence</code> handle the rest. It intelligently uploads your application, manages assets, and renders your content using customizable templates and powerful Confluence macro helpers.</p>
+                <p>From simple widgets to entire documentation portals with nested pages, <code>publish-confluence</code> makes it fast, reliable, and automated.</p>
+            </div>
+        </section>
+
+        <section id="features">
+            <div class="container">
+                <h2>Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="icon">🚀</div>
+                        <h4>Instant App Publishing</h4>
+                        <p>Deploy JavaScript/TypeScript applications to Confluence pages in seconds. Perfect for rapid iteration and continuous delivery.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">📦</div>
+                        <h4>Seamless Asset Management</h4>
+                        <p>Automatically uploads and links all build assets (JS, CSS, images, fonts) to the Confluence page, ensuring everything just works.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🎨</div>
+                        <h4>Customizable Templates</h4>
+                        <p>Utilize Handlebars-powered templates for full control over page layout and the embedded HTML macro content.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🛠️</div>
+                        <h4>Powerful Macro Library</h4>
+                        <p>Easily compose Confluence-native macros (panels, layouts, code blocks, tabs, etc.) directly in your templates for rich, interactive content.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">⚙️</div>
+                        <h4>Effortless Configuration</h4>
+                        <p>Get started quickly with sensible defaults, or fine-tune every aspect via a simple JSON configuration and environment variables.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🔄</div>
+                        <h4>Modern Workflow Support</h4>
+                        <p>Designed for modern JavaScript/TypeScript projects and build tools (Vite, Webpack, Rollup), supporting rapid development and testing.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">📄</div>
+                        <h4>Nested Page Structures</h4>
+                        <p>Manage complex documentation with nested child pages, all configured and published automatically.</p>
+                    </div>
+                     <div class="feature-card">
+                        <div class="icon">📈</div>
+                        <h4>Mermaid.js Integration</h4>
+                        <p>Embed Mermaid diagrams directly in your Confluence pages using a dedicated Handlebars helper.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="quick-start">
+            <div class="container">
+                <h2>Quick Start</h2>
+                <p>Getting up and running with <code>publish-confluence</code> is straightforward:</p>
+
+                <h3>1. Installation</h3>
+                <p>Install the tool globally or as a project dependency:</p>
+                <pre><code class="language-bash">npm install -g publish-confluence
+# or for a project
+npm install --save-dev publish-confluence</code></pre>
+
+                <h3>2. Environment Setup</h3>
+                <p>Create a <code>.env</code> file in your project root with your Confluence API token and base URL:</p>
+                <pre><code class="language-dotenv">CONFLUENCE_BASE_URL=https://your-confluence-instance.atlassian.net
+CONFLUENCE_TOKEN=your_api_token</code></pre>
+
+                <h3>3. Configuration (Optional, but Recommended)</h3>
+                <p>Create a <code>publish-confluence.json</code> file in your project root to specify your space, page title, and build directory:</p>
+                <pre><code class="language-json">{
+  "spaceKey": "YOURSPACE",
+  "pageTitle": "My Awesome JavaScript App",
+  "parentPageTitle": "Applications Dashboard", // Optional
+  "distDir": "./dist" // Your build output directory
+}</code></pre>
+
+                <h3>4. Build & Publish</h3>
+                <p>First, build your application as you normally would (e.g., <code>npm run build</code>). Then, run <code>publish-confluence</code>:</p>
+                <pre><code class="language-bash"># If installed globally
+publish-confluence
+
+# If installed as a project dependency
+npx publish-confluence</code></pre>
+                <p>That's it! Your application or documentation will be published to the specified Confluence page.</p>
+            </div>
+        </section>
+        
+        <section id="how-it-works">
+            <div class="container">
+                <h2>How It Works: A Simplified View</h2>
+                <p><code>publish-confluence</code> simplifies the process of getting your web content onto Confluence by automating several steps:</p>
+                <ol class="workflow-steps">
+                    <li><strong>You Develop:</strong> Create your JavaScript/TypeScript application or documentation using your preferred tools and frameworks.</li>
+                    <li><strong>You Build:</strong> Run your project's build process (e.g., <code>vite build</code>, <code>webpack</code>) which outputs static assets to a distribution directory (e.g., <code>./dist</code>).</li>
+                    <li><strong>Configure <code>publish-confluence</code>:</strong> Define where and how to publish using <code>publish-confluence.json</code> and <code>.env</code>. Customize page and macro templates if needed.</li>
+                    <li><strong>Run <code>publish-confluence</code>:</strong> The CLI tool reads your configuration, finds your build assets, and prepares the content for Confluence.</li>
+                    <li><strong>Asset Upload:</strong> All necessary files (JS, CSS, images, etc.) from your <code>distDir</code> are uploaded as attachments to the target Confluence page.</li>
+                    <li><strong>Template Processing:</strong> Your Handlebars templates (<code>confluence-template.html</code> and <code>macro-template.html</code>) are processed. Placeholders like <code>{{{scripts}}}</code> and <code>{{{styles}}}</code> are replaced with links to the uploaded assets. Macro helpers generate Confluence-specific XHTML.</li>
+                    <li><strong>Page Creation/Update:</strong> <code>publish-confluence</code> interacts with the Confluence API to create a new page or update an existing one with the generated content and attached assets. Nested pages are handled recursively.</li>
+                    <li><strong>View on Confluence:</strong> Your application or documentation is now live and interactive on Confluence!</li>
+                </ol>
+            </div>
+        </section>
+
+        <section id="config">
+            <div class="container">
+                <h2>Deep Dive: Configuration</h2>
+                <p><code>publish-confluence</code> is configured primarily through a <code>publish-confluence.json</code> file in your project root. Here are some key options:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Option</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>spaceKey</code></td>
+                            <td><strong>Required.</strong> The key of the Confluence space.</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><code>pageTitle</code></td>
+                            <td>Title for the Confluence page.</td>
+                            <td>Value from <code>package.json</code> name or "Untitled Page"</td>
+                        </tr>
+                        <tr>
+                            <td><code>parentPageTitle</code></td>
+                            <td>Title of an existing page under which this page will be created.</td>
+                            <td>Space homepage</td>
+                        </tr>
+                        <tr>
+                            <td><code>distDir</code></td>
+                            <td>Directory containing your build output files.</td>
+                            <td><code>./dist</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>templatePath</code></td>
+                            <td>Path to your custom Confluence page template (Handlebars).</td>
+                            <td><code>./confluence-template.html</code> (uses default if not found)</td>
+                        </tr>
+                        <tr>
+                            <td><code>macroTemplatePath</code></td>
+                            <td>Path to your custom HTML macro template (Handlebars). If null, attachments are not processed for a macro.</td>
+                            <td><code>./macro-template.html</code> (uses default if not found)</td>
+                        </tr>
+                        <tr>
+                            <td><code>includedFiles</code></td>
+                            <td>Array of glob patterns for files to attach from <code>distDir</code>.</td>
+                            <td>Common web assets (<code>**/*.js</code>, <code>**/*.css</code>, etc.)</td>
+                        </tr>
+                        <tr>
+                            <td><code>excludedFiles</code></td>
+                            <td>Array of glob patterns for files to exclude from attachment.</td>
+                            <td>Source maps (<code>**/*.map</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><code>childPages</code></td>
+                            <td>Array of configurations for creating nested child pages.</td>
+                            <td><code>[]</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Nested Pages Example</h3>
+                <p>Define a hierarchy of pages easily:</p>
+                <pre><code class="language-json">{
+  "spaceKey": "DOCS",
+  "pageTitle": "My Product Documentation",
+  "distDir": "./dist/docs/root",
+  "templatePath": "./templates/root-page-template.html",
+  "childPages": [
+    {
+      "pageTitle": "Getting Started",
+      "distDir": "./dist/docs/getting-started"
+      // Inherits templatePath or specify its own
+    },
+    {
+      "pageTitle": "API Reference",
+      "distDir": "./dist/docs/api",
+      "childPages": [
+        {
+          "pageTitle": "Users API",
+          "distDir": "./dist/docs/api/users"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+            </div>
+        </section>
+
+        <section id="templates-section">
+            <div class="container">
+                <h2>Deep Dive: Templates</h2>
+                <p><code>publish-confluence</code> uses Handlebars templates for maximum flexibility in structuring your Confluence pages and the embedded HTML macros.</p>
+
+                <h3>Page Template (<code>confluence-template.html</code>)</h3>
+                <p>This template defines the overall structure of your Confluence page. It's where you can use various Confluence macro helpers.</p>
+                <p><strong>Key Variables:</strong></p>
+                <ul>
+                    <li><code>{{pageTitle}}</code>: The title of the page.</li>
+                    <li><code>{{{macro}}}</code>: This is crucial! It's replaced by the content rendered from your <code>macro-template.html</code>. Use triple braces to prevent HTML escaping.</li>
+                    <li><code>{{currentDate}}</code>: The current date in YYYY-MM-DD format.</li>
+                </ul>
+                <p><strong>Example <code>confluence-template.html</code>:</strong></p>
+                <pre><code class="language-html">&lt;h1&gt;{{pageTitle}}&lt;/h1&gt;
+
+&lt;!-- Add a Table of Contents --&gt;
+{{confluence-toc maxLevel=3}}
+
+&lt;h2&gt;Application Dashboard&lt;/h2&gt;
+&lt;p&gt;Below is the interactive dashboard:&lt;/p&gt;
+
+&lt;!-- This is where your app/macro content goes --&gt;
+{{{macro}}}
+
+&lt;hr/&gt;
+&lt;p&gt;&lt;em&gt;Last updated: {{currentDate}}&lt;/em&gt;&lt;/p&gt;</code></pre>
+
+                <h3>Macro Template (<code>macro-template.html</code>)</h3>
+                <p>This template defines the content that goes inside Confluence's HTML Macro. It's typically where you'll set up the root element for your JavaScript application and include script/style tags.</p>
+                <p><strong>Key Variables:</strong></p>
+                <ul>
+                    <li><code>{{{scripts}}}</code>: Replaced with <code>&lt;script&gt;</code> tags for all attached JavaScript files. Use triple braces.</li>
+                    <li><code>{{{styles}}}</code>: Replaced with <code>&lt;link&gt;</code> tags for all attached CSS files. Use triple braces.</li>
+                </ul>
+                <p><strong>Example <code>macro-template.html</code>:</strong></p>
+                <pre><code class="language-html">&lt;div class="app-wrapper"&gt;
+  &lt;div id="app"&gt;
+    &lt;!-- Your JavaScript app will mount here --&gt;
+    &lt;p&gt;Loading application...&lt;/p&gt;
+  &lt;/div&gt;
+  {{{styles}}}  &lt;!-- Links to your CSS files --&gt;
+  {{{scripts}}} &lt;!-- Links to your JS files --&gt;
+&lt;/div&gt;</code></pre>
+                <p>If you don't provide these files, <code>publish-confluence</code> uses sensible defaults.</p>
+            </div>
+        </section>
+
+        <section id="macros">
+            <div class="container">
+                <h2>Interactive Showcase: Macro Helpers</h2>
+                <p><code>publish-confluence</code> provides a rich set of Handlebars helpers that generate Confluence XHTML macros. This allows you to create well-structured and visually appealing Confluence pages programmatically.</p>
+                <p>Below are some of the most commonly used helpers. Click on a macro name to see its Handlebars syntax and a conceptual output.</p>
+
+                <div class="macro-showcase">
+                    <div class="tabs">
+                        <input type="radio" name="macro-tabs" id="tab-html" checked><label for="tab-html">HTML Macro</label>
+                        <div class="tab-content">
+                            <h4><code>{{#confluence-html}} ... {{/confluence-html}}</code></h4>
+                            <p>Embeds raw HTML, essential for JavaScript applications. This is where <code>{{{scripts}}}</code> and <code>{{{styles}}}</code> are typically used (often within <code>macro-template.html</code> which is then injected via <code>{{{macro}}}</code> in <code>confluence-template.html</code>).</p>
+                            <pre><code class="language-handlebars">{{#confluence-html}}
+  &lt;div id="my-app-container"&gt;&lt;/div&gt;
+  &lt;!-- These are typically in macro-template.html --&gt;
+  &lt;!-- {{{styles}}} --&gt;
+  &lt;!-- {{{scripts}}} --&gt;
+{{/confluence-html}}</code></pre>
+                            <div class="output-example">
+                                <p><strong>Conceptual Output:</strong> A Confluence HTML Macro block containing your specified HTML. The tool automatically links your uploaded CSS and JS files if <code>{{{styles}}}</code> and <code>{{{scripts}}}</code> are used within the macro template.</p>
+                            </div>
+                        </div>
+
+                        <input type="radio" name="macro-tabs" id="tab-panel"><label for="tab-panel">Panel</label>
+                        <div class="tab-content">
+                            <h4><code>{{#confluence-panel title="..."}} ... {{/confluence-panel}}</code></h4>
+                            <p class="params">Params: title, borderStyle, borderColor, borderWidth, bgColor, titleBGColor, titleColor</p>
+                            <pre><code class="language-handlebars">{{#confluence-panel title="Important Note" bgColor="#f0f8ff"}}
+  &lt;p&gt;This is some important information for the team.&lt;/p&gt;
+{{/confluence-panel}}</code></pre>
+                            <div class="output-example">
+                                <p><strong>Conceptual Output:</strong></p>
+                                <div class="panel">
+                                    <strong>Important Note</strong>
+                                    <p>This is some important information for the team.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <input type="radio" name="macro-tabs" id="tab-layout"><label for="tab-layout">Layout</label>
+                        <div class="tab-content">
+                            <h4><code>{{#confluence-layout}} {{#layout-section type="..."}} {{#layout-cell}} ... {{/layout-cell}} {{/layout-section}} {{/confluence-layout}}</code></h4>
+                            <p class="params">Section types: single, two_equal, two_left_sidebar, two_right_sidebar, three_equal</p>
+                            <pre><code class="language-handlebars">{{#confluence-layout}}
+  {{#layout-section type="two_equal"}}
+    {{#layout-cell}}
+      &lt;p&gt;Content for Left Column&lt;/p&gt;
+    {{/layout-cell}}
+    {{#layout-cell}}
+      &lt;p&gt;Content for Right Column&lt;/p&gt;
+    {{/layout-cell}}
+  {{/layout-section}}
+{{/confluence-layout}}</code></pre>
+                            <div class="output-example">
+                                <p><strong>Conceptual Output:</strong> A two-column layout section on the Confluence page.</p>
+                                <div style="display:flex; gap: 10px;">
+                                    <div style="flex:1; border:1px solid #555; padding: 5px;">Content for Left Column</div>
+                                    <div style="flex:1; border:1px solid #555; padding: 5px;">Content for Right Column</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="radio" name="macro-tabs" id="tab-code"><label for="tab-code">Code Block</label>
+                        <div class="tab-content">
+                            <h4><code>{{#confluence-code language="..." title="..." linenumbers=true}} ... {{/confluence-code}}</code></h4>
+                            <p class="params">Params: language, title, linenumbers</p>
+                            <pre><code class="language-handlebars">{{#confluence-code language="javascript" title="Example.js" linenumbers=true}}
+function greet(name) {
+  console.log("Hello, " + name + "!");
+}
+{{/confluence-code}}</code></pre>
+                            <div class="output-example">
+                                <p><strong>Conceptual Output:</strong> A Confluence code block with JavaScript syntax highlighting, a title, and line numbers.</p>
+                                <div class="code-block">
+<strong>Example.js</strong><br>
+1 function greet(name) {
+2   console.log("Hello, " + name + "!");
+3 }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <input type="radio" name="macro-tabs" id="tab-status"><label for="tab-status">Status</label>
+                        <div class="tab-content">
+                            <h4><code>{{confluence-status type="..." text="..."}}</code></h4>
+                            <p class="params">Params: type (green, yellow, red, blue, grey), text</p>
+                            <pre><code class="language-handlebars">{{confluence-status type="green" text="Completed"}}
+{{confluence-status type="blue" text="In Progress"}}</code></pre>
+                            <div class="output-example">
+                                <p><strong>Conceptual Output:</strong></p>
+                                <p><span class="status-green">[Completed]</span></p>
+                                <p><span class="status-blue">[In Progress]</span></p>
+                            </div>
+                        </div>
+
+                        <input type="radio" name="macro-tabs" id="tab-image"><label for="tab-image">Image</label>
+                        <div class="tab-content">
+                            <h4><code>{{confluence-image src="..." alt="..." width="..."}}</code></h4>
+                            <p class="params">Params: src (filename or URL), alt, title, width, height, align, border, thumbnail, class, style</p>
+                            <pre><code class="language-handlebars">{{confluence-image src="logo.png" alt="Company Logo" width="150"}}
+{{confluence-image src="https://via.placeholder.com/100" title="External Placeholder"}}</code></pre>
+                            <div class="output-example">
+                                <p><strong>Conceptual Output:</strong> An image embedded on the page. If <code>src</code> is a filename, it refers to an attached file. If it's a URL, it's an external image.</p>
+                                <p>[Image: logo.png, 150px wide]</p>
+                                <p>[Image: External Placeholder from https://via.placeholder.com/100]</p>
+                            </div>
+                        </div>
+                        
+                        <input type="radio" name="macro-tabs" id="tab-mermaid"><label for="tab-mermaid">Mermaid Diagram</label>
+                        <div class="tab-content">
+                            <h4><code>{{#confluence-mermaid theme="..."}} ... {{/confluence-mermaid}}</code> or <code>{{confluence-mermaid file="..."}}</code></h4>
+                            <p>Renders MermaidJS diagrams. Requires Mermaid JS files in your project's distribution directory.</p>
+                            <pre><code class="language-handlebars">{{#confluence-mermaid theme="dark"}}
+graph TD
+    A[Start] --&gt; B(Process);
+    B --&gt; C{Decision};
+    C --&gt;|Yes| D[End];
+    C --&gt;|No| B;
+{{/confluence-mermaid}}
+
+{{confluence-mermaid file="diagrams/architecture.mmd" theme="neutral"}}</code></pre>
+                            <div class="output-example">
+                                <p><strong>Conceptual Output:</strong> A rendered Mermaid diagram on the Confluence page. The tool handles including the Mermaid library (if configured) and the diagram definition within an HTML macro.</p>
+                                <p>[Mermaid Diagram Rendered Here]</p>
+                            </div>
+                        </div>
+                        
+                        <p style="margin-top: 2rem; text-align:center;">...and many more, including TOC, Links, Admonitions (Info, Note, Warning, Tip), Tabs, Expand, and more!</p>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cli">
+            <div class="container">
+                <h2>Command Line Power</h2>
+                <p><code>publish-confluence</code> offers more than just publishing. Its CLI includes helpful commands for managing your projects:</p>
+                
+                <h3><code>publish-confluence create</code></h3>
+                <p>Initializes a new project for <code>publish-confluence</code>. It guides you through an interactive setup to:</p>
+                <ul>
+                    <li>Create a basic project structure.</li>
+                    <li>Generate template files (<code>confluence-template.html</code>, <code>macro-template.html</code>).</li>
+                    <li>Create a <code>publish-confluence.json</code> configuration file.</li>
+                    <li>Help set up environment variables in a <code>.env</code> file.</li>
+                </ul>
+                <pre><code class="language-bash">publish-confluence create</code></pre>
+
+                <h3><code>publish-confluence fetch</code></h3>
+                <p>Retrieves the raw storage format (XHTML) of an existing Confluence page. This is useful for inspecting current page content or for migration purposes.</p>
+                <pre><code class="language-bash">publish-confluence fetch --space-key YOURSPACE --page-title "Existing Page Title"</code></pre>
+                <p>You can also output the full page JSON object:</p>
+                <pre><code class="language-bash">publish-confluence fetch -s YOURSPACE -p "My Page" -f json</code></pre>
+
+                <h3><code>publish-confluence generate-prompt</code></h3>
+                <p>Generates a structured prompt for AI assistance (like LLMs). This prompt includes project description, technical constraints, template structure, and build configuration details, helping you get targeted help for your Confluence-embeddable projects.</p>
+                <pre><code class="language-bash">publish-confluence generate-prompt</code></pre>
+                <p>You can also provide a file with your project idea:</p>
+                <pre><code class="language-bash">publish-confluence generate-prompt --file ./my-project-idea.md</code></pre>
+            </div>
+        </section>
+
+        <section id="workflow-example">
+            <div class="container">
+                <h2>Example Workflow</h2>
+                <p>Here's a typical workflow when using <code>publish-confluence</code>:</p>
+                <ol class="workflow-steps">
+                    <li><strong>Initialize Project:</strong> Use <code>publish-confluence create</code> to set up your project with initial configuration and template files.</li>
+                    <li><strong>Develop Your App/Docs:</strong> Build your JavaScript application, data visualization, or write your documentation in Markdown/HTML.</li>
+                    <li><strong>Configure:</strong> Fine-tune <code>publish-confluence.json</code>. Set your Confluence space, page titles, and <code>distDir</code>.</li>
+                    <li><strong>Customize Templates:</strong> Modify <code>confluence-template.html</code> and <code>macro-template.html</code>. Use macro helpers to structure your page (e.g., add panels, layouts, TOC).</li>
+                    <li><strong>Build Your Project:</strong> Run your standard build command (e.g., <code>npm run build</code> or <code>vite build</code>) to generate assets in your <code>distDir</code>.</li>
+                    <li><strong>Publish:</strong> Execute <code>npx publish-confluence</code>. The tool uploads assets and creates/updates the Confluence page(s).</li>
+                    <li><strong>Iterate:</strong> Made changes? Simply rebuild and re-run <code>publish-confluence</code>. Updates are quick and easy.</li>
+                    <li><strong>Review:</strong> Check your interactive application or documentation live on Confluence.</li>
+                </ol>
+            </div>
+        </section>
+        
+        <section id="why-choose">
+            <div class="container">
+                <h2>Why Choose Publish-Confluence?</h2>
+                <p><code>publish-confluence</code> isn't just another utility; it's a comprehensive solution designed to make your life easier when working with Confluence.</p>
+                <ul>
+                    <li><strong>Save Time and Effort:</strong> Automate tedious manual publishing tasks.</li>
+                    <li><strong>Maintain Consistency:</strong> Ensure your Confluence content is always up-to-date with your latest builds and documentation.</li>
+                    <li><strong>Improve Quality:</strong> Deliver rich, interactive, and professionally formatted content within Confluence.</li>
+                    <li><strong>Embrace Documentation-as-Code:</strong> Keep your documentation and embedded applications under version control, integrating seamlessly with CI/CD pipelines.</li>
+                    <li><strong>Boost Collaboration:</strong> Make it easier to share interactive prototypes, dashboards, and up-to-date technical information with your team.</li>
+                    <li><strong>Developer-Friendly:</strong> Works with your existing modern JavaScript/TypeScript workflows and tools.</li>
+                    <li><strong>Flexible and Extensible:</strong> Customizable templates and a growing library of macro helpers give you the power to create what you need.</li>
+                </ul>
+                <p>Stop fighting with Confluence limitations and start publishing with power and ease!</p>
+            </div>
+        </section>
+
+
+        <section id="cta" class="hero">
+            <div class="container">
+                <h2>Ready to Transform Your Confluence Workflow?</h2>
+                <p class="subtitle">Install <code>publish-confluence</code> today and experience the difference. Say goodbye to manual updates and hello to streamlined, automated publishing.</p>
+                <pre style="max-width: 400px; margin: 2rem auto; text-align: left;"><code class="language-bash">npm install -g publish-confluence</code></pre>
+                <a href="https://github.com/thomasrohde/publish-confluence" target="_blank" class="cta-button">View on GitHub</a>
+                <a href="https://github.com/thomasrohde/publish-confluence/issues" target="_blank" class="cta-button secondary" style="margin-left: 1rem;">Report an Issue</a>
+                <p style="margin-top: 2rem;">Contributions are welcome! Help us make <code>publish-confluence</code> even better.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Thomas Klok Rohde. All rights reserved.</p>
+
+            <p>This presentation is a conceptual overview. For detailed documentation, please refer to the <a href="https://github.com/thomasrohde/publish-confluence" target="_blank">official GitHub repository</a>.</p>
+        </div>
+    </footer>
+</body>
+</html>
