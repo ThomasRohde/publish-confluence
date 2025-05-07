@@ -1,0 +1,908 @@
+2025-05-07T03:33:00.198Z [INFO] File logging enabled: log.txt
+2025-05-07T03:33:00.210Z [DEBUG] [ConfluenceClient] Initializing ConfluenceClient
+Context: {
+  "baseUrl": "https://confluence.danskenet.net/rest/api",
+  "authMethod": "Token Authentication",
+  "sslVerification": "Disabled",
+  "token": "ODIzO...Mj23e (44 chars)",
+  "hasCustomErrorHandler": true
+}
+2025-05-07T03:33:00.213Z [DEBUG] Confluence client initialized with custom error handling
+2025-05-07T03:33:00.217Z [VERBOSE] Loaded template from ./confluence-template.html
+2025-05-07T03:33:00.221Z [VERBOSE] Loaded template from ./macro-template.html
+2025-05-07T03:33:00.238Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Mermaid Diagram Demo",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:33:00.244Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Mermaid Diagram Demo\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:00.889Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "376",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12a8",
+    "x-confluence-cluster-node-name": "yd5483-confluence-node1",
+    "set-cookie": "JSESSIONID=EC1EC5B735A49EC9571335EF00F47417; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41jiz8LTKcUYGqOOTlJYR7h27FVo9aAHeXKAMlnh8Fx9Mo8oVXpGNqyH1yOEP7ad91xAw; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:33:00 GMT"
+  }
+}
+2025-05-07T03:33:01.405Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Mermaid Diagram Demo",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:33:01.407Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Mermaid Diagram Demo\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:01.703Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "376",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12c7",
+    "x-confluence-cluster-node-name": "yd5489-confluence-node2",
+    "set-cookie": "JSESSIONID=488173AFAFC7E5407A9A6663D6CFA060; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41xWQOwDwcTMAJlk8dBekbnj632GntcUgVbqQvSpCrraCl0bYAkx3AFnd3O81B3sNuPuM; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:33:01 GMT"
+  }
+}
+2025-05-07T03:33:01.705Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Applets",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:33:01.707Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Applets\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:02.034Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "829",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12e6",
+    "x-confluence-cluster-node-name": "yd5490-confluence-node3",
+    "set-cookie": "JSESSIONID=31A5CCCB843631B181FDE794FA9475CA; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41f3C9p5dYqmpy_3pdPq2xunRNhC2GDaUoZLHTcJTE7iDC16YpErhGSD4oXn0C6K3W094; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:33:02 GMT"
+  }
+}
+2025-05-07T03:33:02.036Z [DEBUG] [ConfluenceClient] API Request: POST /content
+Context: {
+  "method": "POST",
+  "url": "/content",
+  "params": {},
+  "hasData": true,
+  "dataType": "object"
+}
+2025-05-07T03:33:02.038Z [VERBOSE] [ConfluenceClient] Request body preview: {
+  "type": "page",
+  "title": "Mermaid Diagram Demo",
+  "space": {
+    "key": "~thro"
+  },
+  "body": {
+    "storage": {
+      "value": "<ac:structured-macro ac:name=\"info\" ac:schema-version=\"1\" ac:macro-id=\"ffea6469-129c-4d51-8d13-d2b7f123b11a\">\n        <ac:parameter ac:name=\"title\">Using Mermaid Renderer in Confluence</ac:parameter>\n        <ac:rich-text-body><p>The Mermaid Renderer is designed to bridge the gap between documentation and visualization in Confluence environments. It e
+2025-05-07T03:33:02.098Z [VERBOSE] Page already exists but wasn't found initially. Will attempt to update instead.
+Context: {
+  "message": "A page with this title already exists: A page already exists with the title Mermaid Diagram Demo in the space with key ~thro",
+  "status": 400
+}
+2025-05-07T03:33:02.100Z [DEBUG] [ConfluenceClient] API Response: undefined undefined
+Context: {
+  "dataType": "object"
+}
+2025-05-07T03:33:02.298Z [VERBOSE] Attaching file: mermaid.umd.min.js from C:\Users\E29667\GitHub\mermaid-demo\mermaid\mermaid.umd.min.js
+2025-05-07T03:33:02.304Z [DEBUG] [ConfluenceClient] API Request: GET /content/undefined/child/attachment
+Context: {
+  "method": "GET",
+  "url": "/content/undefined/child/attachment",
+  "params": {
+    "expand": "version"
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:02.360Z [ERROR] [ConfluenceClient] Resource not found
+Context: {
+  "url": "https://confluence.danskenet.net/rest/api/content/undefined/child/attachment",
+  "method": "GET",
+  "status": 404,
+  "statusText": "",
+  "responseData": "",
+  "requestPath": "/content/undefined/child/attachment"
+}
+2025-05-07T03:33:02.364Z [ERROR] [ConfluenceClient] Failed to upload attachment mermaid.umd.min.js to page undefined
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\mermaid.umd.min.js",
+  "fileSize": "3497304 bytes",
+  "timestamp": "2025-05-07T03:33:02.364Z"
+}
+2025-05-07T03:33:02.367Z [ERROR] Failed to upload attachment mermaid.umd.min.js
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\mermaid.umd.min.js",
+  "fileSize": 3497304,
+  "timestamp": "2025-05-07T03:33:02.366Z",
+  "possibleIssues": [
+    "File size exceeds Confluence attachment limits",
+    "File type is not allowed in Confluence",
+    "Page does not exist or permission issues",
+    "Network connectivity problems"
+  ]
+}
+2025-05-07T03:33:02.369Z [VERBOSE] Attaching file: sample-flowchart.mmd from C:\Users\E29667\GitHub\mermaid-demo\mermaid\sample-flowchart.mmd
+2025-05-07T03:33:02.372Z [DEBUG] [ConfluenceClient] API Request: GET /content/undefined/child/attachment
+Context: {
+  "method": "GET",
+  "url": "/content/undefined/child/attachment",
+  "params": {
+    "expand": "version"
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:02.436Z [ERROR] [ConfluenceClient] Resource not found
+Context: {
+  "url": "https://confluence.danskenet.net/rest/api/content/undefined/child/attachment",
+  "method": "GET",
+  "status": 404,
+  "statusText": "",
+  "responseData": "",
+  "requestPath": "/content/undefined/child/attachment"
+}
+2025-05-07T03:33:02.439Z [ERROR] [ConfluenceClient] Failed to upload attachment sample-flowchart.mmd to page undefined
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-flowchart.mmd",
+  "fileSize": "184 bytes",
+  "timestamp": "2025-05-07T03:33:02.439Z"
+}
+2025-05-07T03:33:02.441Z [ERROR] Failed to upload attachment sample-flowchart.mmd
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-flowchart.mmd",
+  "fileSize": 184,
+  "timestamp": "2025-05-07T03:33:02.441Z",
+  "possibleIssues": [
+    "File size exceeds Confluence attachment limits",
+    "File type is not allowed in Confluence",
+    "Page does not exist or permission issues",
+    "Network connectivity problems"
+  ]
+}
+2025-05-07T03:33:02.444Z [VERBOSE] Attaching file: sample-multi.mmd from C:\Users\E29667\GitHub\mermaid-demo\mermaid\sample-multi.mmd
+2025-05-07T03:33:02.449Z [DEBUG] [ConfluenceClient] API Request: GET /content/undefined/child/attachment
+Context: {
+  "method": "GET",
+  "url": "/content/undefined/child/attachment",
+  "params": {
+    "expand": "version"
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:02.511Z [ERROR] [ConfluenceClient] Resource not found
+Context: {
+  "url": "https://confluence.danskenet.net/rest/api/content/undefined/child/attachment",
+  "method": "GET",
+  "status": 404,
+  "statusText": "",
+  "responseData": "",
+  "requestPath": "/content/undefined/child/attachment"
+}
+2025-05-07T03:33:02.516Z [ERROR] [ConfluenceClient] Failed to upload attachment sample-multi.mmd to page undefined
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-multi.mmd",
+  "fileSize": "1200 bytes",
+  "timestamp": "2025-05-07T03:33:02.515Z"
+}
+2025-05-07T03:33:02.518Z [ERROR] Failed to upload attachment sample-multi.mmd
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-multi.mmd",
+  "fileSize": 1200,
+  "timestamp": "2025-05-07T03:33:02.518Z",
+  "possibleIssues": [
+    "File size exceeds Confluence attachment limits",
+    "File type is not allowed in Confluence",
+    "Page does not exist or permission issues",
+    "Network connectivity problems"
+  ]
+}
+2025-05-07T03:33:02.520Z [VERBOSE] Attaching file: sample-sequence.mmd from C:\Users\E29667\GitHub\mermaid-demo\mermaid\sample-sequence.mmd
+2025-05-07T03:33:02.524Z [DEBUG] [ConfluenceClient] API Request: GET /content/undefined/child/attachment
+Context: {
+  "method": "GET",
+  "url": "/content/undefined/child/attachment",
+  "params": {
+    "expand": "version"
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:02.580Z [ERROR] [ConfluenceClient] Resource not found
+Context: {
+  "url": "https://confluence.danskenet.net/rest/api/content/undefined/child/attachment",
+  "method": "GET",
+  "status": 404,
+  "statusText": "",
+  "responseData": "",
+  "requestPath": "/content/undefined/child/attachment"
+}
+2025-05-07T03:33:02.584Z [ERROR] [ConfluenceClient] Failed to upload attachment sample-sequence.mmd to page undefined
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-sequence.mmd",
+  "fileSize": "432 bytes",
+  "timestamp": "2025-05-07T03:33:02.584Z"
+}
+2025-05-07T03:33:02.587Z [ERROR] Failed to upload attachment sample-sequence.mmd
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-sequence.mmd",
+  "fileSize": 432,
+  "timestamp": "2025-05-07T03:33:02.586Z",
+  "possibleIssues": [
+    "File size exceeds Confluence attachment limits",
+    "File type is not allowed in Confluence",
+    "Page does not exist or permission issues",
+    "Network connectivity problems"
+  ]
+}
+2025-05-07T03:33:07.595Z [VERBOSE] Loaded template from ./macro-template.html
+2025-05-07T03:33:07.599Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Mermaid Diagram Demo",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:33:07.601Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Mermaid Diagram Demo\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:07.986Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "376",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12e6",
+    "x-confluence-cluster-node-name": "yd5490-confluence-node3",
+    "set-cookie": "JSESSIONID=94E2C690BC74D2CBEBCA99F99CD4FACB; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41D4ENDgpqWp70sjgnQQssSEuVJg6aYRz9KMybahvATLaAqTrDi9N7j4gekAZS19MpFy4; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:33:07 GMT"
+  }
+}
+2025-05-07T03:33:08.503Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Mermaid Diagram Demo",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:33:08.505Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Mermaid Diagram Demo\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:08.807Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "376",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12a8",
+    "x-confluence-cluster-node-name": "yd5483-confluence-node1",
+    "set-cookie": "JSESSIONID=FA52B01E5CD9AA6F239FFA5B649A4FF5; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41HNmh2zcG12jnbyA8pnO6Vx0fYfr-1ZnSF7Dupa6wFat3kSmMlnqoJoAW4ZX1XP7VaNU; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:33:08 GMT"
+  }
+}
+2025-05-07T03:33:08.809Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Applets",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:33:08.812Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Applets\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:33:09.110Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "829",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12c7",
+    "x-confluence-cluster-node-name": "yd5489-confluence-node2",
+    "set-cookie": "JSESSIONID=B44E7CCB8A1657F0236277CCB22F06DF; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41gE_pg1EjEXXghjEI3lqfOz510VqBSOxTQgKeqxIN_XIpRfWmmTlSXxpaJsQFn25DL8U; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:33:09 GMT"
+  }
+}
+2025-05-07T03:33:09.113Z [DEBUG] [ConfluenceClient] API Request: POST /content
+Context: {
+  "method": "POST",
+  "url": "/content",
+  "params": {},
+  "hasData": true,
+  "dataType": "object"
+}
+2025-05-07T03:33:09.116Z [VERBOSE] [ConfluenceClient] Request body preview: {
+  "type": "page",
+  "title": "Mermaid Diagram Demo",
+  "space": {
+    "key": "~thro"
+  },
+  "body": {
+    "storage": {
+      "value": "<ac:structured-macro ac:name=\"info\" ac:schema-version=\"1\" ac:macro-id=\"52eb46b6-a090-4f73-9150-30d5f3c51e2a\">\n        <ac:parameter ac:name=\"title\">Using Mermaid Renderer in Confluence</ac:parameter>\n        <ac:rich-text-body><p>The Mermaid Renderer is designed to bridge the gap between documentation and visualization in Confluence environments. It e
+2025-05-07T03:33:09.174Z [VERBOSE] Page already exists but wasn't found initially. Will attempt to update instead.
+Context: {
+  "message": "A page with this title already exists: A page already exists with the title Mermaid Diagram Demo in the space with key ~thro",
+  "status": 400
+}
+2025-05-07T03:33:09.177Z [DEBUG] [ConfluenceClient] API Response: undefined undefined
+Context: {
+  "dataType": "object"
+}
+2025-05-07T03:33:09.179Z [SUCCESS] All pages published successfully.
+2025-05-07T03:47:48.567Z [INFO] File logging enabled: log.txt
+2025-05-07T03:47:48.581Z [DEBUG] [ConfluenceClient] Initializing ConfluenceClient
+Context: {
+  "baseUrl": "https://confluence.danskenet.net/rest/api",
+  "authMethod": "Token Authentication",
+  "sslVerification": "Disabled",
+  "token": "ODIzO...Mj23e (44 chars)",
+  "hasCustomErrorHandler": true
+}
+2025-05-07T03:47:48.586Z [DEBUG] Confluence client initialized with custom error handling
+2025-05-07T03:47:48.592Z [VERBOSE] Loaded template from ./confluence-template.html
+2025-05-07T03:47:48.598Z [VERBOSE] Loaded template from ./macro-template.html
+2025-05-07T03:47:48.616Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Mermaid Diagram Demo",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:47:48.619Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Mermaid Diagram Demo\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:49.254Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "376",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12c7",
+    "x-confluence-cluster-node-name": "yd5489-confluence-node2",
+    "set-cookie": "JSESSIONID=1F80ECBA5A37CC014CFFB0518A3D008C; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41UEwEDZB-ctCZy_m_BZDXz4E7y7NBBsV66pfcf7oz6gHdMZPYbXQR4sfggaOQxmIbe4w; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:47:49 GMT"
+  }
+}
+2025-05-07T03:47:49.762Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Mermaid Diagram Demo",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:47:49.765Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Mermaid Diagram Demo\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:50.075Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "376",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12e6",
+    "x-confluence-cluster-node-name": "yd5490-confluence-node3",
+    "set-cookie": "JSESSIONID=FA4ADAA3D3FB3D2DD6E7AE32433FE4D8; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41vjdn8SQ2cIcDXI2_kJQYEPV9XoFaJXYy4TYbK8lT1lM_szNbYWh3DGr6tOjuJWhNYJA; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:47:50 GMT"
+  }
+}
+2025-05-07T03:47:50.079Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Applets",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:47:50.082Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Applets\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:50.394Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "829",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12a8",
+    "x-confluence-cluster-node-name": "yd5483-confluence-node1",
+    "set-cookie": "JSESSIONID=5FC35CBC87413A676977752C4669C0B3; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41ySAxUzotVcq7hd4apVTwmuY5bQk3ayhSoIDBDH4I51q3ONrqir14RBGoZ_bnFT_k1I8; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:47:50 GMT"
+  }
+}
+2025-05-07T03:47:50.397Z [DEBUG] [ConfluenceClient] API Request: POST /content
+Context: {
+  "method": "POST",
+  "url": "/content",
+  "params": {},
+  "hasData": true,
+  "dataType": "object"
+}
+2025-05-07T03:47:50.400Z [VERBOSE] [ConfluenceClient] Request body preview: {
+  "type": "page",
+  "title": "Mermaid Diagram Demo",
+  "space": {
+    "key": "~thro"
+  },
+  "body": {
+    "storage": {
+      "value": "<ac:structured-macro ac:name=\"info\" ac:schema-version=\"1\" ac:macro-id=\"faba1c6a-81ec-4c49-903a-3c5a308380e1\">\n        <ac:parameter ac:name=\"title\">Using Mermaid Renderer in Confluence</ac:parameter>\n        <ac:rich-text-body><p>The Mermaid Renderer is designed to bridge the gap between documentation and visualization in Confluence environments. It e
+2025-05-07T03:47:50.471Z [VERBOSE] Page already exists but wasn't found initially. Will attempt to update instead.
+Context: {
+  "message": "A page with this title already exists: A page already exists with the title Mermaid Diagram Demo in the space with key ~thro",
+  "status": 400
+}
+2025-05-07T03:47:50.475Z [DEBUG] [ConfluenceClient] API Response: undefined undefined
+Context: {
+  "dataType": "object"
+}
+2025-05-07T03:47:50.701Z [VERBOSE] Attaching file: mermaid.umd.min.js from C:\Users\E29667\GitHub\mermaid-demo\mermaid\mermaid.umd.min.js
+2025-05-07T03:47:50.709Z [DEBUG] [ConfluenceClient] API Request: GET /content/undefined/child/attachment
+Context: {
+  "method": "GET",
+  "url": "/content/undefined/child/attachment",
+  "params": {
+    "expand": "version"
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:50.785Z [ERROR] [ConfluenceClient] Resource not found
+Context: {
+  "url": "https://confluence.danskenet.net/rest/api/content/undefined/child/attachment",
+  "method": "GET",
+  "status": 404,
+  "statusText": "",
+  "responseData": "",
+  "requestPath": "/content/undefined/child/attachment"
+}
+2025-05-07T03:47:50.790Z [ERROR] [ConfluenceClient] Failed to upload attachment mermaid.umd.min.js to page undefined
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\mermaid.umd.min.js",
+  "fileSize": "3497304 bytes",
+  "timestamp": "2025-05-07T03:47:50.790Z"
+}
+2025-05-07T03:47:50.794Z [ERROR] Failed to upload attachment mermaid.umd.min.js
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\mermaid.umd.min.js",
+  "fileSize": 3497304,
+  "timestamp": "2025-05-07T03:47:50.794Z",
+  "possibleIssues": [
+    "File size exceeds Confluence attachment limits",
+    "File type is not allowed in Confluence",
+    "Page does not exist or permission issues",
+    "Network connectivity problems"
+  ]
+}
+2025-05-07T03:47:50.797Z [VERBOSE] Attaching file: sample-flowchart.mmd from C:\Users\E29667\GitHub\mermaid-demo\mermaid\sample-flowchart.mmd
+2025-05-07T03:47:50.803Z [DEBUG] [ConfluenceClient] API Request: GET /content/undefined/child/attachment
+Context: {
+  "method": "GET",
+  "url": "/content/undefined/child/attachment",
+  "params": {
+    "expand": "version"
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:50.871Z [ERROR] [ConfluenceClient] Resource not found
+Context: {
+  "url": "https://confluence.danskenet.net/rest/api/content/undefined/child/attachment",
+  "method": "GET",
+  "status": 404,
+  "statusText": "",
+  "responseData": "",
+  "requestPath": "/content/undefined/child/attachment"
+}
+2025-05-07T03:47:50.876Z [ERROR] [ConfluenceClient] Failed to upload attachment sample-flowchart.mmd to page undefined
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-flowchart.mmd",
+  "fileSize": "184 bytes",
+  "timestamp": "2025-05-07T03:47:50.876Z"
+}
+2025-05-07T03:47:50.880Z [ERROR] Failed to upload attachment sample-flowchart.mmd
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-flowchart.mmd",
+  "fileSize": 184,
+  "timestamp": "2025-05-07T03:47:50.879Z",
+  "possibleIssues": [
+    "File size exceeds Confluence attachment limits",
+    "File type is not allowed in Confluence",
+    "Page does not exist or permission issues",
+    "Network connectivity problems"
+  ]
+}
+2025-05-07T03:47:50.883Z [VERBOSE] Attaching file: sample-multi.mmd from C:\Users\E29667\GitHub\mermaid-demo\mermaid\sample-multi.mmd
+2025-05-07T03:47:50.888Z [DEBUG] [ConfluenceClient] API Request: GET /content/undefined/child/attachment
+Context: {
+  "method": "GET",
+  "url": "/content/undefined/child/attachment",
+  "params": {
+    "expand": "version"
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:50.947Z [ERROR] [ConfluenceClient] Resource not found
+Context: {
+  "url": "https://confluence.danskenet.net/rest/api/content/undefined/child/attachment",
+  "method": "GET",
+  "status": 404,
+  "statusText": "",
+  "responseData": "",
+  "requestPath": "/content/undefined/child/attachment"
+}
+2025-05-07T03:47:50.953Z [ERROR] [ConfluenceClient] Failed to upload attachment sample-multi.mmd to page undefined
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-multi.mmd",
+  "fileSize": "1200 bytes",
+  "timestamp": "2025-05-07T03:47:50.953Z"
+}
+2025-05-07T03:47:50.957Z [ERROR] Failed to upload attachment sample-multi.mmd
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-multi.mmd",
+  "fileSize": 1200,
+  "timestamp": "2025-05-07T03:47:50.957Z",
+  "possibleIssues": [
+    "File size exceeds Confluence attachment limits",
+    "File type is not allowed in Confluence",
+    "Page does not exist or permission issues",
+    "Network connectivity problems"
+  ]
+}
+2025-05-07T03:47:50.962Z [VERBOSE] Attaching file: sample-sequence.mmd from C:\Users\E29667\GitHub\mermaid-demo\mermaid\sample-sequence.mmd
+2025-05-07T03:47:50.967Z [DEBUG] [ConfluenceClient] API Request: GET /content/undefined/child/attachment
+Context: {
+  "method": "GET",
+  "url": "/content/undefined/child/attachment",
+  "params": {
+    "expand": "version"
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:51.037Z [ERROR] [ConfluenceClient] Resource not found
+Context: {
+  "url": "https://confluence.danskenet.net/rest/api/content/undefined/child/attachment",
+  "method": "GET",
+  "status": 404,
+  "statusText": "",
+  "responseData": "",
+  "requestPath": "/content/undefined/child/attachment"
+}
+2025-05-07T03:47:51.043Z [ERROR] [ConfluenceClient] Failed to upload attachment sample-sequence.mmd to page undefined
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-sequence.mmd",
+  "fileSize": "432 bytes",
+  "timestamp": "2025-05-07T03:47:51.042Z"
+}
+2025-05-07T03:47:51.047Z [ERROR] Failed to upload attachment sample-sequence.mmd
+Context: {
+  "error": "Confluence API Error (404): Request failed with status code 404",
+  "filePath": "C:\\Users\\E29667\\GitHub\\mermaid-demo\\mermaid\\sample-sequence.mmd",
+  "fileSize": 432,
+  "timestamp": "2025-05-07T03:47:51.046Z",
+  "possibleIssues": [
+    "File size exceeds Confluence attachment limits",
+    "File type is not allowed in Confluence",
+    "Page does not exist or permission issues",
+    "Network connectivity problems"
+  ]
+}
+2025-05-07T03:47:56.063Z [VERBOSE] Loaded template from ./macro-template.html
+2025-05-07T03:47:56.067Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Mermaid Diagram Demo",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:47:56.070Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Mermaid Diagram Demo\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:56.464Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "376",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12e6",
+    "x-confluence-cluster-node-name": "yd5490-confluence-node3",
+    "set-cookie": "JSESSIONID=B10D6FEB99E2EA0963CBB33A8B3D3CC2; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41Izvi74PF5Gt98zIO6BPi_nV4mXOhl0LBDX9WdSHXemEuQUSI9pnQZ7lDYlPad2i7eXA; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:47:56 GMT"
+  }
+}
+2025-05-07T03:47:56.977Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Mermaid Diagram Demo",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:47:56.980Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Mermaid Diagram Demo\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:57.352Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "376",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12a8",
+    "x-confluence-cluster-node-name": "yd5483-confluence-node1",
+    "set-cookie": "JSESSIONID=B8392790ADC1244B6E03CE1469B73122; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41A5lzR2gaWy-4sGelJD57_tOBL8AQ97DZ4p0q23596duR2naMhaMmBusx-Z7c7NIaQxE; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:47:57 GMT"
+  }
+}
+2025-05-07T03:47:57.356Z [DEBUG] [ConfluenceClient] Finding page by title
+Context: {
+  "spaceKey": "~thro",
+  "title": "Applets",
+  "operation": "findPageByTitle"
+}
+2025-05-07T03:47:57.357Z [DEBUG] [ConfluenceClient] API Request: GET /content/search
+Context: {
+  "method": "GET",
+  "url": "/content/search",
+  "params": {
+    "cql": "type=page AND space.key=\"~thro\" AND title=\"Applets\""
+  },
+  "hasData": false,
+  "dataType": "none"
+}
+2025-05-07T03:47:57.646Z [DEBUG] [ConfluenceClient] API Response: 200 
+Context: {
+  "status": 200,
+  "statusText": "",
+  "dataType": "object",
+  "headers": {
+    "content-type": "application/json",
+    "content-length": "829",
+    "connection": "keep-alive",
+    "strict-transport-security": "max-age=31536000",
+    "x-xss-protection": "1; mode=block",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "SAMEORIGIN",
+    "content-security-policy": "frame-ancestors 'self' https://jira.danskebank.com",
+    "x-confluence-cluster-node": "480c12c7",
+    "x-confluence-cluster-node-name": "yd5489-confluence-node2",
+    "set-cookie": "JSESSIONID=BEC203A7EA63491AB9E1E2FE95CC8BBE; Path=/; Secure; HttpOnly, QQQVQLLR=02e5afd35e-99cd-41laanWwgJuHhGPaCa0nX_erF-zUGmzCoEKLLvdrfmUdA3ZUmMZbtgf6ppPHx2Joh3g-0; path=/; SameSite=None; Secure",
+    "x-seraph-loginreason": "OK",
+    "x-ausername": "E29667",
+    "date": "Wed, 07 May 2025 03:47:57 GMT"
+  }
+}
+2025-05-07T03:47:57.648Z [DEBUG] [ConfluenceClient] API Request: POST /content
+Context: {
+  "method": "POST",
+  "url": "/content",
+  "params": {},
+  "hasData": true,
+  "dataType": "object"
+}
+2025-05-07T03:47:57.649Z [VERBOSE] [ConfluenceClient] Request body preview: {
+  "type": "page",
+  "title": "Mermaid Diagram Demo",
+  "space": {
+    "key": "~thro"
+  },
+  "body": {
+    "storage": {
+      "value": "<ac:structured-macro ac:name=\"info\" ac:schema-version=\"1\" ac:macro-id=\"0eff6e6c-03e2-45e7-90a2-3701b36cb5bf\">\n        <ac:parameter ac:name=\"title\">Using Mermaid Renderer in Confluence</ac:parameter>\n        <ac:rich-text-body><p>The Mermaid Renderer is designed to bridge the gap between documentation and visualization in Confluence environments. It e
+2025-05-07T03:47:57.716Z [VERBOSE] Page already exists but wasn't found initially. Will attempt to update instead.
+Context: {
+  "message": "A page with this title already exists: A page already exists with the title Mermaid Diagram Demo in the space with key ~thro",
+  "status": 400
+}
+2025-05-07T03:47:57.718Z [DEBUG] [ConfluenceClient] API Response: undefined undefined
+Context: {
+  "dataType": "object"
+}
+2025-05-07T03:47:57.720Z [SUCCESS] All pages published successfully.
