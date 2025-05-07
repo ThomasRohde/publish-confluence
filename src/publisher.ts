@@ -4,6 +4,7 @@ import Handlebars from 'handlebars';
 import path from 'path';
 import { ConfluenceClient } from './client';
 import { loadConfiguration } from './config';
+import { ConfluenceApiError } from './errors';
 import { createLogger } from './logger';
 import { ConfluenceApiCredentials, PublishConfig, PublishOptions } from './types';
 import { generateUuid } from './utils';
@@ -482,14 +483,21 @@ function determineTroubleshootingSteps(error: any): string[] {
  * @returns True if this is a "page already exists" error that can be suppressed
  */
 function isPageAlreadyExistsError(error: any): boolean {
-  // Check if error is a BadRequestError with specific message about page already existing
+  // Ensure error is an instance of ConfluenceApiError or its subclasses
+  if (!(error instanceof ConfluenceApiError)) {
+    return false;
+  }
+  // Now we know error is ConfluenceApiError, so statusCode and apiErrorData are available
+  const apiError = error as ConfluenceApiError;
+
+  // Check if apiErrorData and its message property exist and match
+  // Safely access the message property, as apiErrorData can be a generic object
+  const message = (apiError.apiErrorData as any)?.message;
+
   return (
-    error.statusCode === 400 &&
-    error.responseData &&
-    typeof error.responseData === 'object' &&
-    'message' in error.responseData &&
-    typeof error.responseData.message === 'string' &&
-    error.responseData.message.includes('A page with this title already exists')
+    apiError.statusCode === 400 &&
+    typeof message === 'string' &&
+    message.includes('A page with this title already exists')
   );
 }
 
@@ -532,13 +540,20 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
       customErrorHandler: (error) => {
         // If this is a "page already exists" error, log it as verbose instead of error
         if (isPageAlreadyExistsError(error)) {
-          log.verbose('Page already exists but wasn\'t found initially. Will attempt to update instead.', {
-            message: error.responseData?.message,
-            status: error.statusCode
+          // Cast error to ConfluenceApiError to safely access properties
+          const apiError = error as ConfluenceApiError;
+          const errorMessage = (apiError.apiErrorData as any)?.message || 'Page already exists';
+          
+          log.verbose('Page already exists but was not found by initial search. The client will attempt to find and update it.', {
+            originalMessage: errorMessage,
+            status: apiError.statusCode
           });
-          return true; // Return true to indicate the error was handled
+          // CRITICAL CHANGE: Return false to allow the error to propagate.
+          // This enables client.ts's internal logic in createPage() to handle it.
+          return false; 
         }
-        return false; // Return false to let the default error handler run
+        // For any other error, let the default handler in client.ts manage it.
+        return false; 
       }
     });
     
@@ -547,36 +562,29 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
     await publishPageRecursive(client, rootConfig, options);
     log.success('All pages published successfully.');  
   } catch (error: any) {
-    // Check if this is a "page already exists" error that we can handle gracefully
-    if (isPageAlreadyExistsError(error)) {
-      // This is a special case where the page already exists but wasn't initially found
-      // The page was ultimately published, so we'll just show a success message
-      log.verbose('Detected a "page already exists" error, but the page was successfully published', {
-        message: error.responseData?.message,
-        status: error.statusCode
-      });
-      
-      log.success('All pages published successfully despite initial page existence conflict.');
-      return;
-    }
-    
-    // For all other errors, provide detailed error information
+    // For all other errors (including "page already exists" if client.ts retries failed), 
+    // provide detailed error information
     const errorType = error.constructor ? error.constructor.name : 'Unknown Error';
+    // Ensure apiErrorData and its message are accessed safely if error is ConfluenceApiError
+    let detailedMessage = error.message;
+    if (error instanceof ConfluenceApiError && error.apiErrorData && (error.apiErrorData as any).message) {
+        detailedMessage = (error.apiErrorData as any).message;
+    }
+
     const errorContext = {
       errorType,
+      originalErrorMessage: error.message, // Keep the original JS error message
+      confluenceApiMessage: (error instanceof ConfluenceApiError) ? detailedMessage : null,
       troubleshootingSteps: determineTroubleshootingSteps(error),
       stack: error.stack || 'No stack trace available',
-      options,
+      options, // These are the command line options
       timestamp: new Date().toISOString(),
-      // Add error-specific information
       statusCode: error.statusCode || error.status || null,
-      apiPath: error.path || null,
-      requestInfo: error.request ? {
-        method: error.request.method || null,
-        url: error.request.url || null
+      apiPath: (error instanceof ConfluenceApiError) ? error.requestPath : (error.path || null),
+      requestInfo: (error instanceof ConfluenceApiError && error.method && error.url) ? {
+        method: error.method,
+        url: error.url
       } : null,
-      // Add troubleshooting guidance based on error type
-      troubleshooting: determineTroubleshootingSteps(error)
     };
     
     log.error(`Failed to publish to Confluence: ${error.message}`, errorContext);
