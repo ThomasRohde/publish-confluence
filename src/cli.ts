@@ -109,12 +109,17 @@ program
   .option('-c, --comment', 'Display content with comment flags in info macros', false)
   .option('--log-file [path]', 'Enable logging to file with optional custom path')
   .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
-  .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates')
-  .option('-s, --space-key <key>', 'Confluence space key (can be specified in config file)'); 
+  .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates');
 
-// Default action (publish)
+// Explicit 'publish' command that does the same thing as the default action
+// This provides a more explicit way to run the publish action
 program
-  .action((options) => {
+  .command('publish')
+  .description('Publish JavaScript builds and HTML content to Confluence (default command)')
+  .action((cmdOptions) => {
+    // Merge command options with global options
+    const options = { ...program.opts(), ...cmdOptions };
+    
     // Set verbosity level based on options
     if (options.quiet) {
       verbosity = VERBOSITY.QUIET;
@@ -126,12 +131,14 @@ program
       verbosity = VERBOSITY.NORMAL;
     }
     
+    console.log('Starting publish-confluence...');
     // Configure file logging if enabled
     if (options.logFile) {
       configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
       log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
     }
-      publishToConfluence(options).catch(err => {
+    
+    publishToConfluence(options).catch(err => {
       log.error(err);
       process.exit(1);
     });
@@ -141,7 +148,8 @@ program
 program
   .command('create')
   .description('Create a new publish-confluence project')
-  .action(() => {    // Set verbosity level based on options
+  .action(() => {
+    // Set verbosity level based on options
     const options = program.opts();
     if (options.quiet) {
       verbosity = VERBOSITY.QUIET;
@@ -158,7 +166,8 @@ program
       configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
       log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
     }
-      // Use the extracted createProject function from project-creator.ts
+    
+    // Use the extracted createProject function from project-creator.ts
     createProject(log).catch(err => {
       log.error(err);
       process.exit(1);
@@ -236,6 +245,33 @@ program
       log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
     }
       generatePromptCommand().catch(err => {
+      log.error(err);
+      process.exit(1);
+    });
+  });
+
+// Default action (publish) - used when no command is specified
+// Moving this to the end to ensure it's processed last on all platforms
+program
+  .action((options) => {
+    // Set verbosity level based on options
+    if (options.quiet) {
+      verbosity = VERBOSITY.QUIET;
+    } else if (options.debug) {
+      verbosity = VERBOSITY.DEBUG;
+    } else if (options.verbose) {
+      verbosity = VERBOSITY.VERBOSE;
+    } else {
+      verbosity = VERBOSITY.NORMAL;
+    }
+    console.log('Starting publish-confluence...');
+    // Configure file logging if enabled
+    if (options.logFile) {
+      configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
+      log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
+    }
+    
+    publishToConfluence(options).catch(err => {
       log.error(err);
       process.exit(1);
     });
