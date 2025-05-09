@@ -99,7 +99,17 @@ async function generatePromptCommand(): Promise<void> {
 program
   .name('publish-confluence')
   .description('Publish JavaScript builds and HTML content to Confluence')
-  .version('1.1.0'); 
+  .version('1.1.0')
+  .showHelpAfterError(true)
+  .helpOption('-h, --help', 'display help for command')
+  .addHelpText('after', '\nWhen run without a command, publish-confluence will execute the "publish" command by default.')
+  .action((_, command) => {
+    // This is the default action when no command is specified
+    // If help wasn't explicitly requested, run the publish command
+    if (!process.argv.includes('-h') && !process.argv.includes('--help')) {
+      runPublishCommand(program.opts());
+    }
+  });
 
 // Default options for all commands
 program
@@ -111,29 +121,40 @@ program
   .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
   .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates')
 
-// Default action (publish)
+/**
+ * Default publish action function
+ */
+function runPublishCommand(options: any) {
+  // Set verbosity level based on options
+  if (options.quiet) {
+    verbosity = VERBOSITY.QUIET;
+  } else if (options.debug) {
+    verbosity = VERBOSITY.DEBUG;
+  } else if (options.verbose) {
+    verbosity = VERBOSITY.VERBOSE;
+  } else {
+    verbosity = VERBOSITY.NORMAL;
+  }
+  
+  // Configure file logging if enabled
+  if (options.logFile) {
+    configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
+    log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
+  }
+  
+  publishToConfluence(options).catch(err => {
+    log.error(err);
+    process.exit(1);
+  });
+}
+
+// Define explicit publish command
 program
-  .action((options) => {
-    // Set verbosity level based on options
-    if (options.quiet) {
-      verbosity = VERBOSITY.QUIET;
-    } else if (options.debug) {
-      verbosity = VERBOSITY.DEBUG;
-    } else if (options.verbose) {
-      verbosity = VERBOSITY.VERBOSE;
-    } else {
-      verbosity = VERBOSITY.NORMAL;
-    }
-    
-    // Configure file logging if enabled
-    if (options.logFile) {
-      configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
-      log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
-    }
-      publishToConfluence(options).catch(err => {
-      log.error(err);
-      process.exit(1);
-    });
+  .command('publish')
+  .description('Publish JavaScript builds and HTML content to Confluence (default)')
+  .action((cmdOptions) => {
+    const options = { ...program.opts(), ...cmdOptions };
+    runPublishCommand(options);
   });
 
 // Create command
@@ -237,7 +258,6 @@ program
       generatePromptCommand().catch(err => {
       log.error(err);
       process.exit(1);
-    });
-  });
+    });  });
 
 program.parse();
