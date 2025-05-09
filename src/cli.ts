@@ -110,7 +110,6 @@ program
   .option('--log-file [path]', 'Enable logging to file with optional custom path')
   .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
   .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates')
-  .option('-s, --space-key <key>', 'Confluence space key (can be specified in config file)'); 
 
 // Default action (publish)
 program
