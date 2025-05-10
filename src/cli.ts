@@ -165,6 +165,7 @@ program.hook('preAction', () => {
 program
   .command('publish', { isDefault: true })
   .description('Publish JavaScript builds and HTML content to Confluence (default)')
+  .option('--dry-run [dir]', 'Generate storage files locally instead of publishing to Confluence')
   .action((cmdOptions) => {
     const options = { ...program.opts(), ...cmdOptions };
     runPublishCommand(options);

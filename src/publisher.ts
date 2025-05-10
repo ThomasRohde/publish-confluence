@@ -117,19 +117,28 @@ export async function findFilesToAttach(distDir: string, includedFiles: string[]
 /**
  * Get authentication credentials from environment variables
  * 
+ * @param skipThrow - Skip throwing error if environment variables are missing
  * @returns Object containing authentication credentials and base URL
- * @throws Error if required environment variables are not set
+ * @throws Error if required environment variables are not set (unless skipThrow is true)
  */
-export function getAuthCredentials(): { auth: ConfluenceApiCredentials, baseUrl: string } {
+export function getAuthCredentials(skipThrow: boolean = false): { auth: ConfluenceApiCredentials, baseUrl: string } {
   // Check for token authentication
   const token = process.env.CONFLUENCE_TOKEN;
   const baseUrl = process.env.CONFLUENCE_BASE_URL;
   
   if (!token || !baseUrl) {
-    throw new Error(
-      'Authentication credentials not found. Please provide:\n' +
-      '- CONFLUENCE_TOKEN and CONFLUENCE_BASE_URL environment variables for token authentication'
-    );
+    const errorMessage = 'Authentication credentials not found. Please provide:\n' +
+      '- CONFLUENCE_TOKEN and CONFLUENCE_BASE_URL environment variables for token authentication';
+    
+    if (!skipThrow) {
+      throw new Error(errorMessage);
+    }
+    
+    // Return dummy values in dry-run mode
+    return {
+      baseUrl: 'https://dry-run.confluence.example.com',
+      auth: { token: 'dry-run-token' }
+    };
   }
 
   return {
@@ -212,8 +221,8 @@ export async function processMacroTemplates(
  * @throws Error if authentication fails or configuration is invalid
  */
 export function initializeClient(options: PublishOptions): ConfluenceClient {
-  // Get authentication credentials
-  const { auth, baseUrl } = getAuthCredentials();
+  // Get authentication credentials, skip throwing in dry-run mode
+  const { auth, baseUrl } = getAuthCredentials(isDryRunMode(options));
   
   // Initialize ConfluenceClient
   return new ConfluenceClient({
@@ -227,14 +236,14 @@ export function initializeClient(options: PublishOptions): ConfluenceClient {
 /**
  * Handle page creation or update in Confluence
  * 
- * @param client - The ConfluenceClient instance
+ * @param client - The client instance (real or dry-run) 
  * @param config - The publish configuration
  * @param pageContent - The content to publish to the page
  * @returns The created or updated Confluence page
  * @throws Error if page creation/update fails
  */
 export async function handlePageUpsert(
-  client: ConfluenceClient,
+  client: any, // Use any for type flexibility
   config: PublishConfig,
   pageContent: string
 ) {
@@ -258,14 +267,14 @@ export async function handlePageUpsert(
 /**
  * Upload file attachments to the Confluence page
  * 
- * @param client - The ConfluenceClient instance
+ * @param client - The client instance (real or dry-run)
  * @param pageId - The ID of the Confluence page
  * @param distDir - Directory containing build output files
  * @param filesToAttach - Array of files to attach
  * @throws Error if file uploads fail
  */
 export async function uploadAttachments(
-  client: ConfluenceClient,
+  client: any, // Use any for type flexibility
   pageId: string,
   distDir: string,
   filesToAttach: string[]
@@ -313,7 +322,7 @@ export async function uploadAttachments(
  * Publishes child pages recursively
  */
 async function publishChildPages(
-  client: ConfluenceClient,
+  client: any, // Use any for type flexibility
   config: PublishConfig,
   parentConfig: PublishConfig,
   parentTitle: string,
@@ -375,7 +384,7 @@ async function publishChildPages(
  * Add recursive publishing helper
  */
 async function publishPageRecursive(
-  client: ConfluenceClient,
+  client: any, // Use any for type flexibility
   cfg: PublishConfig,
   options?: PublishOptions
 ): Promise<void> {
@@ -420,13 +429,13 @@ async function publishPageRecursive(
     
     // Add pageId and baseUrl to the context for use in confluence-url helper in both templates
     context.pageId = pageId;
-    context.baseUrl = getAuthCredentials().baseUrl;
+    context.baseUrl = getBaseUrl(options);
     
     // Generate initial macro content with attachment links
     const initialMacro = await processMacroTemplates(
       cfg, 
       context, 
-      getAuthCredentials().baseUrl, 
+      getBaseUrl(options), 
       pageId, 
       files, 
       options
@@ -438,7 +447,7 @@ async function publishPageRecursive(
       macro: initialMacro, 
       currentDate: context.currentDate,
       pageId: pageId,
-      baseUrl: getAuthCredentials().baseUrl
+      baseUrl: getBaseUrl(options)
     });
     
     // Update the page
@@ -471,7 +480,7 @@ async function publishPageRecursive(
       
       // Add pageId and baseUrl to the context now that we have them
       context.pageId = pageId;
-      context.baseUrl = getAuthCredentials().baseUrl;
+      context.baseUrl = getBaseUrl(options);
       
       if (files.length > 0 && cfg.macroTemplatePath) {
         needsFinalUpdate = true; // We'll need to update the page with attachment links
@@ -497,13 +506,13 @@ async function publishPageRecursive(
             
             // Add pageId and baseUrl to the context now that we have them
             context.pageId = pageId;
-            context.baseUrl = getAuthCredentials().baseUrl;
+            context.baseUrl = getBaseUrl(options);
             
             // Generate macro content with proper attachment links
             const updatedMacro = await processMacroTemplates(
               cfg, 
               context, 
-              getAuthCredentials().baseUrl, 
+              getBaseUrl(options), 
               pageId, 
               files, 
               options
@@ -514,7 +523,7 @@ async function publishPageRecursive(
               macro: updatedMacro, 
               currentDate: context.currentDate,
               pageId: pageId,
-              baseUrl: getAuthCredentials().baseUrl
+              baseUrl: getBaseUrl(options)
             });
             
             // Update the page with proper content
@@ -560,13 +569,13 @@ async function publishPageRecursive(
       
       // Make sure context has pageId and baseUrl
       context.pageId = pageId;
-      context.baseUrl = getAuthCredentials().baseUrl;
+      context.baseUrl = getBaseUrl(options);
       
       // Generate updated macro content with attachment links
       const updatedMacro = await processMacroTemplates(
         cfg, 
         context, 
-        getAuthCredentials().baseUrl, 
+        getBaseUrl(options), 
         pageId, 
         files, 
         options
@@ -577,7 +586,7 @@ async function publishPageRecursive(
         macro: updatedMacro, 
         currentDate: context.currentDate,
         pageId: pageId,
-        baseUrl: getAuthCredentials().baseUrl
+        baseUrl: getBaseUrl(options)
       });
       
       // Update the page with attachment links resolved
@@ -666,6 +675,18 @@ function determineTroubleshootingSteps(error: any): string[] {
   return defaultSteps;
 }
 
+// Get the dry-run status in a type-safe way
+function isDryRunMode(options?: any): boolean {
+  return options && 'dryRun' in options && !!options.dryRun;
+}
+
+// Get base URL for Confluence in a safe way, handling dry-run mode
+function getBaseUrl(options?: any): string {
+  return isDryRunMode(options)
+    ? 'https://dry-run.confluence.example.com'
+    : getAuthCredentials(isDryRunMode(options)).baseUrl;
+}
+
 /**
  * Check if an error is a "page already exists" error that should be suppressed
  * because the page was ultimately published successfully
@@ -690,7 +711,7 @@ function isPageAlreadyExistsError(error: any): boolean {
  * 
  * This function orchestrates the entire publishing process:
  * 1. Loads configuration
- * 2. Initializes the Confluence client
+ * 2. Initializes the Confluence client (or dry-run client)
  * 3. Loads templates
  * 4. Finds files to attach
  * 5. Creates or updates the page
@@ -701,43 +722,37 @@ function isPageAlreadyExistsError(error: any): boolean {
  * @returns Promise that resolves when publishing is complete
  * @throws Error if any part of the publishing process fails
  */
-export async function publishToConfluence(options: PublishOptions): Promise<void> {
-  try {
-    log.verbose('Starting publishing process', { options });
+export async function publishToConfluence(options: PublishOptions): Promise<void> {try {
+    // Load the main configuration - skip env checks in dry-run mode
+    const rootConfig = await loadConfiguration(!!options.dryRun);
     
-    const rootConfig = await loadConfiguration();    
-    log.debug('Configuration loaded', { 
-      spaceKey: rootConfig.spaceKey,
-      pageTitle: rootConfig.pageTitle,
-      parentPageTitle: rootConfig.parentPageTitle || 'none',
-      hasChildPages: !!rootConfig.childPages
-    });
+    // Initialize client or dry-run client
+    let client;
     
-    // Create client with customized error handling for page already exists errors
-    const { auth, baseUrl } = getAuthCredentials();
-    const client = new ConfluenceClient({
-      baseUrl,
-      auth,
-      verbose: options.verbose || options.debug,
-      rejectUnauthorized: !options.allowSelfSigned,
-      // Custom error handler to suppress "page already exists" errors in the output
-      customErrorHandler: (error) => {
-        // If this is a "page already exists" error, log it as verbose instead of error
-        if (isPageAlreadyExistsError(error)) {
-          log.verbose('Page already exists but wasn\'t found initially. Will attempt to update instead.', {
-            message: error.responseData?.message,
-            status: error.statusCode
-          });
-          return true; // Return true to indicate the error was handled
-        }
-        return false; // Return false to let the default error handler run
-      }
-    });
+    if (options.dryRun) {
+      // Import dynamically since we only need this for dry-run mode
+      const { createDryRunClient } = await import('./dry-run');
+      
+      // Normalize the directory path
+      const dryRunDir = path.isAbsolute(options.dryRun) 
+        ? options.dryRun 
+        : path.resolve(process.cwd(), options.dryRun || 'dry-run');
+      
+      log.info(`Starting dry-run mode. Will write files to: ${dryRunDir}`);
+      client = await createDryRunClient(dryRunDir);
+    } else {
+      // Initialize regular Confluence client
+      client = initializeClient(options);
+    }
     
-    log.debug('Confluence client initialized with custom error handling');
+    log.debug(options.dryRun 
+      ? 'Dry-run client initialized, no actual API calls will be made'
+      : 'Confluence client initialized with custom error handling');
     
     await publishPageRecursive(client, rootConfig, options);
-    log.success('All pages published successfully.');  
+    log.success(options.dryRun
+      ? 'All pages generated successfully in dry-run mode.'
+      : 'All pages published successfully.');  
   } catch (error: any) {
     // Check if this is a "page already exists" error that we can handle gracefully
     if (isPageAlreadyExistsError(error)) {

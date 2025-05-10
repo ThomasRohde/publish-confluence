@@ -144,10 +144,11 @@ function processConfigInheritance(config: Partial<PublishConfig>, parentConfig?:
  * 
  * It also validates required environment variables and the final configuration.
  * 
+ * @param skipEnvCheck - Skip checking for environment variables (for dry-run mode)
  * @returns A complete, validated PublishConfig object
  * @throws Error if configuration is invalid or required environment variables are missing
  */
-export async function loadConfiguration(): Promise<PublishConfig> {
+export async function loadConfiguration(skipEnvCheck: boolean = false): Promise<PublishConfig> {
   let config: Partial<PublishConfig> = { ...DEFAULT_CONFIG };
   
   // Try to load package.json
@@ -205,18 +206,19 @@ export async function loadConfiguration(): Promise<PublishConfig> {
       log.verbose('No publish-confluence.json found, using defaults');
     }
   }
-  
-  // Check required environment variables
+    // Check required environment variables
   const requiredEnvVars = [
     'CONFLUENCE_TOKEN',
     'CONFLUENCE_BASE_URL'
   ];
   
-  const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  
-  if (missingEnvVars.length > 0) {
-    log.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
-    throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  if (!skipEnvCheck) {
+    const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    
+    if (missingEnvVars.length > 0) {
+      log.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+      throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+    }
   }
   
   // Validate the configuration using Zod
