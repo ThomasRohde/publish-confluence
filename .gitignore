@@ -60,4 +60,5 @@ test-results/
 package-lock.json
 docs/dry-run/
 docs/dry/
+samples/target-architecture-template/
 package-lock.json
