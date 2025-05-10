@@ -121,9 +121,7 @@
 
     .page-item {
       margin-bottom: var(--spacing-sm);
-    }
-
-    .page-link {
+    }    .page-link {
       display: block;
       padding: var(--spacing-sm);
       color: var(--text-color);
@@ -134,6 +132,16 @@
 
     .page-link:hover {
       background-color: var(--background-color);
+    }
+    
+    .page-link-root {
+      background-color: rgba(76, 154, 255, 0.1);
+      border-left: 3px solid var(--primary-color);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .root-page {
+      margin-bottom: var(--spacing-md);
     }
 
     .no-spaces {
@@ -245,11 +253,31 @@
               <div class="space-pages">
                 <h3>Pages</h3>
           `;
-          
-          if (space.pages.length === 0) {
+            if (space.pages.length === 0) {
             html += '<p>No pages in this space yet.</p>';
-          } else {            html += '<ul class="page-list">';
+          } else {
+            html += '<ul class="page-list">';
+            
+            // Look for the root page (typically without a number prefix)
+            const rootPage = space.pages.find(p => !p.title.match(/^\d+\.\s/));
+            
+            if (rootPage) {
+              // Add the root page first with special styling
+              const rootSafeFilename = rootPage.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
+              html += `
+                <li class="page-item root-page">
+                  <a href="${space.key}/${rootSafeFilename}.html" class="page-link page-link-root"><strong>📄 ${rootPage.title}</strong></a>
+                </li>
+              `;
+            }
+            
+            // Add all other pages
             space.pages.forEach(page => {
+              // Skip the root page since we already added it
+              if (rootPage && page.id === rootPage.id) {
+                return;
+              }
+              
               // Use a more URL-safe filename by replacing problematic characters
               const safeFilename = page.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
               html += `

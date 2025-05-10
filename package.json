@@ -23,8 +23,6 @@
         "postbuild": "npm run copy-templates",
         "prepublishOnly": "npm run build",
         "start": "node ./dist/cli.js",
-        "test-publish-js": "node test-publish.js",
-        "test-preview": "tsx src/dry-run-test.ts",
         "publish-npm": "npm publish",
         "publish-npm-beta": "npm publish --tag beta"
     },

@@ -1,8 +1,12 @@
 {{!-- recursivePageTree.hbs - A partial for rendering page trees recursively --}}
 {{#each pages}}
-  <div class="page-item">
-    <a href="../{{../spaceKey}}/{{encode title}}.html" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
+  <div class="page-item {{#unless title.[0].[0].match}}root-page{{/unless}}">
+    <a href="../{{../spaceKey}}/{{encode title}}.html" 
+       class="page-link {{#if isActive}}active{{/if}} {{#unless title.[0].[0].match}}page-link-root{{/unless}}" 
+       data-id="{{id}}">
+      {{#unless title.[0].[0].match}}📄 <strong>{{/unless}}
       {{title}}
+      {{#unless title.[0].[0].match}}</strong>{{/unless}}
     </a>
     {{#if children.length}}
       <div class="page-children">

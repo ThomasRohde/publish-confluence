@@ -276,6 +276,9 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
   const rootPages: PreviewPage[] = [];
   const pageMap = new Map<string, PreviewPage>();
   
+  // Find the root page (should be the one without numbers at the beginning)
+  const rootPage = pages.find(page => !page.title.match(/^\d+\.\s/));
+  
   // First pass: create page objects
   for (const page of pages) {
     const pageObj: PreviewPage = {
@@ -286,11 +289,21 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
     
     pageMap.set(page.id, pageObj);
   }
-    // Second pass: build tree
+      // Second pass: build tree
   for (const page of pages) {
     const pageObj = pageMap.get(page.id);
     
     if (!pageObj) continue;
+    
+    // If this is the identified root page, always add it to root pages first
+    if (rootPage && page.id === rootPage.id) {
+      // If it's already in rootPages, don't add it again
+      if (!rootPages.some(p => p.id === page.id)) {
+        rootPages.unshift(pageObj); // Add to beginning of array
+        log.debug(`[DRY-RUN] Added ${page.title} as main root page at the beginning`);
+      }
+      continue;
+    }
     
     if (page.parentId) {
       const parentPage = pageMap.get(page.parentId);
@@ -341,6 +354,12 @@ async function getAllPages(spaceDir: string): Promise<Array<{id: string, title: 
             
             // Found a page
             log.debug(`[DRY-RUN] Found page in directory: ${dirPath}`);
+            
+            // Add additional logging to help diagnose root page issues
+            if (!metadata.parentId) {
+              log.debug(`[DRY-RUN] Found possible root page: ${metadata.title} (ID: ${metadata.id})`);
+            }
+            
             pages.push({
               id: metadata.id,
               title: metadata.title,
@@ -388,10 +407,15 @@ async function generatePagesForSpace(
   spaceKey: string,
   pages: PreviewPage[],
   spacesData: SpacesData
-): Promise<void> {
-  // Process all pages recursively
+): Promise<void> {  // Process all pages recursively
   async function processPages(pagesArray: PreviewPage[]): Promise<void> {
     for (const page of pagesArray) {
+      // For the main root page, we need special handling
+      const isRootPage = !page.title.match(/^\d+\.\s/);
+      if (isRootPage) {
+        log.debug(`[DRY-RUN] Processing root page: ${page.title}`);
+      }
+      
       await generatePagePreview(context, spaceDir, spacePreviewDir, spaceKey, page, spacesData);
       
       if (page.children.length > 0) {
