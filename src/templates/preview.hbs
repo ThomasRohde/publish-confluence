@@ -608,11 +608,10 @@
     </div>    {{#if attachments.length}}
       <div class="confluence-attachments">
         <h2 class="attachments-header">Attachments</h2>
-        <ul class="attachment-list">
-          {{#each attachments}}
+        <ul class="attachment-list">          {{#each attachments}}
             <li class="attachment-item">
               <span class="attachment-icon">📎</span>
-              <a href="{{path}}" target="_blank" class="attachment-name">{{name}}</a>
+              <a href="{{path}}" target="_blank" class="attachment-name" download="{{name}}">{{name}}</a>
               <span class="attachment-size">{{size}}</span>
             </li>
           {{/each}}

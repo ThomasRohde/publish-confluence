@@ -16,8 +16,7 @@ async function testDryRunPreview() {
   const testDir = args[0] || path.resolve(process.cwd(), 'dry-run-test');
   
   log.info(`Starting dry-run preview test in: ${testDir}`);
-  
-  try {
+    try {
     // Create a dry-run client with preview enabled
     const client = await createDryRunClient(testDir, { 
       previewEnabled: true 
@@ -31,6 +30,21 @@ async function testDryRunPreview() {
       spaceKey,
       'Test Root Page',
       '<h1>Test Root Page</h1><p>This is a test page for the dry-run preview feature.</p>'
+    );
+    
+    // Page with images
+    const imagePage = await client.createPage(
+      spaceKey,
+      'Test Page With Images',
+      '<h1>Test Page With Images</h1><p>This page contains test images.</p>' +
+      '<p>Sample Image: <ac:image><ri:attachment ri:filename="sample-image.png" /></ac:image></p>' +
+      '<p>Another reference: <ac:link><ri:attachment ri:filename="sample-image.png" /><ac:plain-text-link-body><![CDATA[Download Sample Image]]></ac:plain-text-link-body></ac:link></p>',
+      rootPage.id
+    );
+      // Add an attachment to the image page
+    await client.uploadAttachment(
+      imagePage.id,
+      path.resolve(process.cwd(), 'sample-image.png')
     );
     
     // Child pages

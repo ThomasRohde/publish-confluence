@@ -437,10 +437,9 @@ async function generatePagePreview(
     const metadata = JSON.parse(metadataContent);
     
     const content = await fs.readFile(contentPath, 'utf8');
-    
-    // Convert Confluence storage format to HTML
+      // Convert Confluence storage format to HTML
     const attachmentsDir = path.join(pageDirPath, 'attachments');
-    const attachmentBaseUrl = `../attachments/${page.id}`;
+    const attachmentBaseUrl = `./attachments/${page.id}`;
     
     const convertedContent = ConfluenceConverter.convertStorageToHtml(content, attachmentBaseUrl);
     
@@ -465,10 +464,9 @@ async function generatePagePreview(
           // Get file size
           const stats = await fs.stat(sourcePath);
           const size = formatFileSize(stats.size);
-          
-          attachments.push({
+            attachments.push({
             name: entry.name,
-            path: `attachments/${page.id}/${entry.name}`,
+            path: `./attachments/${page.id}/${entry.name}`,
             size
           });
         }

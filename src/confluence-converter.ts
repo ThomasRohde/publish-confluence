@@ -244,8 +244,7 @@ export class ConfluenceConverter {
         href = spaceKey ? 
           `./index.html?space=${spaceKey}&page=${encodeURIComponent(pageTitle)}` : 
           `./index.html?page=${encodeURIComponent(pageTitle)}`;
-      } 
-      else if (nodeName === 'ri:attachment') {
+      }      else if (nodeName === 'ri:attachment') {
         const filename = child.getAttribute('ri:filename');
         if (filename) {
           href = `${attachmentBaseUrl}/${filename}`;
@@ -767,14 +766,12 @@ export class ConfluenceConverter {
    * @param element The ri: element
    * @param attachmentBaseUrl Base URL for attachment references
    * @returns The HTML representation
-   */
-  private static processResourceIdentifier(element: Element, attachmentBaseUrl: string): string {
+   */  private static processResourceIdentifier(element: Element, attachmentBaseUrl: string): string {
     const nodeName = element.nodeName.toLowerCase();
     
     switch (nodeName) {
       case 'ri:url':
         return element.getAttribute('ri:value') || '#';
-      
       case 'ri:attachment':
         const filename = element.getAttribute('ri:filename');
         return filename ? `${attachmentBaseUrl}/${filename}` : '#';
