@@ -1,11 +1,11 @@
 // src/dry-run-preview.ts
 import * as fs from 'fs/promises';
+import Handlebars from 'handlebars';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import Handlebars from 'handlebars';
 import { ConfluenceConverter } from './confluence-converter';
+import { DryRunContext } from './dry-run';
 import { createLogger } from './logger';
-import { DryRunContext, SimulatedPage } from './dry-run';
 
 // Initialize logger
 const log = createLogger();
@@ -218,15 +218,16 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
         <p>This is a preview of your Confluence pages.</p>
         <p>Note: Template files couldn't be loaded. Using simplified view.</p>
         <div id="content">Loading...</div>
-        <script>
-          fetch('spacesData.json')
+        <script>          fetch('spacesData.json')
             .then(response => response.json())
             .then(data => {
               let html = '<h2>Spaces</h2>';
               data.spaces.forEach(space => {
                 html += \`<h3>\${space.key}</h3><ul>\`;
                 space.pages.forEach(page => {
-                  html += \`<li><a href="\${space.key}/\${encodeURIComponent(page.title)}.html">\${page.title}</a></li>\`;
+                  // Use a more URL-safe filename approach by replacing problematic characters
+                  const safeFilename = page.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
+                  html += \`<li><a href="\${space.key}/\${safeFilename}.html">\${page.title}</a></li>\`;
                 });
                 html += '</ul>';
               });
@@ -456,12 +457,14 @@ async function generatePagePreview(
       attachments,
       spaces: spacesData.spaces
     };
-    
-    // Compile template
+      // Compile template
     const previewHtml = await renderPreviewTemplate(pageData);
     
     // Write preview HTML file
-    const previewFilePath = path.join(spacePreviewDir, `${encodeURIComponent(page.title)}.html`);
+    // Use a more URL-safe filename by replacing problematic characters
+    // instead of relying on encodeURIComponent, which creates issues with some HTTP servers
+    const safeFilename = page.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
+    const previewFilePath = path.join(spacePreviewDir, `${safeFilename}.html`);
     await fs.writeFile(previewFilePath, previewHtml);
     
     log.verbose(`[DRY-RUN] Generated preview for page: ${page.title}`);
@@ -630,10 +633,10 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
       `;
       log.info('[DRY-RUN] Using fallback preview template');
     }
-    
-    // Register helpers
+      // Register helpers
     Handlebars.registerHelper('encode', function(str) {
-      return encodeURIComponent(str);
+      // Use a more URL-safe filename approach by replacing problematic characters
+      return str.replace(/[^a-zA-Z0-9-_.]/g, '_');
     });
     
     // Compile the template

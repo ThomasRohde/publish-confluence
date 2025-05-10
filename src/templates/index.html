@@ -205,11 +205,12 @@
           }
           
           const data = await response.json();
-          
-          if (spaceKey && pageTitle) {
+            if (spaceKey && pageTitle) {
             // Navigate to specific page
             const decodedPageTitle = decodeURIComponent(pageTitle);
-            window.location.href = `${spaceKey}/${encodeURIComponent(decodedPageTitle)}.html`;
+            // Use a more URL-safe filename by replacing problematic characters
+            const safeFilename = decodedPageTitle.replace(/[^a-zA-Z0-9-_.]/g, '_');
+            window.location.href = `${spaceKey}/${safeFilename}.html`;
           } else {
             // Display spaces and pages
             displaySpacesAndPages(data);
@@ -247,12 +248,13 @@
           
           if (space.pages.length === 0) {
             html += '<p>No pages in this space yet.</p>';
-          } else {
-            html += '<ul class="page-list">';
+          } else {            html += '<ul class="page-list">';
             space.pages.forEach(page => {
+              // Use a more URL-safe filename by replacing problematic characters
+              const safeFilename = page.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
               html += `
                 <li class="page-item">
-                  <a href="${space.key}/${encodeURIComponent(page.title)}.html" class="page-link">${page.title}</a>
+                  <a href="${space.key}/${safeFilename}.html" class="page-link">${page.title}</a>
                 </li>
               `;
             });
