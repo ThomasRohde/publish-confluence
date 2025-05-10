@@ -174,16 +174,27 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
       }
     }
     
-    // Copy index.html
+    // Copy template files
     try {
       if (!templatesFound) {
         throw new Error("No template directory found after checking multiple locations");
       }
       
+      // Copy index.html
       const indexHtmlPath = path.resolve(templateDir, 'index.html');
       const indexHtmlContent = await fs.readFile(indexHtmlPath, 'utf8');
       await fs.writeFile(path.join(previewDir, 'index.html'), indexHtmlContent);
       log.verbose(`[DRY-RUN] Copied index.html from ${indexHtmlPath}`);
+      
+      // Copy CSS file
+      try {
+        const cssPath = path.resolve(templateDir, 'confluence-styles.css');
+        const cssContent = await fs.readFile(cssPath, 'utf8');
+        await fs.writeFile(path.join(previewDir, 'confluence-styles.css'), cssContent);
+        log.verbose(`[DRY-RUN] Copied confluence-styles.css from ${cssPath}`);
+      } catch (error) {
+        log.warn(`[DRY-RUN] Failed to copy confluence-styles.css: ${(error as Error).message}`);
+      }
     } catch (error) {
       log.warn(`[DRY-RUN] Failed to copy index.html: ${(error as Error).message}`);
       // Try alternative location

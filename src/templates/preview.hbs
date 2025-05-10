@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{title}} - Confluence Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>{{title}} - Confluence Preview</title>
+  <link rel="stylesheet" href="../confluence-styles.css">
   <style>
     :root {
       --primary-color: #0052CC;
@@ -593,7 +593,6 @@
       {{/each}}
     </div>
   </aside>
-
   <main class="main-content">
     <div class="page-header">
       <h1>{{title}}</h1>
@@ -604,30 +603,34 @@
       </div>
     </div>
 
-    <div class="page-content">
+    <div class="page-content confluence-content">
       {{{content}}}
-    </div>
-
-    {{#if attachments.length}}
-      <div class="attachments">
-        <h2>Attachments</h2>
-        {{#each attachments}}
-          <div class="attachment-item">
-            <div class="attachment-icon">📎</div>
-            <div class="attachment-info">
-              <div class="attachment-name">{{name}}</div>
-              <div class="attachment-size">{{size}}</div>
-            </div>
-            <div class="attachment-action">
-              <a href="{{path}}" target="_blank">View</a>
-            </div>
-          </div>
-        {{/each}}
+    </div>    {{#if attachments.length}}
+      <div class="confluence-attachments">
+        <h2 class="attachments-header">Attachments</h2>
+        <ul class="attachment-list">
+          {{#each attachments}}
+            <li class="attachment-item">
+              <span class="attachment-icon">📎</span>
+              <a href="{{path}}" target="_blank" class="attachment-name">{{name}}</a>
+              <span class="attachment-size">{{size}}</span>
+            </li>
+          {{/each}}
+        </ul>
       </div>
-    {{/if}}
-  </main>  <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    {{/if}}  </main>
+  
+  <script>    document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM fully loaded');
+      
+      // Setup expand/collapse functionality for Confluence expand macros
+      setupExpandMacros();
+      
+      // Setup tabs functionality
+      setupTabs();
+      
+      // Add syntax highlighting to code blocks
+      highlightCodeBlocks();
       
       // Mobile menu toggle
       const menuToggle = document.querySelector('.menu-toggle');
@@ -717,6 +720,211 @@
         }
       }
     });
+    
+    // Handle page tree collapse/expand
+    function setupPageTree() {
+      // First, log all page children containers found
+      const allChildren = document.querySelectorAll('.page-children');
+      console.log('All page children containers found:', allChildren.length);
+      
+      // Expand/collapse page tree
+      const toggles = document.querySelectorAll('.page-toggle');
+      console.log('Page toggles found:', toggles.length);
+      
+      toggles.forEach(function(toggle) {
+        toggle.addEventListener('click', function(e) {
+          e.stopPropagation(); // Prevent the parent click event
+          
+          // Find the associated children container
+          const pageItem = this.closest('.page-item');
+          if (!pageItem) return;
+          
+          const children = pageItem.querySelector('.page-children');
+          if (!children) return;
+          
+          // Toggle display and icon
+          const isVisible = children.style.display !== 'none';
+          children.style.display = isVisible ? 'none' : 'block';
+          
+          // Update the toggle icon
+          this.textContent = isVisible ? '▶' : '▼';
+        });
+      });
+    }
+      // Setup expand/collapse functionality for Confluence expand macros
+    function setupExpandMacros() {
+      const expandHeaders = document.querySelectorAll('.expand-header');
+      
+      expandHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+          const macro = this.closest('.confluence-expand-macro');
+          if (macro) {
+            macro.classList.toggle('expanded');
+          }
+        });
+      });
+    }
+    
+    // Setup tabs functionality
+    function setupTabs() {
+      const tabsGroups = document.querySelectorAll('.confluence-tabs');
+      
+      tabsGroups.forEach(tabsGroup => {
+        const tabMenuItems = tabsGroup.querySelectorAll('.tab-menu-item');
+        const tabContents = tabsGroup.querySelectorAll('.tab-content');
+        
+        // Set the first tab as active by default if none are active
+        if (!tabsGroup.querySelector('.tab-menu-item.active')) {
+          if (tabMenuItems.length > 0) tabMenuItems[0].classList.add('active');
+          if (tabContents.length > 0) tabContents[0].classList.add('active');
+        }
+        
+        // Add click handlers to each tab
+        tabMenuItems.forEach((tabMenuItem, index) => {
+          tabMenuItem.addEventListener('click', function() {
+            // Deactivate all tabs
+            tabMenuItems.forEach(item => item.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Activate the clicked tab
+            tabMenuItem.classList.add('active');
+            if (tabContents[index]) {
+              tabContents[index].classList.add('active');
+            }
+          });
+        });
+        
+        // Apply custom tab color if specified
+        const tabColor = tabsGroup.getAttribute('data-tab-color');
+        if (tabColor) {
+          tabsGroup.style.setProperty('--tab-color', tabColor);
+        }
+      });
+    }
+    
+    // Add syntax highlighting to code blocks
+    function highlightCodeBlocks() {
+      // Simple syntax highlighting for code blocks
+      const codeBlocks = document.querySelectorAll('.code-block pre code');
+      
+      codeBlocks.forEach(block => {
+        const language = block.parentElement.className.replace('language-', '').trim();
+        
+        // Apply basic styling based on language
+        if (language && language !== 'text') {
+          applyBasicHighlighting(block, language);
+        }
+      });
+    }
+    
+    // Simple syntax highlighting function
+    function applyBasicHighlighting(codeElement, language) {
+      let html = codeElement.innerHTML;
+      
+      // Common patterns across languages
+      const patterns = {
+        // Keywords
+        keywords: {
+          'javascript': /\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|extends|new|this|import|export|from|as|async|await|try|catch|finally)\b/g,
+          'typescript': /\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|extends|interface|type|enum|namespace|implements|readonly|private|protected|public|static|new|this|import|export|from|as|async|await|try|catch|finally)\b/g,
+          'python': /\b(def|class|if|elif|else|for|while|try|except|finally|with|import|from|as|return|yield|pass|break|continue|in|is|not|and|or|True|False|None)\b/g,
+          'java': /\b(public|private|protected|class|interface|enum|extends|implements|static|final|void|return|if|else|for|while|switch|case|break|new|this|try|catch|finally|throw|throws|import)\b/g,
+          'csharp': /\b(public|private|protected|class|interface|enum|struct|using|static|readonly|const|void|return|if|else|for|while|switch|case|break|new|this|try|catch|finally|throw|namespace|sealed|abstract|base|override|virtual)\b/g,
+          'html': /\b(html|head|body|div|span|p|a|img|table|tr|td|th|ul|ol|li|form|input|button|script|style|link|meta)\b/g,
+          'css': /\b(body|div|span|p|a|img|table|tr|td|th|ul|ol|li|form|input|button|margin|padding|color|background|border|font|text|display|position|width|height|top|left|right|bottom)\b/g,
+        },
+        // Strings
+        strings: {
+          'default': /(['"])(?:\\.|[^\\])*?\1/g
+        },
+        // Comments
+        comments: {
+          'c-style': /\/\/.*?$|\/\*[\s\S]*?\*\//gm,
+          'python': /#.*?$|'''[\s\S]*?'''|"""[\s\S]*?"""/gm,
+          'html': /<!--[\s\S]*?-->/g
+        },
+        // Numbers
+        numbers: /\b\d+\.?\d*\b/g
+      };
+      
+      // Map language to appropriate patterns
+      const languagePatterns = {
+        'javascript': {
+          keywords: patterns.keywords.javascript,
+          strings: patterns.strings.default,
+          comments: patterns.comments['c-style'],
+          numbers: patterns.numbers
+        },
+        'typescript': {
+          keywords: patterns.keywords.typescript,
+          strings: patterns.strings.default,
+          comments: patterns.comments['c-style'],
+          numbers: patterns.numbers
+        },
+        'python': {
+          keywords: patterns.keywords.python,
+          strings: patterns.strings.default,
+          comments: patterns.comments.python,
+          numbers: patterns.numbers
+        },
+        'java': {
+          keywords: patterns.keywords.java,
+          strings: patterns.strings.default,
+          comments: patterns.comments['c-style'],
+          numbers: patterns.numbers
+        },
+        'csharp': {
+          keywords: patterns.keywords.csharp,
+          strings: patterns.strings.default,
+          comments: patterns.comments['c-style'],
+          numbers: patterns.numbers
+        },
+        'html': {
+          keywords: patterns.keywords.html,
+          strings: patterns.strings.default,
+          comments: patterns.comments.html
+        },
+        'css': {
+          keywords: patterns.keywords.css,
+          strings: patterns.strings.default,
+          comments: patterns.comments['c-style']
+        }
+      };
+      
+      // Get patterns for this language or use default set
+      const langPatterns = languagePatterns[language] || {
+        strings: patterns.strings.default,
+        numbers: patterns.numbers
+      };
+      
+      // Apply highlighting
+      // First escape HTML to prevent XSS
+      html = html.replace(/&/g, '&amp;')
+                 .replace(/</g, '&lt;')
+                 .replace(/>/g, '&gt;');
+      
+      // Then apply syntax highlighting, order matters to avoid highlighting within comments/strings
+      if (langPatterns.comments) {
+        html = html.replace(langPatterns.comments, '<span style="color: #6A9955;">$&</span>');
+      }
+      
+      if (langPatterns.strings) {
+        html = html.replace(langPatterns.strings, '<span style="color: #CE9178;">$&</span>');
+      }
+      
+      if (langPatterns.keywords) {
+        html = html.replace(langPatterns.keywords, '<span style="color: #569CD6;">$&</span>');
+      }
+      
+      if (langPatterns.numbers) {
+        html = html.replace(langPatterns.numbers, '<span style="color: #B5CEA8;">$&</span>');
+      }
+      
+      codeElement.innerHTML = html;
+    }
+    
+    // Initialize page tree
+    setupPageTree();
   </script>
 </body>
 </html>

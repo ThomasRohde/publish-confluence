@@ -1,7 +1,5 @@
 // src/confluence-converter.ts
 import { DOMParser } from 'xmldom';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { createLogger } from './logger';
 
 const log = createLogger();
@@ -83,6 +81,11 @@ export class ConfluenceConverter {
     // Handle resource identifiers
     if (nodeName.startsWith('ri:')) {
       return this.processResourceIdentifier(element, attachmentBaseUrl);
+    }
+
+    // Handle Confluence tables
+    if (nodeName === 'table') {
+      return this.processConfluenceTable(element, attachmentBaseUrl);
     }
 
     // For standard HTML elements, recreate them with their attributes
@@ -271,10 +274,8 @@ export class ConfluenceConverter {
    * @param element The ac:structured-macro element
    * @param attachmentBaseUrl Base URL for attachment references
    * @returns The HTML representation of the macro
-   */
-  private static processConfluenceMacro(element: Element, attachmentBaseUrl: string): string {
+   */  private static processConfluenceMacro(element: Element, attachmentBaseUrl: string): string {
     const macroName = element.getAttribute('ac:name') || 'unknown';
-    
     // Handle specific macros
     switch (macroName) {
       case 'code':
@@ -286,17 +287,85 @@ export class ConfluenceConverter {
       case 'panel':
         return this.processPanelMacro(element, attachmentBaseUrl);
       
+      case 'tabs-group':
+        return this.processTabsGroupMacro(element, attachmentBaseUrl);
+        
+      case 'tab-pane':
+        return this.processTabPaneMacro(element, attachmentBaseUrl);
+      
       case 'note':
       case 'info':
       case 'warning':
       case 'tip':
         return this.processAdmonitionMacro(element, macroName, attachmentBaseUrl);
+        
+      case 'column':
+        return `<div class="confluence-column">${this.processChildren(element, attachmentBaseUrl)}</div>`;
+        
+      case 'section':
+        return `<div class="confluence-section">${this.processChildren(element, attachmentBaseUrl)}</div>`;
+        
+      case 'table-of-contents':
+        return `<div class="confluence-toc"><div class="toc-header">Table of Contents</div><div class="toc-placeholder">[Table of Contents would appear here]</div></div>`;
+        
+      case 'expand':
+        let title = 'Click to expand...';
+        let expandContent = '';
+        
+        // Extract title and content
+        for (let i = 0; i < element.childNodes.length; i++) {
+          const child = element.childNodes[i] as Element;
+          if (!child.nodeName) continue;
+          
+          const nodeName = child.nodeName.toLowerCase();
+          
+          if (nodeName === 'ac:parameter' && child.getAttribute('ac:name') === 'title') {
+            title = child.textContent || title;
+          } else if (nodeName === 'ac:rich-text-body') {
+            expandContent = this.processChildren(child, attachmentBaseUrl);
+          }
+        }
+        
+        return `
+          <div class="confluence-expand-macro">
+            <div class="expand-header" onclick="this.parentElement.classList.toggle('expanded')">
+              <span class="expand-icon">▶</span>
+              <span>${title}</span>
+            </div>
+            <div class="expand-content">${expandContent}</div>
+          </div>
+        `;
       
+      case 'status':
+        let color = 'grey';
+        let text = 'Status';
+        
+        // Extract parameters
+        for (let i = 0; i < element.childNodes.length; i++) {
+          const child = element.childNodes[i] as Element;
+          if (!child.nodeName) continue;
+          
+          if (child.nodeName.toLowerCase() === 'ac:parameter') {
+            const paramName = child.getAttribute('ac:name');
+            
+            if (paramName === 'colour' || paramName === 'color') {
+              color = (child.textContent || '').toLowerCase();
+            } else if (paramName === 'title') {
+              text = child.textContent || text;
+            }
+          }
+        }
+        
+        return `<span class="confluence-status confluence-status-${color}">${text}</span>`;
+        
+      case 'chart':
+        return `<div class="confluence-chart-placeholder">[Chart: ${element.getAttribute('ac:name')}]</div>`;
+                
       default:
         // For unhandled macros, display a placeholder with the macro name
-        return `<div class="macro macro-${macroName}">
+        return `<div class="confluence-macro confluence-macro-${macroName}">
           <div class="macro-title">${macroName}</div>
-          <div class="macro-content">${this.processChildren(element, attachmentBaseUrl)}</div>
+          <div class="macro-body">${this.processChildren(element, attachmentBaseUrl)}</div>
         </div>`;
     }
   }
@@ -421,6 +490,113 @@ export class ConfluenceConverter {
     result += '</div>';
     
     return result;
+  }
+
+  /**
+   * Process Confluence tabs-group macro
+   * @param element The tabs-group macro element
+   * @param attachmentBaseUrl Base URL for attachment references
+   * @returns The HTML tabs group
+   */
+  private static processTabsGroupMacro(element: Element, attachmentBaseUrl: string): string {
+    // Extract parameters
+    let disposition = 'horizontal';
+    let outline = false;
+    let color = '';
+    let content = '';
+    
+    // Process child nodes to find parameters and tabs content
+    for (let i = 0; i < element.childNodes.length; i++) {
+      const child = element.childNodes[i] as Element;
+      if (!child.nodeName) continue;
+      
+      const nodeName = child.nodeName.toLowerCase();
+      
+      if (nodeName === 'ac:parameter') {
+        const paramName = child.getAttribute('ac:name');
+        if (paramName === 'disposition') {
+          disposition = (child.textContent || 'horizontal').trim();
+        } else if (paramName === 'outline') {
+          outline = (child.textContent || 'false').trim() === 'true';
+        } else if (paramName === 'color') {
+          color = (child.textContent || '').trim();
+        }
+      }
+      else if (nodeName === 'ac:rich-text-body') {
+        content = this.processChildren(child, attachmentBaseUrl);
+      }
+    }
+
+    // Build HTML representation
+    const outlineClass = outline ? 'tabs-outline' : '';
+    const colorAttr = color ? `data-tab-color="${color}"` : '';
+    
+    return `<div class="confluence-tabs confluence-tabs-${disposition} ${outlineClass}" ${colorAttr}>
+      <div class="tabs-menu"></div>
+      <div class="tabs-content">${content}</div>
+    </div>`;
+  }
+
+  /**
+   * Process Confluence tab-pane macro
+   * @param element The tab-pane macro element
+   * @param attachmentBaseUrl Base URL for attachment references
+   * @returns The HTML tab pane
+   */
+  private static processTabPaneMacro(element: Element, attachmentBaseUrl: string): string {
+    // Extract parameters
+    let name = 'Tab';
+    let icon = '';
+    let anchor = '';
+    let content = '';
+    
+    // Process child nodes to find parameters and content
+    for (let i = 0; i < element.childNodes.length; i++) {
+      const child = element.childNodes[i] as Element;
+      if (!child.nodeName) continue;
+      
+      const nodeName = child.nodeName.toLowerCase();
+      
+      if (nodeName === 'ac:parameter') {
+        const paramName = child.getAttribute('ac:name');
+        if (paramName === 'name') {
+          name = (child.textContent || 'Tab').trim();
+        } else if (paramName === 'icon') {
+          icon = (child.textContent || '').trim();
+        } else if (paramName === 'anchor') {
+          anchor = (child.textContent || '').trim();
+        }
+      }
+      else if (nodeName === 'ac:rich-text-body') {
+        content = this.processChildren(child, attachmentBaseUrl);
+      }
+    }
+
+    // Build HTML representation
+    // Note: We create both the menu item and content, which will be properly
+    // organized by JavaScript in the browser
+    const iconHtml = icon ? `<span class="tab-menu-icon ${icon}"></span>` : '';
+    const tabContent = `<div class="tab-content">${content}</div>`;
+    
+    // Insert the menu item into the tabs-menu and the content into tabs-content
+    // This will be handled via JavaScript in the browser
+    const script = `
+      <script>
+        (function() {
+          const tabContent = document.currentScript.previousElementSibling;
+          const tabsContent = tabContent.parentElement;
+          const tabsGroup = tabsContent.parentElement;
+          const tabsMenu = tabsGroup.querySelector('.tabs-menu');
+          const menuItem = document.createElement('div');
+          menuItem.className = 'tab-menu-item';
+          menuItem.dataset.anchor = '${anchor}';
+          menuItem.innerHTML = '${iconHtml}${name}';
+          tabsMenu.appendChild(menuItem);
+        })();
+      </script>
+    `;
+    
+    return tabContent + script;
   }
 
   /**
@@ -614,6 +790,70 @@ export class ConfluenceConverter {
         // For unhandled resource identifiers, return empty string
         return '';
     }
+  }
+
+  /**
+   * Process Confluence table element
+   * @param element The table element
+   * @param attachmentBaseUrl Base URL for attachment references
+   * @returns The HTML table
+   */
+  private static processConfluenceTable(element: Element, attachmentBaseUrl: string): string {
+    // Create a more Confluence-like table
+    let result = '<div class="confluence-table-wrapper">';
+    result += '<table class="confluenceTable">';
+    
+    // Process thead and tbody
+    let inHeader = false;
+    
+    for (let i = 0; i < element.childNodes.length; i++) {
+      const child = element.childNodes[i] as Element;
+      if (!child.nodeName) continue;
+      
+      const nodeName = child.nodeName.toLowerCase();
+      
+      if (nodeName === 'thead') {
+        inHeader = true;
+        result += '<thead>';
+        result += this.processChildren(child, attachmentBaseUrl);
+        result += '</thead>';
+        inHeader = false;
+      } 
+      else if (nodeName === 'tbody') {
+        result += '<tbody>';
+        result += this.processChildren(child, attachmentBaseUrl);
+        result += '</tbody>';
+      }
+      else if (nodeName === 'tr') {
+        result += '<tr>';
+        
+        // Process each cell
+        for (let j = 0; j < child.childNodes.length; j++) {
+          const cell = child.childNodes[j] as Element;
+          if (!cell.nodeName) continue;
+          
+          const cellName = cell.nodeName.toLowerCase();
+          
+          if (cellName === 'th' || (inHeader && cellName === 'td')) {
+            result += '<th class="confluenceTh">';
+            result += this.processChildren(cell, attachmentBaseUrl);
+            result += '</th>';
+          } 
+          else if (cellName === 'td') {
+            result += '<td class="confluenceTd">';
+            result += this.processChildren(cell, attachmentBaseUrl);
+            result += '</td>';
+          }
+        }
+        
+        result += '</tr>';
+      }
+    }
+    
+    result += '</table>';
+    result += '</div>';
+    
+    return result;
   }
 
   /**
