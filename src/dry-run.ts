@@ -1,24 +1,34 @@
 // src/dry-run.ts
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { createLogger } from './logger';
 import { PublishConfig, ConfluencePage, ConfluenceAttachment } from './types';
+import { generatePreview } from './dry-run-preview';
 
 // Initialize logger
 const log = createLogger();
+
+// Add this at the top of the file to properly define __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Interface for a dry-run context that simulates Confluence operations
  */
 export interface DryRunContext {
+  /** The base directory where simulated Confluence content will be saved */
   baseDir: string;
+  /** Map of simulated pages (spaceKey:title -> SimulatedPage) */
   simulatedPages: Map<string, SimulatedPage>;
+  /** Whether to generate HTML preview files for browsing the pages (defaults to true) */
+  previewEnabled?: boolean;
 }
 
 /**
  * Interface for a simulated Confluence page
  */
-interface SimulatedPage {
+export interface SimulatedPage {
   id: string;
   title: string;
   spaceKey: string;
@@ -56,9 +66,13 @@ function generateUuid(): string {
 /**
  * Creates a new DryRunContext
  * @param baseDir The directory where simulated Confluence content will be saved
+ * @param options Additional options for the dry-run context
  * @returns A new DryRunContext
  */
-export async function createDryRunContext(baseDir: string): Promise<DryRunContext> {
+export async function createDryRunContext(
+  baseDir: string, 
+  options: { previewEnabled?: boolean } = {}
+): Promise<DryRunContext> {
   // Create the base directory if it doesn't exist
   await fs.mkdir(baseDir, { recursive: true });
   
@@ -69,7 +83,8 @@ export async function createDryRunContext(baseDir: string): Promise<DryRunContex
   
   return {
     baseDir,
-    simulatedPages: new Map()
+    simulatedPages: new Map(),
+    previewEnabled: options.previewEnabled ?? true // Enable preview by default
   };
 }
 
@@ -688,14 +703,18 @@ export async function uploadAttachment(
 /**
  * Creates a mock Confluence client for dry-run mode
  * @param baseDir The directory where simulated Confluence content will be saved
+ * @param options Additional options for the dry-run context
  * @returns A mock Confluence client
  */
-export async function createDryRunClient(baseDir: string) {
+export async function createDryRunClient(
+  baseDir: string,
+  options: { previewEnabled?: boolean } = {}
+) {
   // Create the context
-  const context = await createDryRunContext(baseDir);
+  const context = await createDryRunContext(baseDir, options);
   
-  // Return a mock client with the necessary methods
-  return {
+  // Define the client object
+  const client = {
     findPageByTitle: (spaceKey: string, title: string) => 
       findPageByTitle(context, spaceKey, title),
     
@@ -743,14 +762,99 @@ export async function createDryRunClient(baseDir: string) {
         return createPage(context, spaceKey, title, content, parentId);
       }
     },
-    
-    uploadAttachment: (pageId: string, filePath: string) => 
+      uploadAttachment: (pageId: string, filePath: string) => 
       uploadAttachment(context, pageId, filePath),
     
-    // Mock for listAttachments - returns empty array for simplicity
     listAttachments: async (pageId: string) => {
-      log.verbose(`[DRY-RUN] Listing attachments for page: ${pageId}`);
-      return [];
+      // Find the page in memory
+      let page: SimulatedPage | undefined;
+      for (const p of context.simulatedPages.values()) {
+        if (p.id === pageId) {
+          page = p;
+          break;
+        }
+      }
+      
+      if (!page) {
+        // Try to find the page directory
+        const pageDirPath = await findPageDirById(context, pageId);
+        if (pageDirPath) {
+          // Load metadata
+          const metadataPath = path.join(pageDirPath, 'metadata.json');
+          const metadataContent = await fs.readFile(metadataPath, 'utf8');
+          const metadata = JSON.parse(metadataContent);
+          
+          // Return attachment info
+          const results: ConfluenceAttachment[] = [];
+          for (const [filename, _] of Object.entries(metadata.attachments || {})) {
+            results.push({
+              id: generateUuid(),
+              type: 'attachment',
+              status: 'current',
+              title: filename,
+              version: { number: 1, minorEdit: false },
+              extensions: {
+                mediaType: 'application/octet-stream',
+                fileSize: 0
+              },
+              _links: {
+                webui: `/spaces/${metadata.spaceKey}/pages/${pageId}/attachments/${generateUuid()}`,
+                self: `/rest/api/content/${pageId}/child/attachment/${generateUuid()}`,
+                download: `/download/attachments/${pageId}/${filename}`
+              }
+            });
+          }
+          return { results };
+        }
+        return { results: [] };
+      }
+      
+      // Return attachment info
+      const results: ConfluenceAttachment[] = [];
+      for (const [filename, _] of page.attachments.entries()) {
+        results.push({
+          id: generateUuid(),
+          type: 'attachment',
+          status: 'current',
+          title: filename,
+          version: { number: 1, minorEdit: false },
+          extensions: {
+            mediaType: 'application/octet-stream',
+            fileSize: 0
+          },
+          _links: {
+            webui: `/spaces/${page.spaceKey}/pages/${pageId}/attachments/${generateUuid()}`,
+            self: `/rest/api/content/${pageId}/child/attachment/${generateUuid()}`,
+            download: `/download/attachments/${pageId}/${filename}`
+          }
+        });
+      }
+      return { results };
+    },
+    
+    // Generate HTML preview for browsing the Confluence pages
+    generatePreview: async () => {
+      if (context.previewEnabled) {
+        return await generatePreview(context);
+      } else {
+        log.info('[DRY-RUN] Preview generation is disabled');
+        return null;
+      }
     }
   };
+  
+  // If preview is enabled, automatically generate it when the client is created
+  if (context.previewEnabled) {
+    // Using setTimeout to ensure all operations complete before generating preview
+    setTimeout(async () => {
+      try {
+        const previewPath = await generatePreview(context);
+        log.info(`[DRY-RUN] Preview is available at: file://${previewPath}`);
+      } catch (error) {
+        log.error(`[DRY-RUN] Failed to generate preview: ${(error as Error).message}`);
+      }
+    }, 100);
+  }
+  
+  return client;
 }

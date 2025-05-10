@@ -478,104 +478,61 @@ Create your own templates to customize the page and macro content:
 Usage: publish-confluence [options] [command]
 
 Options:
-  -q, --quiet     Suppress all output except errors
-  -v, --verbose   Enable verbose output
-  -d, --debug     Enable debug output
-  -h, --help      Display help
+  -q, --quiet              Suppress all output except errors
+  -v, --verbose            Enable verbose output
+  -d, --debug              Enable debug output
+  --dry-run [dir]          Generate storage files locally instead of publishing to Confluence
+  --no-preview             Disable HTML preview generation in dry-run mode
+  -c, --comment            Display content with comment flags in info macros
+  --log-file [path]        Enable logging to file with optional custom path
+  --allow-self-signed      Allow self-signed SSL certificates (default: true)
+  --no-allow-self-signed   Disallow self-signed SSL certificates
+  -h, --help               Display help
 
 Commands:
-  create          Create a new publish-confluence project
-  fetch           Fetch content from a Confluence page
-  generate-prompt Generate a project prompt for LLM assistance
+  publish                  Publish JavaScript builds and HTML content to Confluence (default)
+  create                   Create a new publish-confluence project
+  fetch                    Fetch content from a Confluence page
+  generate-prompt          Generate a project prompt for LLM assistance
 ```
 
-### Create Command
+### Dry-Run Mode
 
-The create command helps you set up a new project with the necessary configuration files:
+The dry-run mode allows you to generate Confluence storage format files locally without actually publishing to Confluence. This is useful for testing, previewing, and debugging your pages before publishing them.
 
-```
-Usage: publish-confluence create [options]
-
-Options:
-  -q, --quiet               Suppress all output except errors
-  -v, --verbose             Enable verbose output
-  -d, --debug               Enable debug output
-  -h, --help                Display help
-```
-
-Running this command will guide you through an interactive setup process that:
-
-1. Creates a basic project structure
-2. Generates template files (confluence-template.html and macro-template.html)
-3. Creates a publish-confluence.json configuration file
-4. Sets up environment variables in a .env file
-
-Example:
 ```bash
-publish-confluence create
+# Generate files in the default 'dry-run' directory
+publish-confluence --dry-run
+
+# Specify a custom directory
+publish-confluence --dry-run ./my-preview
 ```
 
-### Fetch Command
+When using dry-run mode, the tool will:
 
-The fetch command allows you to retrieve the body storage format from a Confluence page:
+1. Create a local directory structure mirroring your Confluence space hierarchy
+2. Generate HTML files with properly formatted Confluence storage content
+3. Copy all attachments to the appropriate directories
+4. Generate an HTML preview that looks similar to Confluence for browsing locally
 
-```
-Usage: publish-confluence fetch [options]
+#### HTML Preview Feature
 
-Options:
-  -s, --space-key <key>     Confluence space key (required)
-  -p, --page-title <title>  Title of the page to fetch (required)
-  -f, --format <format>     Output format: "storage" (default) or "json"
-  -q, --quiet               Suppress all output except errors
-  -v, --verbose             Enable verbose output
-  -d, --debug               Enable debug output
-  -h, --help                Display help
-```
+By default, dry-run mode generates an HTML preview that allows you to browse the page hierarchy and view your pages with Confluence-like styling. This makes it easy to verify the output before publishing to the actual Confluence instance.
 
-#### Examples
+To disable the preview generation:
 
-Fetch a page's content in storage format:
 ```bash
-publish-confluence fetch -s MYSPACE -p "My Page Title"
+publish-confluence --dry-run --no-preview
 ```
 
-Fetch from a personal space (with tilde in space key):
-```bash
-publish-confluence fetch -s ~username -p "My Personal Page"
-```
+The preview provides:
+- A browsable page hierarchy similar to Confluence
+- Confluence-like styling and formatting
+- Proper rendering of Confluence macros
+- Links to attachments and other pages
+- A responsive layout that works on different screen sizes
 
-Get the full page object as JSON:
-```bash
-publish-confluence fetch -s MYSPACE -p "My Page Title" -f json
-```
-
-### Generate-Prompt Command
-
-This command generates a structured prompt for AI assistance with your project:
-
-```
-Usage: publish-confluence generate-prompt [options]
-
-Options:
-  -f, --file <filepath>     Read project idea from a file
-  -q, --quiet               Suppress all output except errors
-  -v, --verbose             Enable verbose output
-  -d, --debug               Enable debug output
-  -h, --help                Display help
-```
-
-The generate-prompt command creates a structured prompt that includes:
-1. Project description and requirements
-2. Technical constraints
-3. Template structure
-4. Build configuration details
-
-This is useful when seeking assistance from AI tools for your Confluence projects.
-
-Example:
-```bash
-publish-confluence generate-prompt
-```
+You can open the generated `index.html` file in any browser to browse your pages.
 
 ## Authentication
 

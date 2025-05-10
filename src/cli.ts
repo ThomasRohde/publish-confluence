@@ -166,6 +166,7 @@ program
   .command('publish', { isDefault: true })
   .description('Publish JavaScript builds and HTML content to Confluence (default)')
   .option('--dry-run [dir]', 'Generate storage files locally instead of publishing to Confluence')
+  .option('--no-preview', 'Disable HTML preview generation in dry-run mode')
   .action((cmdOptions) => {
     const options = { ...program.opts(), ...cmdOptions };
     runPublishCommand(options);

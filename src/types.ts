@@ -66,6 +66,8 @@ export interface PublishOptions {
   comment?: boolean;
   /** Path to the directory for dry-run output (if set, no actual API calls will be made) */
   dryRun?: string;
+  /** Enable HTML preview generation in dry-run mode (defaults to true) */
+  preview?: boolean;
 }
 
 /**

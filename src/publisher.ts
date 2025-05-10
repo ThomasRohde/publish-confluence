@@ -722,7 +722,8 @@ function isPageAlreadyExistsError(error: any): boolean {
  * @returns Promise that resolves when publishing is complete
  * @throws Error if any part of the publishing process fails
  */
-export async function publishToConfluence(options: PublishOptions): Promise<void> {try {
+export async function publishToConfluence(options: PublishOptions): Promise<void> {
+  try {
     // Load the main configuration - skip env checks in dry-run mode
     const rootConfig = await loadConfiguration(!!options.dryRun);
     
@@ -737,9 +738,12 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
       const dryRunDir = path.isAbsolute(options.dryRun) 
         ? options.dryRun 
         : path.resolve(process.cwd(), options.dryRun || 'dry-run');
+        log.info(`Starting dry-run mode. Will write files to: ${dryRunDir}`);
       
-      log.info(`Starting dry-run mode. Will write files to: ${dryRunDir}`);
-      client = await createDryRunClient(dryRunDir);
+      // Create the dry-run client with preview enabled by default, unless explicitly disabled
+      client = await createDryRunClient(dryRunDir, {
+        previewEnabled: options.preview !== false
+      });
     } else {
       // Initialize regular Confluence client
       client = initializeClient(options);

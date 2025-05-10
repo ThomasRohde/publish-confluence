@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} - Confluence Preview</title>
+  <style>
+    :root {
+      --primary-color: #0052CC;
+      --primary-light: #4C9AFF;
+      --primary-dark: #0747A6;
+      --secondary-color: #6554C0;
+      --background-color: #F4F5F7;
+      --text-color: #172B4D;
+      --light-text: #6B778C;
+      --border-color: #DFE1E6;
+      --success-color: #36B37E;
+      --warning-color: #FFAB00;
+      --error-color: #FF5630;
+      --info-color: #00B8D9;
+      --panel-background: #FFFFFF;
+      --sidebar-width: 280px;
+      --header-height: 60px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --border-radius: 3px;
+      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.5;
+      font-size: 14px;
+      display: grid;
+      grid-template-areas:
+        "header header"
+        "sidebar main"
+        "footer footer";
+      grid-template-columns: var(--sidebar-width) 1fr;
+      grid-template-rows: var(--header-height) 1fr auto;
+      min-height: 100vh;
+    }
+
+    /* Header styles */
+    .header {
+      grid-area: header;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0 var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .dry-run-badge {
+      background-color: #FF8B00;
+      color: white;
+      font-size: 12px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+    }
+
+    /* Sidebar styles */
+    .sidebar {
+      grid-area: sidebar;
+      background-color: var(--panel-background);
+      border-right: 1px solid var(--border-color);
+      padding: var(--spacing-md);
+      overflow-y: auto;
+    }
+
+    .spaces-nav {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .spaces-nav h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: var(--spacing-md);
+      color: var(--primary-dark);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-sm);
+    }
+
+    .space-item {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .space-key {
+      font-weight: 500;
+      color: var(--primary-dark);
+      margin-bottom: var(--spacing-sm);
+      display: block;
+      cursor: pointer;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+    }
+
+    .space-key:hover {
+      background-color: var(--background-color);
+    }
+
+    .page-tree {
+      margin-left: var(--spacing-md);
+    }
+
+    .page-item {
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .page-link {
+      display: block;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+
+    .page-link:hover {
+      background-color: var(--background-color);
+    }
+
+    .page-link.active {
+      background-color: var(--primary-light);
+      color: white;
+    }
+
+    .page-children {
+      margin-left: var(--spacing-lg);
+      margin-top: var(--spacing-xs);
+      border-left: 1px solid var(--border-color);
+      padding-left: var(--spacing-sm);
+    }
+
+    /* Main content styles */
+    .main-content {
+      grid-area: main;
+      background-color: var(--panel-background);
+      padding: var(--spacing-xl);
+      overflow-y: auto;
+      margin: var(--spacing-md);
+      border-radius: var(--border-radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header {
+      margin-bottom: var(--spacing-xl);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-md);
+    }
+
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .metadata {
+      color: var(--light-text);
+      font-size: 12px;
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .page-content {
+      line-height: 1.6;
+    }
+
+    /* Page content styling */
+    .page-content h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin: var(--spacing-lg) 0 var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .page-content h2 {
+      font-size: 20px;
+      font-weight: 500;
+      margin: var(--spacing-lg) 0 var(--spacing-md);
+    }
+
+    .page-content h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin: var(--spacing-md) 0;
+    }
+
+    .page-content h4, .page-content h5, .page-content h6 {
+      font-size: 14px;
+      font-weight: 500;
+      margin: var(--spacing-md) 0;
+    }
+
+    .page-content p {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .page-content ul, .page-content ol {
+      margin-bottom: var(--spacing-md);
+      padding-left: var(--spacing-xl);
+    }
+
+    .page-content li {
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .page-content code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background-color: var(--background-color);
+      padding: 0 var(--spacing-xs);
+      border-radius: var(--border-radius);
+    }
+
+    .page-content pre {
+      background-color: var(--background-color);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius);
+      overflow-x: auto;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .page-content pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+
+    .page-content blockquote {
+      border-left: 4px solid var(--primary-light);
+      padding-left: var(--spacing-md);
+      margin-left: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      color: var(--light-text);
+    }
+
+    .page-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .page-content th, .page-content td {
+      border: 1px solid var(--border-color);
+      padding: var(--spacing-sm);
+      text-align: left;
+    }
+
+    .page-content th {
+      background-color: var(--background-color);
+      font-weight: 500;
+    }
+
+    .page-content a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .page-content a:hover {
+      text-decoration: underline;
+    }
+
+    /* Attachments section */
+    .attachments {
+      margin-top: var(--spacing-xl);
+      border-top: 1px solid var(--border-color);
+      padding-top: var(--spacing-md);
+    }
+
+    .attachments h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .attachment-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-sm);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .attachment-icon {
+      margin-right: var(--spacing-sm);
+      color: var(--light-text);
+    }
+
+    .attachment-info {
+      flex: 1;
+    }
+
+    .attachment-name {
+      font-weight: 500;
+    }
+
+    .attachment-size {
+      font-size: 12px;
+      color: var(--light-text);
+    }
+
+    .attachment-action {
+      margin-left: var(--spacing-sm);
+    }
+
+    .attachment-action a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    /* Macro styles */
+    .macro {
+      margin-bottom: var(--spacing-md);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+
+    .macro-title {
+      background-color: var(--background-color);
+      padding: var(--spacing-sm);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .macro-content {
+      padding: var(--spacing-md);
+    }
+
+    .code-block {
+      margin-bottom: var(--spacing-md);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+
+    .code-title {
+      background-color: var(--background-color);
+      padding: var(--spacing-sm);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Admonition boxes */
+    .admonition {
+      margin-bottom: var(--spacing-md);
+      border-left: 4px solid var(--info-color);
+      background-color: rgba(0, 184, 217, 0.1);
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      overflow: hidden;
+    }
+
+    .admonition-title {
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-weight: 500;
+      background-color: rgba(0, 184, 217, 0.2);
+    }
+
+    .admonition-content {
+      padding: var(--spacing-md);
+    }
+
+    .admonition-note {
+      border-left-color: var(--info-color);
+      background-color: rgba(0, 184, 217, 0.1);
+    }
+
+    .admonition-note .admonition-title {
+      background-color: rgba(0, 184, 217, 0.2);
+    }
+
+    .admonition-warning {
+      border-left-color: var(--warning-color);
+      background-color: rgba(255, 171, 0, 0.1);
+    }
+
+    .admonition-warning .admonition-title {
+      background-color: rgba(255, 171, 0, 0.2);
+    }
+
+    .admonition-tip {
+      border-left-color: var(--success-color);
+      background-color: rgba(54, 179, 126, 0.1);
+    }
+
+    .admonition-tip .admonition-title {
+      background-color: rgba(54, 179, 126, 0.2);
+    }
+
+    /* Task list */
+    .task-list {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .task {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .task input[type="checkbox"] {
+      margin-right: var(--spacing-sm);
+      margin-top: 3px;
+    }
+
+    /* Layout components */
+    .confluence-layout {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .layout-section {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .layout-section-single .layout-cell {
+      width: 100%;
+    }
+
+    .layout-section-two_equal .layout-cell {
+      width: 50%;
+    }
+
+    .layout-section-two_left_sidebar .layout-cell:first-child {
+      width: 30%;
+    }
+
+    .layout-section-two_left_sidebar .layout-cell:last-child {
+      width: 70%;
+    }
+
+    .layout-section-two_right_sidebar .layout-cell:first-child {
+      width: 70%;
+    }
+
+    .layout-section-two_right_sidebar .layout-cell:last-child {
+      width: 30%;
+    }
+
+    .layout-section-three_equal .layout-cell {
+      width: 33.33%;
+    }
+
+    .layout-section-three_with_sidebars .layout-cell:first-child,
+    .layout-section-three_with_sidebars .layout-cell:last-child {
+      width: 20%;
+    }
+
+    .layout-section-three_with_sidebars .layout-cell:nth-child(2) {
+      width: 60%;
+    }
+
+    .layout-cell {
+      background-color: var(--panel-background);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Error display */
+    .error {
+      color: var(--error-color);
+      background-color: rgba(255, 86, 48, 0.1);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      body {
+        grid-template-columns: minmax(var(--sidebar-width), 250px) 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        grid-template-areas:
+          "header header"
+          "main main"
+          "footer footer";
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin: var(--spacing-sm);
+        padding: var(--spacing-md);
+      }
+    }
+
+    /* For mobile sidebar toggle */
+    .menu-toggle {
+      display: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+      
+      .sidebar.active {
+        display: block;
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        bottom: 0;
+        width: 80%;
+        z-index: 100;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-info">
+      <h1>Confluence Preview</h1>
+      <span class="dry-run-badge">DRY RUN</span>
+    </div>
+    <button class="menu-toggle">☰ Menu</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="spaces-nav">
+      <h2>Spaces</h2>
+      {{#each spaces}}
+        <div class="space-item">
+          <span class="space-key" data-key="{{key}}">{{key}}</span>
+          <div class="page-tree">
+            {{#each pages}}
+              <div class="page-item">
+                <a href="?space={{../key}}&page={{encode title}}" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
+                  {{title}}
+                </a>
+                {{#if children.length}}
+                  <div class="page-children">
+                    {{#each children}}
+                      <div class="page-item">
+                        <a href="?space={{../../key}}&page={{encode title}}" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
+                          {{title}}
+                        </a>
+                        {{#if children.length}}
+                          <!-- Recursively render children here if needed -->
+                        {{/if}}
+                      </div>
+                    {{/each}}
+                  </div>
+                {{/if}}
+              </div>
+            {{/each}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>{{title}}</h1>
+      <div class="metadata">
+        <span>Space: {{spaceKey}}</span>
+        <span>Version: {{version}}</span>
+        <span>ID: {{id}}</span>
+      </div>
+    </div>
+
+    <div class="page-content">
+      {{{content}}}
+    </div>
+
+    {{#if attachments.length}}
+      <div class="attachments">
+        <h2>Attachments</h2>
+        {{#each attachments}}
+          <div class="attachment-item">
+            <div class="attachment-icon">📎</div>
+            <div class="attachment-info">
+              <div class="attachment-name">{{name}}</div>
+              <div class="attachment-size">{{size}}</div>
+            </div>
+            <div class="attachment-action">
+              <a href="{{path}}" target="_blank">View</a>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{/if}}
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Mobile menu toggle
+      const menuToggle = document.querySelector('.menu-toggle');
+      const sidebar = document.querySelector('.sidebar');
+      
+      if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', function() {
+          sidebar.classList.toggle('active');
+        });
+      }
+
+      // Expand/collapse space navigation
+      const spaceKeys = document.querySelectorAll('.space-key');
+      
+      spaceKeys.forEach(function(spaceKey) {
+        spaceKey.addEventListener('click', function() {
+          const pageTree = this.nextElementSibling;
+          if (pageTree) {
+            pageTree.style.display = pageTree.style.display === 'none' ? 'block' : 'none';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
