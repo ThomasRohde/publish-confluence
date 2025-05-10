@@ -20,12 +20,6 @@ const __dirname = path.dirname(__filename);
 // Load environment variables from .env file
 config();
 
-// Initialize logger
-const log = createLogger();
-
-// Default verbosity level
-let verbosity = VERBOSITY.NORMAL;
-
 // Register a Handlebars helper to render unescaped HTML content
 Handlebars.registerHelper('raw', function(this: any, options: Handlebars.HelperOptions) {
   return new Handlebars.SafeString(options.fn(this));
@@ -37,28 +31,11 @@ function errorColor(str: string): string {
   return `\x1b[31m${str}\x1b[0m`;
 }
 
-/**
- * Configure command options and logging based on verbosity settings
- * @param options Command options
- */
-function configureCommandOptions(options: any): void {
-  // Set verbosity level based on options
-  if (options.quiet) {
-    verbosity = VERBOSITY.QUIET;
-  } else if (options.debug) {
-    verbosity = VERBOSITY.DEBUG;
-  } else if (options.verbose) {
-    verbosity = VERBOSITY.VERBOSE;
-  } else {
-    verbosity = VERBOSITY.NORMAL;
-  }
-  
-  // Configure file logging if enabled
-  if (options.logFile) {
-    configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
-    log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
-  }
-}
+// Initialize logger
+const log = createLogger();
+
+// Default verbosity level
+let verbosity = VERBOSITY.NORMAL;
 
 /**
  * Create a readline interface for interactive prompts
@@ -105,8 +82,7 @@ async function generatePromptCommand(): Promise<void> {
 
     // Combine global options and command-specific options
     const combinedOptions = { ...options, ...cmdOptions };
-    
-    // Generate the prompt using our extracted module
+      // Generate the prompt using our extracted module
     const generatedPrompt = await generatePrompt(rl, combinedOptions, log);
     
     log.info('\nGenerated prompt:');
@@ -123,9 +99,32 @@ async function generatePromptCommand(): Promise<void> {
 }
 
 /**
+ * Configure command options and logging based on verbosity settings
+ * @param options Command options
+ */
+function configureCommandOptions(options: any): void {
+  // Set verbosity level based on options
+  if (options.quiet) {
+    verbosity = VERBOSITY.QUIET;
+  } else if (options.debug) {
+    verbosity = VERBOSITY.DEBUG;
+  } else if (options.verbose) {
+    verbosity = VERBOSITY.VERBOSE;
+  } else {
+    verbosity = VERBOSITY.NORMAL;
+  }
+  
+  // Configure file logging if enabled
+  if (options.logFile) {
+    configureFileLogging(true, typeof options.logFile === 'string' ? options.logFile : undefined);
+    log.info(`File logging enabled: ${typeof options.logFile === 'string' ? options.logFile : 'publish-confluence.log'}`);
+  }
+}
+
+/**
  * Default publish action function
  */
-function runPublishCommand(options: any): void {
+function runPublishCommand(options: any) {
   configureCommandOptions(options);
   
   publishToConfluence(options).catch(err => {
@@ -152,14 +151,18 @@ program
   .option('-v, --verbose', 'Enable verbose output', false)
   .option('-d, --debug', 'Enable debug output (includes verbose)', false)
   .option('-c, --comment', 'Display content with comment flags in info macros', false)
-  .option('--log-file [path]', 'Enable logging to file with optional custom path')
-  .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
+  .option('--log-file [path]', 'Enable logging to file with optional custom path')  .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
   .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates');
 
-// Register macro helpers before command actions run
-program.hook('preAction', () => {
-  registerMacroHelpers(Handlebars, program.opts());
-});
+// Default publish action function
+function runPublishCommand(options: any) {
+  configureCommandOptions(options);
+  
+  publishToConfluence(options).catch(err => {
+    log.error(err);
+    process.exit(1);
+  });
+}
 
 // Define explicit publish command
 program
