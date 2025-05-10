@@ -256,6 +256,11 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
   // Get all page directories
   const pages = await getAllPages(spaceDir);
   
+  log.debug(`[DRY-RUN] Found ${pages.length} pages in space ${spaceKey}`);
+  pages.forEach(page => {
+    log.debug(`[DRY-RUN] Page: ${page.title} (ID: ${page.id}), Parent: ${page.parentId || 'none'}`);
+  });
+  
   // Build parent-child relationships
   const rootPages: PreviewPage[] = [];
   const pageMap = new Map<string, PreviewPage>();
@@ -270,8 +275,7 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
     
     pageMap.set(page.id, pageObj);
   }
-  
-  // Second pass: build tree
+    // Second pass: build tree
   for (const page of pages) {
     const pageObj = pageMap.get(page.id);
     
@@ -281,15 +285,23 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
       const parentPage = pageMap.get(page.parentId);
       if (parentPage) {
         parentPage.children.push(pageObj);
+        log.debug(`[DRY-RUN] Added ${page.title} as child of ${parentPage.title}`);
       } else {
         // Parent not found, add to root
         rootPages.push(pageObj);
+        log.debug(`[DRY-RUN] Parent ${page.parentId} not found for ${page.title}, adding to root`);
       }
     } else {
       // Root page
       rootPages.push(pageObj);
+      log.debug(`[DRY-RUN] Added ${page.title} as root page`);
     }
   }
+  
+  log.debug(`[DRY-RUN] Root pages: ${rootPages.length}`);
+  rootPages.forEach(page => {
+    log.debug(`[DRY-RUN] Root page: ${page.title} with ${page.children.length} children`);
+  });
   
   return rootPages;
 }
@@ -305,36 +317,47 @@ async function getAllPages(spaceDir: string): Promise<Array<{id: string, title: 
   // Recursively search for pages
   async function searchDirectory(dirPath: string): Promise<void> {
     try {
+      log.debug(`[DRY-RUN] Searching directory: ${dirPath}`);
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
       
+      // Check if this directory has a metadata.json file
       for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const entryPath = path.join(dirPath, entry.name);
-          
-          // Check if this is a page directory
+        if (entry.isFile() && entry.name === 'metadata.json') {
           try {
-            const metadataPath = path.join(entryPath, 'metadata.json');
+            const metadataPath = path.join(dirPath, entry.name);
             const metadataContent = await fs.readFile(metadataPath, 'utf8');
             const metadata = JSON.parse(metadataContent);
             
             // Found a page
+            log.debug(`[DRY-RUN] Found page in directory: ${dirPath}`);
             pages.push({
               id: metadata.id,
               title: metadata.title,
               parentId: metadata.parentId
             });
+            
+            // Don't break - continue to look for subdirectories
           } catch (error) {
-            // Not a page directory or error reading metadata, continue search
-            await searchDirectory(entryPath);
+            log.debug(`[DRY-RUN] Error reading metadata: ${(error as Error).message}`);
           }
+        }
+      }
+      
+      // Look in all subdirectories
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const subDirPath = path.join(dirPath, entry.name);
+          await searchDirectory(subDirPath);
         }
       }
     } catch (error) {
       // Ignore errors and continue
+      log.debug(`[DRY-RUN] Error reading directory: ${(error as Error).message}`);
     }
   }
   
   await searchDirectory(spaceDir);
+  log.debug(`[DRY-RUN] Found ${pages.length} total pages`);
   return pages;
 }
 
@@ -632,12 +655,90 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
         </html>
       `;
       log.info('[DRY-RUN] Using fallback preview template');
-    }
-      // Register helpers
+    }    // Register helpers
     Handlebars.registerHelper('encode', function(str) {
-      // Use a more URL-safe filename approach by replacing problematic characters
+      if (typeof str !== 'string') {
+        return '';
+      }
+      
+      // Replace problematic characters with underscores for URL safety
+      // This has to match the same encoding used in generatePagePreview when writing the files
       return str.replace(/[^a-zA-Z0-9-_.]/g, '_');
     });
+    
+    // Try to load partial templates
+    try {
+      for (const location of templateLocations) {
+        try {
+          const partialsDir = path.resolve(location, 'partials');
+          
+          // Check if the partials directory exists
+          await fs.access(partialsDir);
+          
+          // Load all partial templates
+          const partialFiles = await fs.readdir(partialsDir);
+          
+          for (const partialFile of partialFiles) {
+            if (partialFile.endsWith('.hbs')) {
+              const partialPath = path.join(partialsDir, partialFile);
+              const partialContent = await fs.readFile(partialPath, 'utf8');
+              const partialName = path.basename(partialFile, '.hbs');
+              
+              // Register the partial
+              Handlebars.registerPartial(partialName, partialContent);
+              log.verbose(`[DRY-RUN] Registered partial template: ${partialName}`);
+            }
+          }
+          
+          break; // Successfully loaded partials, no need to check other locations
+        } catch (error) {
+          // No partials directory or error reading partials, try next location
+          log.debug(`[DRY-RUN] No partials found in: ${location}/partials`);
+        }
+      }
+    } catch (error) {
+      log.debug(`[DRY-RUN] Error loading partial templates: ${(error as Error).message}`);
+    }
+      // Define the recursive page tree partial inline if it wasn't loaded from a file
+    if (!Handlebars.partials['recursivePageTree']) {
+      Handlebars.registerPartial('recursivePageTree', `
+        {{#each pages}}
+          <div class="page-item">
+            <a href="../{{../spaceKey}}/{{encode title}}.html" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
+              {{title}}
+            </a>
+            {{#if children.length}}
+              <div class="page-children">
+                {{> recursivePageTree pages=children spaceKey=../spaceKey}}
+              </div>
+            {{/if}}
+          </div>
+        {{/each}}
+      `);
+      log.verbose(`[DRY-RUN] Registered inline recursivePageTree partial`);
+    }
+    
+    // Log availability of partials
+    log.debug(`[DRY-RUN] Available Handlebars partials: ${Object.keys(Handlebars.partials).join(', ')}`);
+    
+    // Log page data for debugging
+    log.debug(`[DRY-RUN] Rendering template for page: ${pageData.title}`);
+    log.debug(`[DRY-RUN] Page has ${pageData.spaces.length} spaces`);
+    pageData.spaces.forEach(space => {
+      log.debug(`[DRY-RUN] Space ${space.key} has ${space.pages.length} root pages`);
+      space.pages.forEach(page => {
+        logPageHierarchy(page, 1);
+      });
+    });
+    
+    // Helper function to log page hierarchy
+    function logPageHierarchy(page: PreviewPage, level: number) {
+      const indent = '  '.repeat(level);
+      log.debug(`[DRY-RUN] ${indent}Page: ${page.title} (${page.id}), ${page.children.length} children, active: ${page.isActive}`);
+      page.children.forEach(child => {
+        logPageHierarchy(child, level + 1);
+      });
+    }
     
     // Compile the template
     const template = Handlebars.compile(templateContent);

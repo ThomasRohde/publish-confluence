@@ -130,9 +130,7 @@
 
     .page-item {
       margin-bottom: var(--spacing-xs);
-    }
-
-    .page-link {
+    }    .page-link {
       display: block;
       padding: var(--spacing-xs) var(--spacing-sm);
       color: var(--text-color);
@@ -144,6 +142,26 @@
       position: relative;
     }
 
+    .page-link.has-children {
+      padding-left: var(--spacing-lg);
+      cursor: pointer;
+    }
+
+    .page-link.has-children::before {
+      content: "▶";
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--light-text);
+      transition: transform 0.2s;
+    }
+
+    .page-link.has-children.expanded::before {
+      transform: translateY(-50%) rotate(90deg);
+    }
+
     .page-link:hover {
       background-color: var(--background-color);
     }
@@ -151,13 +169,15 @@
     .page-link.active {
       background-color: var(--primary-light);
       color: white;
-    }
-
-    .page-children {
+    }    .page-children {
       margin-left: var(--spacing-lg);
       margin-top: var(--spacing-xs);
       border-left: 1px solid var(--border-color);
       padding-left: var(--spacing-sm);
+      /* Always display for debugging */
+      display: block !important; 
+      /* Add a background color to make them more visible */
+      background-color: rgba(76, 154, 255, 0.05);
     }
 
     /* Main content styles */
@@ -559,32 +579,15 @@
 
   <aside class="sidebar">
     <div class="spaces-nav">
-      <h2>Spaces</h2>
-      {{#each spaces}}
+      <h2>Spaces</h2>      {{#each spaces}}
         <div class="space-item">
           <span class="space-key" data-key="{{key}}">{{key}}</span>
           <div class="page-tree">
-            {{#each pages}}
-              <div class="page-item">
-                <a href="?space={{../key}}&page={{encode title}}" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
-                  {{title}}
-                </a>
-                {{#if children.length}}
-                  <div class="page-children">
-                    {{#each children}}
-                      <div class="page-item">
-                        <a href="?space={{../../key}}&page={{encode title}}" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
-                          {{title}}
-                        </a>
-                        {{#if children.length}}
-                          <!-- Recursively render children here if needed -->
-                        {{/if}}
-                      </div>
-                    {{/each}}
-                  </div>
-                {{/if}}
-              </div>
-            {{/each}}
+            <!-- Debug info to verify recursivePageTree is working -->
+            <div style="color: #FF5630; font-size: 12px; margin-bottom: 8px;">
+              Space: {{key}}, Pages: {{pages.length}}
+            </div>
+            {{> recursivePageTree pages=pages spaceKey=key}}
           </div>
         </div>
       {{/each}}
@@ -622,10 +625,10 @@
         {{/each}}
       </div>
     {{/if}}
-  </main>
-
-  <script>
+  </main>  <script>
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM fully loaded');
+      
       // Mobile menu toggle
       const menuToggle = document.querySelector('.menu-toggle');
       const sidebar = document.querySelector('.sidebar');
@@ -638,6 +641,7 @@
 
       // Expand/collapse space navigation
       const spaceKeys = document.querySelectorAll('.space-key');
+      console.log('Space keys found:', spaceKeys.length);
       
       spaceKeys.forEach(function(spaceKey) {
         spaceKey.addEventListener('click', function() {
@@ -647,6 +651,71 @@
           }
         });
       });
+      
+      // First, log all page children containers found
+      const allChildren = document.querySelectorAll('.page-children');
+      console.log('All page children containers found:', allChildren.length);
+      
+      // Add expand/collapse functionality for child pages
+      const pagesWithChildren = document.querySelectorAll('.page-item > .page-link + .page-children');
+      console.log('Pages with children found:', pagesWithChildren.length);
+      
+      pagesWithChildren.forEach(function(childrenContainer) {
+        const pageLink = childrenContainer.previousElementSibling;
+        console.log('Adding expand/collapse to:', pageLink.textContent.trim());
+        
+        // Add a visual indicator for pages with children
+        pageLink.classList.add('has-children');
+        
+        // Make the parent link expandable
+        pageLink.addEventListener('click', function(event) {
+          console.log('Page link clicked:', this.textContent.trim());
+          
+          // If clicking the page link, don't prevent default if Ctrl is pressed
+          // This allows opening the page in a new tab with Ctrl+click
+          if (!event.ctrlKey && !event.metaKey) {
+            event.preventDefault();
+            
+            // Toggle display of children
+            childrenContainer.style.display = childrenContainer.style.display === 'none' ? 'block' : 'none';
+            pageLink.classList.toggle('expanded', childrenContainer.style.display !== 'none');
+            console.log('Toggled children visibility for:', this.textContent.trim());
+          }
+        });
+        
+        // Auto-expand children for the active page and its ancestors
+        if (pageLink.classList.contains('active') || childrenContainer.querySelector('.active')) {
+          childrenContainer.style.display = 'block';
+          pageLink.classList.add('expanded');
+          console.log('Auto-expanded active path:', pageLink.textContent.trim());
+        } else {
+          // Hide others by default (for cleaner UI)
+          childrenContainer.style.display = 'none';
+        }
+      });
+      
+      // If we have an active page, make sure all its parents are expanded
+      const activePage = document.querySelector('.page-link.active');
+      if (activePage) {
+        console.log('Found active page:', activePage.textContent.trim());
+        
+        // Find all parent page-items containing this active page
+        let parent = activePage.parentElement;
+        while (parent) {
+          if (parent.classList.contains('page-children')) {
+            // This is a children container, expand it
+            parent.style.display = 'block';
+            
+            // Find the parent link and mark it as expanded
+            const parentLink = parent.previousElementSibling;
+            if (parentLink && parentLink.classList.contains('page-link')) {
+              parentLink.classList.add('expanded');
+              console.log('Expanded parent:', parentLink.textContent.trim());
+            }
+          }
+          parent = parent.parentElement;
+        }
+      }
     });
   </script>
 </body>

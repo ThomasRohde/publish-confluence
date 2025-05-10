@@ -1,0 +1,48 @@
+{
+  "spaces": [
+    {
+      "key": "TEST",
+      "pages": [
+        {
+          "id": "parent1",
+          "title": "Parent Page 1",
+          "isActive": true,
+          "children": [
+            {
+              "id": "child1",
+              "title": "Child Page 1",
+              "isActive": false,
+              "children": []
+            },
+            {
+              "id": "child2",
+              "title": "Child Page 2",
+              "isActive": false,
+              "children": [
+                {
+                  "id": "grandchild1",
+                  "title": "Grandchild Page 1",
+                  "isActive": false,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "parent2",
+          "title": "Parent Page 2",
+          "isActive": false,
+          "children": [
+            {
+              "id": "child3",
+              "title": "Child Page 3",
+              "isActive": false,
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigation Test</title>
+  <style>
+    :root {
+      --primary-color: #0052CC;
+      --primary-light: #4C9AFF;
+      --primary-dark: #0747A6;
+      --background-color: #F4F5F7;
+      --text-color: #172B4D;
+      --light-text: #6B778C;
+      --border-color: #DFE1E6;
+      --sidebar-width: 280px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --border-radius: 3px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      padding: var(--spacing-md);
+    }
+
+    .spaces-nav h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: var(--spacing-md);
+      color: var(--primary-dark);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-sm);
+    }
+
+    .space-item {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .space-key {
+      font-weight: 500;
+      color: var(--primary-dark);
+      margin-bottom: var(--spacing-sm);
+      display: block;
+      cursor: pointer;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+    }
+
+    .page-tree {
+      margin-left: var(--spacing-md);
+    }
+
+    .page-item {
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .page-link {
+      display: block;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+
+    .page-link.has-children {
+      padding-left: var(--spacing-lg);
+      cursor: pointer;
+    }
+
+    .page-link.has-children::before {
+      content: "▶";
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--light-text);
+      transition: transform 0.2s;
+    }
+
+    .page-link.has-children.expanded::before {
+      transform: translateY(-50%) rotate(90deg);
+    }
+
+    .page-link:hover {
+      background-color: var(--background-color);
+    }
+
+    .page-link.active {
+      background-color: var(--primary-light);
+      color: white;
+    }
+
+    .page-children {
+      margin-left: var(--spacing-lg);
+      margin-top: var(--spacing-xs);
+      border-left: 1px solid var(--border-color);
+      padding-left: var(--spacing-sm);
+    }
+  </style>
+</head>
+<body>
+  <h1>Navigation Tree Test</h1>
+  
+  <div class="sidebar">
+    <div class="spaces-nav">
+      <h2>Spaces</h2>
+      <div class="space-item">
+        <span class="space-key">TEST</span>
+        <div class="page-tree">
+          <!-- Parent Page 1 with children -->
+          <div class="page-item">
+            <a href="#" class="page-link active" data-id="parent1">Parent Page 1</a>
+            <div class="page-children">
+              <!-- Child Page 1 -->
+              <div class="page-item">
+                <a href="#" class="page-link" data-id="child1">Child Page 1</a>
+              </div>
+              <!-- Child Page 2 with grandchild -->
+              <div class="page-item">
+                <a href="#" class="page-link" data-id="child2">Child Page 2</a>
+                <div class="page-children">
+                  <!-- Grandchild Page 1 -->
+                  <div class="page-item">
+                    <a href="#" class="page-link" data-id="grandchild1">Grandchild Page 1</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Parent Page 2 with child -->
+          <div class="page-item">
+            <a href="#" class="page-link" data-id="parent2">Parent Page 2</a>
+            <div class="page-children">
+              <!-- Child Page 3 -->
+              <div class="page-item">
+                <a href="#" class="page-link" data-id="child3">Child Page 3</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Expand/collapse space navigation
+      const spaceKeys = document.querySelectorAll('.space-key');
+      
+      spaceKeys.forEach(function(spaceKey) {
+        spaceKey.addEventListener('click', function() {
+          const pageTree = this.nextElementSibling;
+          if (pageTree) {
+            pageTree.style.display = pageTree.style.display === 'none' ? 'block' : 'none';
+          }
+        });
+      });
+      
+      // Add expand/collapse functionality for child pages
+      const pagesWithChildren = document.querySelectorAll('.page-item > .page-link + .page-children');
+      
+      pagesWithChildren.forEach(function(childrenContainer) {
+        const pageLink = childrenContainer.previousElementSibling;
+        
+        // Add a visual indicator for pages with children
+        pageLink.classList.add('has-children');
+        
+        // Make the parent link expandable
+        pageLink.addEventListener('click', function(event) {
+          // Only handle expand/collapse when not clicking on the link itself
+          if (event.target === pageLink) {
+            event.preventDefault();
+            childrenContainer.style.display = childrenContainer.style.display === 'none' ? 'block' : 'none';
+            pageLink.classList.toggle('expanded', childrenContainer.style.display !== 'none');
+          }
+        });
+        
+        // Initially expand the branch containing the active page
+        if (childrenContainer.querySelector('.page-link.active')) {
+          childrenContainer.style.display = 'block';
+          pageLink.classList.add('expanded');
+        } else {
+          childrenContainer.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

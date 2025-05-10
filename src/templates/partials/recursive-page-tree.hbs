@@ -1,0 +1,15 @@
+{{!-- recursivePageTree.hbs - A partial for rendering page trees recursively --}}
+{{#each pages}}
+  <div class="page-item">
+    <a href="../{{../spaceKey}}/{{encode title}}.html" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
+      {{title}}
+    </a>
+    {{#if children.length}}
+      <div class="page-children">
+        {{> recursivePageTree pages=children spaceKey=../spaceKey}}
+      </div>
+    {{/if}}
+  </div>
+{{/each}}
+  </div>
+{{/each}}
