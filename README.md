@@ -515,6 +515,25 @@ When using dry-run mode, the tool will:
 3. Copy all attachments to the appropriate directories
 4. Generate an HTML preview that looks similar to Confluence for browsing locally
 
+The dry-run output is organized as follows:
+
+```
+dry/                            # Default directory (or custom directory you specify)
+├── spaces/                     # Contains all space content
+│   └── YOUR-SPACE-KEY/         # Your space content organized by space key
+│       ├── attachments/        # All attachments for the space
+│       ├── pages/              # Storage format files for all pages
+│       │   ├── Page-Title.html # Main page content in Confluence storage format
+│       │   └── Child-Page.html # Child page content in Confluence storage format
+│       └── page-list.json      # JSON file listing all pages and their relationships
+└── preview/                    # HTML preview files (only if preview is enabled)
+    ├── index.html              # Entry point for the preview
+    ├── css/                    # Styles for the preview
+    ├── js/                     # JavaScript for the preview
+    └── preview-content/        # Content for the preview
+        └── YOUR-SPACE-KEY/     # Preview content for your space
+```
+
 #### HTML Preview Feature
 
 By default, dry-run mode generates an HTML preview that allows you to browse the page hierarchy and view your pages with Confluence-like styling. This makes it easy to verify the output before publishing to the actual Confluence instance.
@@ -532,7 +551,14 @@ The preview provides:
 - Links to attachments and other pages
 - A responsive layout that works on different screen sizes
 
-You can open the generated `index.html` file in any browser to browse your pages.
+You can open the generated `index.html` file in any browser to browse your pages. The preview is particularly useful for verifying:
+
+- The overall structure of your page hierarchy
+- The appearance of your content with macros rendered
+- That all attachments are correctly referenced
+- The final appearance of your templates after variable substitution
+
+This feature is ideal for teams that want to review content locally before publishing to Confluence, or for developing and testing complex page structures without repeatedly updating the actual Confluence instance.
 
 ## Authentication
 

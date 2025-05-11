@@ -35,6 +35,16 @@ publish-confluence [options] [command]
       <td>Enable debug output, providing extensive details for troubleshooting.</td>
     </tr>
     <tr>
+      <td><code>--dry-run</code> [dir]</td>
+      <td></td>
+      <td>Generate storage files locally instead of publishing to Confluence. Optionally specify a custom output directory (defaults to <code>dry/</code>).</td>
+    </tr>
+    <tr>
+      <td><code>--no-preview</code></td>
+      <td></td>
+      <td>Disable HTML preview generation in dry-run mode. Use this if you only need the storage format files and not the browsable preview.</td>
+    </tr>
+    <tr>
       <td><code>--comment</code></td>
       <td><code>-c</code></td>
       <td>Display content marked with <code>comment=true</code> in admonition macros (info, note, warning, tip). Useful for showing developer-only documentation.</td>
@@ -67,6 +77,55 @@ publish-confluence publish
 publish-confluence --debug
 {{/confluence-code}}
 <p>This command does not have specific options beyond the global ones; its behavior is controlled by the <code>publish-confluence.json</code> file and environment variables.</p>
+
+<h4>Dry-Run Mode</h4>
+{{#confluence-panel title="Dry-Run Feature" borderStyle="solid" borderColor="#DDDDDD" borderWidth="1" bgColor="#F4F5F7" titleBGColor="#DFE1E6" titleColor="#42526E"}}
+  <p>The dry-run mode allows you to generate and preview Confluence page content locally without actually publishing to Confluence. This is useful for testing, validating, and reviewing pages before publishing them to a live Confluence instance.</p>
+  
+  <p>When you run the tool with the <code>--dry-run</code> option, it will:</p>
+  <ol>
+    <li>Create a local directory structure mirroring your Confluence space hierarchy</li>
+    <li>Generate HTML files with properly formatted Confluence storage content</li>
+    <li>Copy all required attachments to the appropriate directories</li>
+    <li>Generate an HTML preview with Confluence-like styling (unless <code>--no-preview</code> is specified)</li>
+  </ol>
+  
+  <h5>Output Directory Structure</h5>
+  <p>The dry-run output is organized as follows:</p>
+  {{#confluence-code language="text" title="Dry-Run Directory Structure"}}
+dry/                            # Default directory (or custom directory you specify)
+├── spaces/                     # Contains all space content
+│   └── YOUR-SPACE-KEY/         # Your space content organized by space key
+│       ├── attachments/        # All attachments for the space
+│       ├── pages/              # Storage format files for all pages
+│       │   ├── Page-Title.html # Main page content in Confluence storage format
+│       │   └── Child-Page.html # Child page content in Confluence storage format
+│       └── page-list.json      # JSON file listing all pages and their relationships
+└── preview/                    # HTML preview files (only if preview is enabled)
+    ├── index.html              # Entry point for the preview
+    ├── css/                    # Styles for the preview
+    ├── js/                     # JavaScript for the preview
+    └── preview-content/        # Content for the preview
+        └── YOUR-SPACE-KEY/     # Preview content for your space
+  {{/confluence-code}}
+  
+  <h5>Usage Examples</h5>
+  {{#confluence-code language="bash" title="Dry-Run Examples"}}
+# Generate files in the default 'dry' directory with HTML preview
+publish-confluence --dry-run
+
+# Specify a custom output directory
+publish-confluence --dry-run ./my-preview-folder
+
+# Generate only storage files without the HTML preview
+publish-confluence --dry-run --no-preview
+
+# Combine with other options
+publish-confluence --dry-run --verbose
+  {{/confluence-code}}
+  
+  <p>The HTML preview provides a browsable interface that looks similar to Confluence, making it easy to verify how your pages will appear once published. To view the preview, open the <code>index.html</code> file in the preview directory with any web browser.</p>
+{{/confluence-panel}}
 
 <h3><code>create</code> Command</h3>
 <p>The <code>create</code> command helps you initialize a new project structure suitable for use with <code>publish-confluence</code>. It interactively guides you through setting up:</p>
