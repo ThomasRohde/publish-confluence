@@ -62,3 +62,4 @@ docs/dry-run/
 docs/dry/
 samples/target-architecture-template/
 package-lock.json
+samples/data-dashboard/log.txt

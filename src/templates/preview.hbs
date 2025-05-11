@@ -140,27 +140,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
       position: relative;
+    }    .page-link.has-children {
+      padding-left: var(--spacing-md);
     }
-
-    .page-link.has-children {
-      padding-left: var(--spacing-lg);
-      cursor: pointer;
-    }
-
-    .page-link.has-children::before {
-      content: "▶";
-      position: absolute;
-      left: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 10px;
-      color: var(--light-text);
-      transition: transform 0.2s;
-    }
-
-    .page-link.has-children.expanded::before {
-      transform: translateY(-50%) rotate(90deg);
-    }
+    
+    /* Remove the toggle arrow indicators completely */
 
     .page-link:hover {
       background-color: var(--background-color);
@@ -181,12 +165,11 @@
     
     .root-page {
       margin-bottom: var(--spacing-md);
-    }.page-children {
-      margin-left: var(--spacing-lg);
+    }.page-children {      margin-left: var(--spacing-lg);
       margin-top: var(--spacing-xs);
       border-left: 1px solid var(--border-color);
       padding-left: var(--spacing-sm);
-      /* Always display for debugging */
+      /* Always display all pages - no toggling */
       display: block !important; 
       /* Add a background color to make them more visible */
       background-color: rgba(76, 154, 255, 0.05);
@@ -669,100 +652,38 @@
       // First, log all page children containers found
       const allChildren = document.querySelectorAll('.page-children');
       console.log('All page children containers found:', allChildren.length);
-      
-      // Add expand/collapse functionality for child pages
+        // Page links are now just links, no toggling behavior
       const pagesWithChildren = document.querySelectorAll('.page-item > .page-link + .page-children');
       console.log('Pages with children found:', pagesWithChildren.length);
       
       pagesWithChildren.forEach(function(childrenContainer) {
         const pageLink = childrenContainer.previousElementSibling;
-        console.log('Adding expand/collapse to:', pageLink.textContent.trim());
-        
-        // Add a visual indicator for pages with children
+        console.log('Setting up page links for:', pageLink.textContent.trim());
+          // Add a visual indicator for pages with children
         pageLink.classList.add('has-children');
         
-        // Make the parent link expandable
-        pageLink.addEventListener('click', function(event) {
-          console.log('Page link clicked:', this.textContent.trim());
-          
-          // If clicking the page link, don't prevent default if Ctrl is pressed
-          // This allows opening the page in a new tab with Ctrl+click
-          if (!event.ctrlKey && !event.metaKey) {
-            event.preventDefault();
-            
-            // Toggle display of children
-            childrenContainer.style.display = childrenContainer.style.display === 'none' ? 'block' : 'none';
-            pageLink.classList.toggle('expanded', childrenContainer.style.display !== 'none');
-            console.log('Toggled children visibility for:', this.textContent.trim());
-          }
-        });
-        
-        // Auto-expand children for the active page and its ancestors
-        if (pageLink.classList.contains('active') || childrenContainer.querySelector('.active')) {
-          childrenContainer.style.display = 'block';
-          pageLink.classList.add('expanded');
-          console.log('Auto-expanded active path:', pageLink.textContent.trim());
-        } else {
-          // Hide others by default (for cleaner UI)
-          childrenContainer.style.display = 'none';
-        }
+        // All children containers are always visible
+        childrenContainer.style.display = 'block';
+        pageLink.classList.add('expanded');
       });
       
-      // If we have an active page, make sure all its parents are expanded
+      // Mark active page for highlighting
       const activePage = document.querySelector('.page-link.active');
       if (activePage) {
         console.log('Found active page:', activePage.textContent.trim());
-        
-        // Find all parent page-items containing this active page
-        let parent = activePage.parentElement;
-        while (parent) {
-          if (parent.classList.contains('page-children')) {
-            // This is a children container, expand it
-            parent.style.display = 'block';
-            
-            // Find the parent link and mark it as expanded
-            const parentLink = parent.previousElementSibling;
-            if (parentLink && parentLink.classList.contains('page-link')) {
-              parentLink.classList.add('expanded');
-              console.log('Expanded parent:', parentLink.textContent.trim());
-            }
-          }
-          parent = parent.parentElement;
-        }
-      }
-    });
+        // No need to handle parent expansion as all items are visible by default
+      }    });
     
-    // Handle page tree collapse/expand
+    // Handle page tree setup
     function setupPageTree() {
       // First, log all page children containers found
       const allChildren = document.querySelectorAll('.page-children');
       console.log('All page children containers found:', allChildren.length);
       
-      // Expand/collapse page tree
-      const toggles = document.querySelectorAll('.page-toggle');
-      console.log('Page toggles found:', toggles.length);
-      
-      toggles.forEach(function(toggle) {
-        toggle.addEventListener('click', function(e) {
-          e.stopPropagation(); // Prevent the parent click event
-          
-          // Find the associated children container
-          const pageItem = this.closest('.page-item');
-          if (!pageItem) return;
-          
-          const children = pageItem.querySelector('.page-children');
-          if (!children) return;
-          
-          // Toggle display and icon
-          const isVisible = children.style.display !== 'none';
-          children.style.display = isVisible ? 'none' : 'block';
-          
-          // Update the toggle icon
-          this.textContent = isVisible ? '▶' : '▼';
-        });
-      });
+      // No toggle functionality needed - all page items are expanded by default
     }
-      // Setup expand/collapse functionality for Confluence expand macros
+    
+    // Setup expand/collapse functionality for Confluence expand macros
     function setupExpandMacros() {
       const expandHeaders = document.querySelectorAll('.expand-header');
       

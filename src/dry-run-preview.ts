@@ -23,7 +23,7 @@ const getDirname = () => {
 /**
  * Interface for a page in the preview
  */
-interface PreviewPage {
+export interface PreviewPage {
   id: string;
   title: string;
   isActive?: boolean;
@@ -33,7 +33,7 @@ interface PreviewPage {
 /**
  * Interface for a space in the preview
  */
-interface PreviewSpace {
+export interface PreviewSpace {
   key: string;
   pages: PreviewPage[];
 }
@@ -41,7 +41,7 @@ interface PreviewSpace {
 /**
  * Interface for the spaces data used in the index.html
  */
-interface SpacesData {
+export interface SpacesData {
   spaces: PreviewSpace[];
 }
 
@@ -60,6 +60,10 @@ interface PageData {
     size: string;
   }>;
   spaces: PreviewSpace[];
+  parentInfo?: {
+    id: string;
+    title: string;
+  };
 }
 
 /**
@@ -185,13 +189,23 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
       const indexHtmlContent = await fs.readFile(indexHtmlPath, 'utf8');
       await fs.writeFile(path.join(previewDir, 'index.html'), indexHtmlContent);
       log.verbose(`[DRY-RUN] Copied index.html from ${indexHtmlPath}`);
-      
+        
       // Copy CSS file
       try {
         const cssPath = path.resolve(templateDir, 'confluence-styles.css');
         const cssContent = await fs.readFile(cssPath, 'utf8');
         await fs.writeFile(path.join(previewDir, 'confluence-styles.css'), cssContent);
         log.verbose(`[DRY-RUN] Copied confluence-styles.css from ${cssPath}`);
+        
+        // Also copy our style overrides if they exist
+        try {
+          const overridesCssPath = path.resolve(templateDir, 'style-overrides.css');
+          const overridesCssContent = await fs.readFile(overridesCssPath, 'utf8');
+          await fs.writeFile(path.join(previewDir, 'style-overrides.css'), overridesCssContent);
+          log.verbose(`[DRY-RUN] Copied style-overrides.css from ${overridesCssPath}`);
+        } catch (overrideError) {
+          log.debug(`[DRY-RUN] No style-overrides.css found: ${(overrideError as Error).message}`);
+        }
       } catch (error) {
         log.warn(`[DRY-RUN] Failed to copy confluence-styles.css: ${(error as Error).message}`);
       }
@@ -502,6 +516,35 @@ async function generatePagePreview(
     
     // Copy active flag to page tree
     markActivePage(spacesData, spaceKey, page.id);
+      // Find parent info for navigation links
+    let parentInfo: { id: string, title: string } | undefined;
+    
+    // Get the parent information using the metadata
+    if (metadata.parentId) {
+      // Find the parent page in our tree
+      const findParent = (pages: PreviewPage[]): PreviewPage | null => {
+        for (const p of pages) {
+          if (p.id === metadata.parentId) {
+            return p;
+          }
+          
+          if (p.children.length > 0) {
+            const found = findParent(p.children);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      
+      const parent = findParent(spacesData.spaces.find(s => s.key === spaceKey)?.pages || []);
+      
+      if (parent) {
+        parentInfo = {
+          id: parent.id,
+          title: parent.title
+        };
+      }
+    }
     
     // Prepare template data
     const pageData: PageData = {
@@ -511,7 +554,8 @@ async function generatePagePreview(
       version: metadata.version,
       content: convertedContent,
       attachments,
-      spaces: spacesData.spaces
+      spaces: spacesData.spaces,
+      parentInfo
     };
       // Compile template
     const previewHtml = await renderPreviewTemplate(pageData);
@@ -733,13 +777,14 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
       log.debug(`[DRY-RUN] Error loading partial templates: ${(error as Error).message}`);
     }
       // Define the recursive page tree partial inline if it wasn't loaded from a file
-    if (!Handlebars.partials['recursivePageTree']) {
-      Handlebars.registerPartial('recursivePageTree', `
+    if (!Handlebars.partials['recursivePageTree']) {      Handlebars.registerPartial('recursivePageTree', `
         {{#each pages}}
-          <div class="page-item">
-            <a href="../{{../spaceKey}}/{{encode title}}.html" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
-              {{title}}
-            </a>
+          <div class="page-item {{#if isActive}}active-parent{{/if}}">
+            <div class="page-item-header">
+              <a href="../{{../spaceKey}}/{{encode title}}.html" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
+                {{title}}
+              </a>
+            </div>
             {{#if children.length}}
               <div class="page-children">
                 {{> recursivePageTree pages=children spaceKey=../spaceKey}}
@@ -846,7 +891,7 @@ function markActivePage(spacesData: SpacesData, spaceKey: string, pageId: string
   
   resetAllPages(space.pages);
   
-  // Set the active page
+  // Set the active page and its parent chain
   const setActivePage = (pages: PreviewPage[]): boolean => {
     for (const page of pages) {
       if (page.id === pageId) {
@@ -854,8 +899,13 @@ function markActivePage(spacesData: SpacesData, spaceKey: string, pageId: string
         return true;
       }
       
-      if (page.children.length > 0 && setActivePage(page.children)) {
-        return true;
+      if (page.children.length > 0) {
+        const hasActiveChild = setActivePage(page.children);
+        if (hasActiveChild) {
+          // Mark parent pages as active too (for highlighting the tree)
+          page.isActive = true;
+          return true;
+        }
       }
     }
     
