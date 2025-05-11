@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confluence Preview - Page Index</title>
+  <title>Confluence Preview - Space Index</title>
   <style>
     :root {
       --primary-color: #0052CC;
@@ -93,6 +93,9 @@
       overflow: hidden;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s, box-shadow 0.2s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .space-card:hover {
@@ -113,15 +116,28 @@
 
     .space-pages {
       padding: var(--spacing-md);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .space-footer {
+      padding: var(--spacing-md);
+      background-color: var(--background-color);
+      border-top: 1px solid var(--border-color);
     }
 
     .page-list {
       list-style: none;
+      margin-bottom: var(--spacing-md);
+      flex: 1;
     }
 
     .page-item {
       margin-bottom: var(--spacing-sm);
-    }    .page-link {
+    }
+
+    .page-link {
       display: block;
       padding: var(--spacing-sm);
       color: var(--text-color);
@@ -142,6 +158,21 @@
     
     .root-page {
       margin-bottom: var(--spacing-md);
+    }
+
+    .view-all-link {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .view-all-link:hover {
+      background-color: var(--primary-dark);
     }
 
     .no-spaces {
@@ -167,6 +198,12 @@
       margin-bottom: var(--spacing-lg);
       border-radius: 0 var(--border-radius) var(--border-radius) 0;
     }
+
+    .page-count {
+      margin-top: var(--spacing-sm);
+      color: var(--light-text);
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
@@ -178,7 +215,7 @@
 
     <div class="welcome">
       <h2>Welcome to Confluence Preview</h2>
-      <p>This is a preview of your Confluence pages created in dry-run mode. Select a space and page to view its content.</p>
+      <p>This is a preview of your Confluence pages created in dry-run mode. Select a space to view its pages.</p>
     </div>
 
     <div id="content">
@@ -190,9 +227,6 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const contentElement = document.getElementById('content');
-      const urlParams = new URLSearchParams(window.location.search);
-      const spaceKey = urlParams.get('space');
-      const pageTitle = urlParams.get('page');
       
       // Function to display error
       function showError(message) {
@@ -213,16 +247,8 @@
           }
           
           const data = await response.json();
-            if (spaceKey && pageTitle) {
-            // Navigate to specific page
-            const decodedPageTitle = decodeURIComponent(pageTitle);
-            // Use a more URL-safe filename by replacing problematic characters
-            const safeFilename = decodedPageTitle.replace(/[^a-zA-Z0-9-_.]/g, '_');
-            window.location.href = `${spaceKey}/${safeFilename}.html`;
-          } else {
-            // Display spaces and pages
-            displaySpacesAndPages(data);
-          }
+          // Display spaces and pages
+          displaySpacesAndPages(data);
         } catch (error) {
           showError(error.message);
         }
@@ -245,40 +271,47 @@
         let html = '<div class="spaces-grid">';
         
         data.spaces.forEach(space => {
+          // Find root page if exists
+          const rootPage = space.pages.find(p => !p.title.match(/^\d+\.\s/));
+          
+          // Get total page count
+          const pageCount = space.pages.length;
+          
+          // Get a subset of pages to display (up to 5)
+          const displayPages = space.pages.slice(0, 5);
+          
           html += `
             <div class="space-card">
               <div class="space-header">
                 <h2>${space.key}</h2>
+                <div class="page-count">${pageCount} page${pageCount !== 1 ? 's' : ''}</div>
               </div>
               <div class="space-pages">
-                <h3>Pages</h3>
           `;
-            if (space.pages.length === 0) {
+          
+          if (displayPages.length === 0) {
             html += '<p>No pages in this space yet.</p>';
           } else {
             html += '<ul class="page-list">';
             
-            // Look for the root page (typically without a number prefix)
-            const rootPage = space.pages.find(p => !p.title.match(/^\d+\.\s/));
-            
+            // If we have a root page, show it first
             if (rootPage) {
-              // Add the root page first with special styling
               const rootSafeFilename = rootPage.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
               html += `
                 <li class="page-item root-page">
                   <a href="${space.key}/${rootSafeFilename}.html" class="page-link page-link-root"><strong>📄 ${rootPage.title}</strong></a>
                 </li>
               `;
+              
+              // Remove root page from display pages if it's there
+              const rootIndex = displayPages.findIndex(p => p.id === rootPage.id);
+              if (rootIndex !== -1) {
+                displayPages.splice(rootIndex, 1);
+              }
             }
             
-            // Add all other pages
-            space.pages.forEach(page => {
-              // Skip the root page since we already added it
-              if (rootPage && page.id === rootPage.id) {
-                return;
-              }
-              
-              // Use a more URL-safe filename by replacing problematic characters
+            // Add remaining display pages
+            displayPages.forEach(page => {
               const safeFilename = page.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
               html += `
                 <li class="page-item">
@@ -286,10 +319,14 @@
                 </li>
               `;
             });
+            
             html += '</ul>';
           }
           
           html += `
+              </div>
+              <div class="space-footer">
+                <a href="${space.key}/${rootPage ? rootPage.title.replace(/[^a-zA-Z0-9-_.]/g, '_') : ''}.html" class="view-all-link">Browse Space</a>
               </div>
             </div>
           `;

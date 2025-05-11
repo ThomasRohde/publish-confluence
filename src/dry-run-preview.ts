@@ -747,6 +747,22 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
       return str.replace(/[^a-zA-Z0-9-_.]/g, '_');
     });
     
+    // Add helper to find space by key
+    Handlebars.registerHelper('find', function(array, key) {
+      if (!Array.isArray(array) || typeof key !== 'string') {
+        return null;
+      }
+      return array.find(item => item.key === key);
+    });
+    
+    // Add helper for lookup
+    Handlebars.registerHelper('lookup', function(obj, prop) {
+      if (obj && typeof obj === 'object' && prop in obj) {
+        return obj[prop];
+      }
+      return null;
+    });
+    
     // Try to load partial templates
     try {
       for (const location of templateLocations) {

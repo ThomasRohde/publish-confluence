@@ -75,6 +75,16 @@
       gap: var(--spacing-md);
     }
 
+    .space-badge {
+      background-color: var(--primary-dark);
+      color: white;
+      font-size: 12px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      margin-left: var(--spacing-sm);
+    }
+
     .dry-run-badge {
       background-color: #FF8B00;
       color: white;
@@ -93,11 +103,11 @@
       overflow-y: auto;
     }
 
-    .spaces-nav {
+    .pages-nav {
       margin-bottom: var(--spacing-lg);
     }
 
-    .spaces-nav h2 {
+    .pages-nav h2 {
       font-size: 16px;
       font-weight: 500;
       margin-bottom: var(--spacing-md);
@@ -106,31 +116,11 @@
       padding-bottom: var(--spacing-sm);
     }
 
-    .space-item {
-      margin-bottom: var(--spacing-md);
-    }
-
-    .space-key {
-      font-weight: 500;
-      color: var(--primary-dark);
-      margin-bottom: var(--spacing-sm);
-      display: block;
-      cursor: pointer;
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: var(--border-radius);
-    }
-
-    .space-key:hover {
-      background-color: var(--background-color);
-    }
-
-    .page-tree {
-      margin-left: var(--spacing-md);
-    }
-
     .page-item {
-      margin-bottom: var(--spacing-xs);
-    }    .page-link {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .page-link {
       display: block;
       padding: var(--spacing-xs) var(--spacing-sm);
       color: var(--text-color);
@@ -140,12 +130,12 @@
       overflow: hidden;
       text-overflow: ellipsis;
       position: relative;
-    }    .page-link.has-children {
+    }
+
+    .page-link.has-children {
       padding-left: var(--spacing-md);
     }
     
-    /* Remove the toggle arrow indicators completely */
-
     .page-link:hover {
       background-color: var(--background-color);
     }
@@ -165,7 +155,10 @@
     
     .root-page {
       margin-bottom: var(--spacing-md);
-    }.page-children {      margin-left: var(--spacing-lg);
+    }
+
+    .page-children {
+      margin-left: var(--spacing-lg);
       margin-top: var(--spacing-xs);
       border-left: 1px solid var(--border-color);
       padding-left: var(--spacing-sm);
@@ -352,174 +345,22 @@
       text-decoration: none;
     }
 
-    /* Macro styles */
-    .macro {
-      margin-bottom: var(--spacing-md);
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-    }
-
-    .macro-title {
-      background-color: var(--background-color);
-      padding: var(--spacing-sm);
-      font-weight: 500;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .macro-content {
-      padding: var(--spacing-md);
-    }
-
-    .code-block {
-      margin-bottom: var(--spacing-md);
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-    }
-
-    .code-title {
-      background-color: var(--background-color);
-      padding: var(--spacing-sm);
-      font-weight: 500;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    /* Admonition boxes */
-    .admonition {
-      margin-bottom: var(--spacing-md);
-      border-left: 4px solid var(--info-color);
-      background-color: rgba(0, 184, 217, 0.1);
-      border-radius: 0 var(--border-radius) var(--border-radius) 0;
-      overflow: hidden;
-    }
-
-    .admonition-title {
+    .back-link {
+      display: inline-block;
+      margin-top: var(--spacing-md);
       padding: var(--spacing-sm) var(--spacing-md);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: var(--border-radius);
       font-weight: 500;
-      background-color: rgba(0, 184, 217, 0.2);
     }
 
-    .admonition-content {
-      padding: var(--spacing-md);
-    }
-
-    .admonition-note {
-      border-left-color: var(--info-color);
-      background-color: rgba(0, 184, 217, 0.1);
-    }
-
-    .admonition-note .admonition-title {
-      background-color: rgba(0, 184, 217, 0.2);
-    }
-
-    .admonition-warning {
-      border-left-color: var(--warning-color);
-      background-color: rgba(255, 171, 0, 0.1);
-    }
-
-    .admonition-warning .admonition-title {
-      background-color: rgba(255, 171, 0, 0.2);
-    }
-
-    .admonition-tip {
-      border-left-color: var(--success-color);
-      background-color: rgba(54, 179, 126, 0.1);
-    }
-
-    .admonition-tip .admonition-title {
-      background-color: rgba(54, 179, 126, 0.2);
-    }
-
-    /* Task list */
-    .task-list {
-      margin-bottom: var(--spacing-md);
-    }
-
-    .task {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .task input[type="checkbox"] {
-      margin-right: var(--spacing-sm);
-      margin-top: 3px;
-    }
-
-    /* Layout components */
-    .confluence-layout {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .layout-section {
-      display: flex;
-      gap: var(--spacing-md);
-    }
-
-    .layout-section-single .layout-cell {
-      width: 100%;
-    }
-
-    .layout-section-two_equal .layout-cell {
-      width: 50%;
-    }
-
-    .layout-section-two_left_sidebar .layout-cell:first-child {
-      width: 30%;
-    }
-
-    .layout-section-two_left_sidebar .layout-cell:last-child {
-      width: 70%;
-    }
-
-    .layout-section-two_right_sidebar .layout-cell:first-child {
-      width: 70%;
-    }
-
-    .layout-section-two_right_sidebar .layout-cell:last-child {
-      width: 30%;
-    }
-
-    .layout-section-three_equal .layout-cell {
-      width: 33.33%;
-    }
-
-    .layout-section-three_with_sidebars .layout-cell:first-child,
-    .layout-section-three_with_sidebars .layout-cell:last-child {
-      width: 20%;
-    }
-
-    .layout-section-three_with_sidebars .layout-cell:nth-child(2) {
-      width: 60%;
-    }
-
-    .layout-cell {
-      background-color: var(--panel-background);
-      padding: var(--spacing-md);
-      border-radius: var(--border-radius);
-      border: 1px solid var(--border-color);
-    }
-
-    /* Error display */
-    .error {
-      color: var(--error-color);
-      background-color: rgba(255, 86, 48, 0.1);
-      padding: var(--spacing-md);
-      border-radius: var(--border-radius);
-      margin-bottom: var(--spacing-md);
+    .back-link:hover {
+      background-color: var(--border-color);
     }
 
     /* Responsive adjustments */
-    @media (max-width: 1024px) {
-      body {
-        grid-template-columns: minmax(var(--sidebar-width), 250px) 1fr;
-      }
-    }
-
     @media (max-width: 768px) {
       body {
         grid-template-areas:
@@ -528,93 +369,93 @@
           "footer footer";
         grid-template-columns: 1fr;
       }
-      
+
       .sidebar {
         display: none;
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        height: calc(100vh - var(--header-height));
+        width: 100%;
+        z-index: 10;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
       }
-      
-      .main-content {
-        margin: var(--spacing-sm);
-        padding: var(--spacing-md);
+
+      .sidebar.active {
+        display: block;
+      }
+
+      .menu-toggle {
+        display: block;
       }
     }
 
     /* For mobile sidebar toggle */
     .menu-toggle {
       display: none;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 24px;
       cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-      .menu-toggle {
-        display: block;
-      }
-      
-      .sidebar.active {
-        display: block;
-        position: fixed;
-        top: var(--header-height);
-        left: 0;
-        bottom: 0;
-        width: 80%;
-        z-index: 100;
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-      }
     }
   </style>
 </head>
 <body>
   <header class="header">
     <div class="header-info">
-      <h1>Confluence Preview</h1>
+      <h1>Confluence Preview <span class="space-badge">{{spaceKey}}</span></h1>
       <span class="dry-run-badge">DRY RUN</span>
     </div>
     <button class="menu-toggle">☰ Menu</button>
   </header>
 
   <aside class="sidebar">
-    <div class="spaces-nav">
-      <h2>Spaces</h2>      {{#each spaces}}
-        <div class="space-item">
-          <span class="space-key" data-key="{{key}}">{{key}}</span>
-          <div class="page-tree">
-            <!-- Debug info to verify recursivePageTree is working -->
-            <div style="color: #FF5630; font-size: 12px; margin-bottom: 8px;">
-              Space: {{key}}, Pages: {{pages.length}}
-            </div>
-            {{> recursivePageTree pages=pages spaceKey=key}}
-          </div>
-        </div>
-      {{/each}}
+    <div class="pages-nav">
+      <h2>Pages</h2>
+      {{#with (lookup (find spaces (lookup this "spaceKey")) "pages") as |spacePages|}}
+        {{> recursivePageTree pages=spacePages spaceKey=../spaceKey}}
+      {{/with}}
+    </div>
+    <div>
+      <a href="../index.html" class="back-link">← Back to Spaces</a>
     </div>
   </aside>
+  
   <main class="main-content">
     <div class="page-header">
       <h1>{{title}}</h1>
       <div class="metadata">
-        <span>Space: {{spaceKey}}</span>
-        <span>Version: {{version}}</span>
-        <span>ID: {{id}}</span>
+        <div>Version: {{version}}</div>
       </div>
     </div>
 
     <div class="page-content confluence-content">
       {{{content}}}
-    </div>    {{#if attachments.length}}
-      <div class="confluence-attachments">
-        <h2 class="attachments-header">Attachments</h2>
-        <ul class="attachment-list">          {{#each attachments}}
+    </div>
+    
+    {{#if attachments.length}}
+      <div class="attachments">
+        <h2>Attachments</h2>
+        <ul>
+          {{#each attachments}}
             <li class="attachment-item">
-              <span class="attachment-icon">📎</span>
-              <a href="{{path}}" target="_blank" class="attachment-name" download="{{name}}">{{name}}</a>
-              <span class="attachment-size">{{size}}</span>
+              <div class="attachment-info">
+                <div class="attachment-name">{{name}}</div>
+                <div class="attachment-size">{{size}}</div>
+              </div>
+              <div class="attachment-action">
+                <a href="{{path}}" target="_blank">View</a>
+              </div>
             </li>
           {{/each}}
         </ul>
       </div>
-    {{/if}}  </main>
+    {{/if}}
+  </main>
   
-  <script>    document.addEventListener('DOMContentLoaded', function() {
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM fully loaded');
       
       // Setup expand/collapse functionality for Confluence expand macros
@@ -636,114 +477,83 @@
         });
       }
 
-      // Expand/collapse space navigation
-      const spaceKeys = document.querySelectorAll('.space-key');
-      console.log('Space keys found:', spaceKeys.length);
+      // Mark active page for highlighting
+      const currentPagePath = window.location.pathname;
+      const currentPageFilename = currentPagePath.split('/').pop();
       
-      spaceKeys.forEach(function(spaceKey) {
-        spaceKey.addEventListener('click', function() {
-          const pageTree = this.nextElementSibling;
-          if (pageTree) {
-            pageTree.style.display = pageTree.style.display === 'none' ? 'block' : 'none';
+      if (currentPageFilename) {
+        // Find the page link that matches the current page
+        const pageLinks = document.querySelectorAll('.page-link');
+        pageLinks.forEach(link => {
+          const linkUrl = link.getAttribute('href');
+          if (linkUrl && linkUrl.endsWith(currentPageFilename)) {
+            link.classList.add('active');
+            
+            // Make sure parents are visible
+            let parent = link.closest('.page-children');
+            while (parent) {
+              parent.style.display = 'block';
+              parent = parent.parentElement.closest('.page-children');
+            }
           }
         });
-      });
-      
-      // First, log all page children containers found
-      const allChildren = document.querySelectorAll('.page-children');
-      console.log('All page children containers found:', allChildren.length);
-        // Page links are now just links, no toggling behavior
-      const pagesWithChildren = document.querySelectorAll('.page-item > .page-link + .page-children');
-      console.log('Pages with children found:', pagesWithChildren.length);
-      
-      pagesWithChildren.forEach(function(childrenContainer) {
-        const pageLink = childrenContainer.previousElementSibling;
-        console.log('Setting up page links for:', pageLink.textContent.trim());
-          // Add a visual indicator for pages with children
-        pageLink.classList.add('has-children');
-        
-        // All children containers are always visible
-        childrenContainer.style.display = 'block';
-        pageLink.classList.add('expanded');
-      });
-      
-      // Mark active page for highlighting
-      const activePage = document.querySelector('.page-link.active');
-      if (activePage) {
-        console.log('Found active page:', activePage.textContent.trim());
-        // No need to handle parent expansion as all items are visible by default
-      }    });
-    
-    // Handle page tree setup
-    function setupPageTree() {
-      // First, log all page children containers found
-      const allChildren = document.querySelectorAll('.page-children');
-      console.log('All page children containers found:', allChildren.length);
-      
-      // No toggle functionality needed - all page items are expanded by default
-    }
+      }
+    });
     
     // Setup expand/collapse functionality for Confluence expand macros
     function setupExpandMacros() {
-      const expandHeaders = document.querySelectorAll('.expand-header');
-      
-      expandHeaders.forEach(header => {
-        header.addEventListener('click', function() {
-          const macro = this.closest('.confluence-expand-macro');
-          if (macro) {
-            macro.classList.toggle('expanded');
-          }
-        });
+      const expandMacros = document.querySelectorAll('.expand-container');
+      expandMacros.forEach(macro => {
+        const header = macro.querySelector('.expand-header');
+        const content = macro.querySelector('.expand-content');
+        
+        if (header && content) {
+          header.addEventListener('click', function() {
+            const isExpanded = macro.classList.contains('expanded');
+            if (isExpanded) {
+              macro.classList.remove('expanded');
+              content.style.display = 'none';
+            } else {
+              macro.classList.add('expanded');
+              content.style.display = 'block';
+            }
+          });
+        }
       });
     }
     
     // Setup tabs functionality
     function setupTabs() {
-      const tabsGroups = document.querySelectorAll('.confluence-tabs');
-      
-      tabsGroups.forEach(tabsGroup => {
-        const tabMenuItems = tabsGroup.querySelectorAll('.tab-menu-item');
-        const tabContents = tabsGroup.querySelectorAll('.tab-content');
+      const tabContainers = document.querySelectorAll('.tabs-container');
+      tabContainers.forEach(container => {
+        const tabs = container.querySelectorAll('.tab');
+        const tabContents = container.querySelectorAll('.tab-content');
         
-        // Set the first tab as active by default if none are active
-        if (!tabsGroup.querySelector('.tab-menu-item.active')) {
-          if (tabMenuItems.length > 0) tabMenuItems[0].classList.add('active');
-          if (tabContents.length > 0) tabContents[0].classList.add('active');
-        }
-        
-        // Add click handlers to each tab
-        tabMenuItems.forEach((tabMenuItem, index) => {
-          tabMenuItem.addEventListener('click', function() {
-            // Deactivate all tabs
-            tabMenuItems.forEach(item => item.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
+        tabs.forEach((tab, index) => {
+          tab.addEventListener('click', function() {
+            // Remove active class from all tabs and hide content
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.style.display = 'none');
             
-            // Activate the clicked tab
-            tabMenuItem.classList.add('active');
-            if (tabContents[index]) {
-              tabContents[index].classList.add('active');
-            }
+            // Activate clicked tab and show content
+            tab.classList.add('active');
+            tabContents[index].style.display = 'block';
           });
         });
         
-        // Apply custom tab color if specified
-        const tabColor = tabsGroup.getAttribute('data-tab-color');
-        if (tabColor) {
-          tabsGroup.style.setProperty('--tab-color', tabColor);
+        // Activate first tab by default
+        if (tabs.length > 0) {
+          tabs[0].click();
         }
       });
     }
     
     // Add syntax highlighting to code blocks
     function highlightCodeBlocks() {
-      // Simple syntax highlighting for code blocks
-      const codeBlocks = document.querySelectorAll('.code-block pre code');
-      
+      const codeBlocks = document.querySelectorAll('pre code');
       codeBlocks.forEach(block => {
-        const language = block.parentElement.className.replace('language-', '').trim();
-        
-        // Apply basic styling based on language
-        if (language && language !== 'text') {
+        const language = block.className.replace('language-', '').trim();
+        if (language) {
           applyBasicHighlighting(block, language);
         }
       });
@@ -751,112 +561,43 @@
     
     // Simple syntax highlighting function
     function applyBasicHighlighting(codeElement, language) {
-      let html = codeElement.innerHTML;
-      
-      // Common patterns across languages
+      // Basic syntax highlighting patterns for common languages
       const patterns = {
-        // Keywords
-        keywords: {
-          'javascript': /\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|extends|new|this|import|export|from|as|async|await|try|catch|finally)\b/g,
-          'typescript': /\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|extends|interface|type|enum|namespace|implements|readonly|private|protected|public|static|new|this|import|export|from|as|async|await|try|catch|finally)\b/g,
-          'python': /\b(def|class|if|elif|else|for|while|try|except|finally|with|import|from|as|return|yield|pass|break|continue|in|is|not|and|or|True|False|None)\b/g,
-          'java': /\b(public|private|protected|class|interface|enum|extends|implements|static|final|void|return|if|else|for|while|switch|case|break|new|this|try|catch|finally|throw|throws|import)\b/g,
-          'csharp': /\b(public|private|protected|class|interface|enum|struct|using|static|readonly|const|void|return|if|else|for|while|switch|case|break|new|this|try|catch|finally|throw|namespace|sealed|abstract|base|override|virtual)\b/g,
-          'html': /\b(html|head|body|div|span|p|a|img|table|tr|td|th|ul|ol|li|form|input|button|script|style|link|meta)\b/g,
-          'css': /\b(body|div|span|p|a|img|table|tr|td|th|ul|ol|li|form|input|button|margin|padding|color|background|border|font|text|display|position|width|height|top|left|right|bottom)\b/g,
-        },
-        // Strings
-        strings: {
-          'default': /(['"])(?:\\.|[^\\])*?\1/g
-        },
-        // Comments
-        comments: {
-          'c-style': /\/\/.*?$|\/\*[\s\S]*?\*\//gm,
-          'python': /#.*?$|'''[\s\S]*?'''|"""[\s\S]*?"""/gm,
-          'html': /<!--[\s\S]*?-->/g
-        },
-        // Numbers
-        numbers: /\b\d+\.?\d*\b/g
+        'javascript': /\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|extends|new|this|import|export|from|as|async|await|try|catch|finally)\b/g,
+        'typescript': /\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|extends|interface|type|enum|namespace|implements|readonly|private|protected|public|static|new|this|import|export|from|as|async|await|try|catch|finally)\b/g,
+        'python': /\b(def|class|if|elif|else|for|while|try|except|finally|with|import|from|as|return|yield|pass|break|continue|in|is|not|and|or|True|False|None)\b/g,
+        'html': /(&lt;[\/]?[a-z][\w-]*(?:\s+[\w-]+=(?:"[^"]*"|'[^']*'))*\s*&gt;)/g,
+        'css': /([.#][\w-]+|@media|@keyframes)/g,
+        'bash': /\b(if|then|else|elif|fi|for|while|do|done|case|esac|function|return|in)\b/g,
+        'generic': /\b(function|return|if|else|for|while|class|new|this)\b/g
       };
       
-      // Map language to appropriate patterns
-      const languagePatterns = {
-        'javascript': {
-          keywords: patterns.keywords.javascript,
-          strings: patterns.strings.default,
-          comments: patterns.comments['c-style'],
-          numbers: patterns.numbers
-        },
-        'typescript': {
-          keywords: patterns.keywords.typescript,
-          strings: patterns.strings.default,
-          comments: patterns.comments['c-style'],
-          numbers: patterns.numbers
-        },
-        'python': {
-          keywords: patterns.keywords.python,
-          strings: patterns.strings.default,
-          comments: patterns.comments.python,
-          numbers: patterns.numbers
-        },
-        'java': {
-          keywords: patterns.keywords.java,
-          strings: patterns.strings.default,
-          comments: patterns.comments['c-style'],
-          numbers: patterns.numbers
-        },
-        'csharp': {
-          keywords: patterns.keywords.csharp,
-          strings: patterns.strings.default,
-          comments: patterns.comments['c-style'],
-          numbers: patterns.numbers
-        },
-        'html': {
-          keywords: patterns.keywords.html,
-          strings: patterns.strings.default,
-          comments: patterns.comments.html
-        },
-        'css': {
-          keywords: patterns.keywords.css,
-          strings: patterns.strings.default,
-          comments: patterns.comments['c-style']
-        }
-      };
+      // Get the content
+      let content = codeElement.textContent;
       
-      // Get patterns for this language or use default set
-      const langPatterns = languagePatterns[language] || {
-        strings: patterns.strings.default,
-        numbers: patterns.numbers
-      };
+      // Apply language-specific highlighting or generic if not found
+      const pattern = patterns[language] || patterns.generic;
+      content = content.replace(pattern, '<span style="color: #0052CC;">$1</span>');
       
-      // Apply highlighting
-      // First escape HTML to prevent XSS
-      html = html.replace(/&/g, '&amp;')
-                 .replace(/</g, '&lt;')
-                 .replace(/>/g, '&gt;');
+      // Highlight strings
+      content = content.replace(/(["'])(.*?)\1/g, '<span style="color: #00875A;">$1$2$1</span>');
       
-      // Then apply syntax highlighting, order matters to avoid highlighting within comments/strings
-      if (langPatterns.comments) {
-        html = html.replace(langPatterns.comments, '<span style="color: #6A9955;">$&</span>');
+      // Highlight comments for specific languages
+      if (language === 'javascript' || language === 'typescript') {
+        content = content.replace(/(\/\/.*$)/gm, '<span style="color: #626F86;">$1</span>');
+        content = content.replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color: #626F86;">$1</span>');
+      } else if (language === 'python') {
+        content = content.replace(/(#.*$)/gm, '<span style="color: #626F86;">$1</span>');
       }
       
-      if (langPatterns.strings) {
-        html = html.replace(langPatterns.strings, '<span style="color: #CE9178;">$&</span>');
-      }
-      
-      if (langPatterns.keywords) {
-        html = html.replace(langPatterns.keywords, '<span style="color: #569CD6;">$&</span>');
-      }
-      
-      if (langPatterns.numbers) {
-        html = html.replace(langPatterns.numbers, '<span style="color: #B5CEA8;">$&</span>');
-      }
-      
-      codeElement.innerHTML = html;
+      // Set the highlighted content
+      codeElement.innerHTML = content;
     }
     
-    // Initialize page tree
-    setupPageTree();
+    // Helper function to find an object in an array by property
+    function find(array, key) {
+      return array.find(item => item.key === key);
+    }
   </script>
 </body>
 </html>
