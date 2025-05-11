@@ -2,9 +2,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createLogger } from './logger';
-import { PublishConfig, ConfluencePage, ConfluenceAttachment } from './types';
 import { generatePreview } from './dry-run-preview';
+import { createLogger } from './logger';
+import { ConfluenceAttachment, ConfluencePage } from './types';
 
 // Initialize logger
 const log = createLogger();
@@ -595,12 +595,16 @@ export async function updatePage(
  * @param context The dry-run context
  * @param pageId The page ID
  * @param filePath The path to the file to attach
+ * @param retryCount Number of retry attempts for EBUSY errors
+ * @param retryDelay Delay between retries in milliseconds
  * @returns The attachment information
  */
 export async function uploadAttachment(
   context: DryRunContext,
   pageId: string,
-  filePath: string
+  filePath: string,
+  retryCount: number = 3,
+  retryDelay: number = 500
 ): Promise<ConfluenceAttachment> {
   try {
     // Find the page directory by ID
@@ -650,10 +654,47 @@ export async function uploadAttachment(
     const destinationPath = path.join(attachmentsDir, fileName);
     
     // Read source file content
-    const fileContent = await fs.readFile(filePath);
+    let fileContent: Buffer;
+
+    try {
+      fileContent = await fs.readFile(filePath);
+    } catch (readErr) {
+      log.error(`[DRY-RUN] Failed to read source file: ${(readErr as Error).message}`);
+      throw readErr;
+    }
     
-    // Write to destination
-    await fs.writeFile(destinationPath, fileContent);
+    // Write to destination with retry logic for EBUSY errors
+    let attempt = 0;
+    let lastError: Error | null = null;
+    
+    while (attempt < retryCount) {
+      try {
+        await fs.writeFile(destinationPath, fileContent);
+        
+        // If we got here, the write succeeded
+        break;
+      } catch (writeErr) {
+        const error = writeErr as NodeJS.ErrnoException;
+        lastError = error;
+        
+        // If this is an EBUSY error, retry after a delay
+        if (error.code === 'EBUSY') {
+          attempt++;
+          log.warn(`[DRY-RUN] EBUSY error while writing attachment, retrying (${attempt}/${retryCount}): ${fileName}`);
+          
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        } else {
+          // For other errors, throw immediately
+          throw error;
+        }
+      }
+    }
+    
+    // If we exhausted all retries, throw the last error
+    if (attempt >= retryCount && lastError) {
+      throw lastError;
+    }
     
     // Update the page's attachments
     existingPage.attachments.set(fileName, destinationPath);
@@ -761,8 +802,7 @@ export async function createDryRunClient(
         
         return createPage(context, spaceKey, title, content, parentId);
       }
-    },
-      uploadAttachment: (pageId: string, filePath: string) => 
+    },    uploadAttachment: (pageId: string, filePath: string, comment?: string) => 
       uploadAttachment(context, pageId, filePath),
     
     listAttachments: async (pageId: string) => {
