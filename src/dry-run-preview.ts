@@ -3,8 +3,8 @@ import * as fs from 'fs/promises';
 import Handlebars from 'handlebars';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { ConfluenceConverter } from './confluence-converter';
 import { DryRunContext } from './dry-run';
+import { LocalPreviewConverter } from './local-preview-converter';
 import { createLogger } from './logger';
 
 // Initialize logger
@@ -472,14 +472,18 @@ async function generatePagePreview(
     const contentPath = path.join(pageDirPath, 'content.html');
     
     const metadataContent = await fs.readFile(metadataPath, 'utf8');
-    const metadata = JSON.parse(metadataContent);
-    
-    const content = await fs.readFile(contentPath, 'utf8');
+    const metadata = JSON.parse(metadataContent);    const content = await fs.readFile(contentPath, 'utf8');
       // Convert Confluence storage format to HTML
     const attachmentsDir = path.join(pageDirPath, 'attachments');
     const attachmentBaseUrl = `./attachments/${page.id}`;
     
-    const convertedContent = ConfluenceConverter.convertStorageToHtml(content, attachmentBaseUrl);
+    // Use the LocalPreviewConverter to handle placeholders like {{{scripts}}} and {{{styles}}}
+    const convertedContent = await LocalPreviewConverter.convertForPreview(
+      content, 
+      attachmentBaseUrl, 
+      page.id,
+      spaceKey
+    );
     
     // Get attachments
     const attachments: Array<{name: string, path: string, size: string}> = [];
