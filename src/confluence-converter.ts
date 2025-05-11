@@ -219,7 +219,6 @@ export class ConfluenceConverter {
     
     return imgHtml + ' />';
   }
-
   /**
    * Process Confluence link element
    * @param element The ac:link element
@@ -241,10 +240,20 @@ export class ConfluenceConverter {
       if (nodeName === 'ri:page') {
         const pageTitle = child.getAttribute('ri:content-title') || '';
         const spaceKey = child.getAttribute('ri:space-key') || '';
-        href = spaceKey ? 
-          `./index.html?space=${spaceKey}&page=${encodeURIComponent(pageTitle)}` : 
-          `./index.html?page=${encodeURIComponent(pageTitle)}`;
-      }      else if (nodeName === 'ri:attachment') {
+        
+        // In dry run, we need to link directly to the HTML files
+        // Use a more URL-safe filename by replacing problematic characters
+        const safeFilename = pageTitle.replace(/[^a-zA-Z0-9-_.]/g, '_');
+        
+        // For dry run previews, create a relative path to the page file
+        if (spaceKey) {
+          // Link to another space
+          href = `../${spaceKey}/${safeFilename}.html`;
+        } else {
+          // Link within the same space, use the current directory
+          href = `./${safeFilename}.html`;
+        }
+      } else if (nodeName === 'ri:attachment') {
         const filename = child.getAttribute('ri:filename');
         if (filename) {
           href = `${attachmentBaseUrl}/${filename}`;
@@ -775,13 +784,22 @@ export class ConfluenceConverter {
       case 'ri:attachment':
         const filename = element.getAttribute('ri:filename');
         return filename ? `${attachmentBaseUrl}/${filename}` : '#';
-      
-      case 'ri:page':
+        case 'ri:page':
         const pageTitle = element.getAttribute('ri:content-title') || '';
         const spaceKey = element.getAttribute('ri:space-key') || '';
-        return spaceKey ? 
-          `./index.html?space=${spaceKey}&page=${encodeURIComponent(pageTitle)}` : 
-          `./index.html?page=${encodeURIComponent(pageTitle)}`;
+        
+        // In dry run, we need to link directly to the HTML files
+        // Use a more URL-safe filename by replacing problematic characters
+        const safeFilename = pageTitle.replace(/[^a-zA-Z0-9-_.]/g, '_');
+        
+        // For dry run previews, create a relative path to the page file
+        if (spaceKey) {
+          // Link to another space
+          return `../${spaceKey}/${safeFilename}.html`;
+        } else {
+          // Link within the same space, use the current directory
+          return `./${safeFilename}.html`;
+        }
       
       default:
         // For unhandled resource identifiers, return empty string
