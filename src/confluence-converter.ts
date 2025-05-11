@@ -71,16 +71,19 @@ export class ConfluenceConverter {
     }
 
     const element = node as Element;
-    const nodeName = element.nodeName.toLowerCase();
-
-    // Handle Confluence-specific elements
+    const nodeName = element.nodeName.toLowerCase();    // Handle Confluence-specific elements
     if (nodeName.startsWith('ac:')) {
       return this.processConfluenceElement(element, attachmentBaseUrl);
     }
 
     // Handle resource identifiers
     if (nodeName.startsWith('ri:')) {
-      return this.processResourceIdentifier(element, attachmentBaseUrl);
+      const result = this.processResourceIdentifier(element, attachmentBaseUrl);
+      // If it's a page link object (with href and title), convert it to an anchor tag
+      if (typeof result === 'object' && 'href' in result) {
+        return `<a href="${result.href}">${result.title}</a>`;
+      }
+      return result;
     }
 
     // Handle Confluence tables
@@ -122,7 +125,7 @@ export class ConfluenceConverter {
    */
   private static processConfluenceElement(element: Element, attachmentBaseUrl: string): string {
     const nodeName = element.nodeName.toLowerCase();
-
+    
     // Handle specific Confluence elements
     switch (nodeName) {
       case 'ac:image':
@@ -229,17 +232,21 @@ export class ConfluenceConverter {
     let href = '#';
     let linkText = '';
     let anchorName = element.getAttribute('ac:anchor') || '';
-    
+
     // Process child nodes to extract link details
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
       
       const nodeName = child.nodeName.toLowerCase();
-      
-      if (nodeName === 'ri:page') {
+        if (nodeName === 'ri:page') {
         const pageTitle = child.getAttribute('ri:content-title') || '';
         const spaceKey = child.getAttribute('ri:space-key') || '';
+        
+        // Store the original page title for use as link text if no explicit text is provided
+        if (!linkText) {
+          linkText = pageTitle;
+        }
         
         // In dry run, we need to link directly to the HTML files
         // Use a more URL-safe filename by replacing problematic characters
@@ -258,15 +265,41 @@ export class ConfluenceConverter {
         if (filename) {
           href = `${attachmentBaseUrl}/${filename}`;
         }
+      }      else if (nodeName === 'ac:plain-text-link-body' || nodeName === 'ac:link-body') {
+        // Process the link body to get the displayed text
+        const processedLinkText = this.processNode(child, attachmentBaseUrl);
+        // Only use this if it's non-empty (could be an empty self-closing tag)
+        if (processedLinkText && processedLinkText.trim()) {
+          linkText = processedLinkText;
+        }
       }
-      else if (nodeName === 'ac:plain-text-link-body' || nodeName === 'ac:link-body') {
-        linkText = this.processNode(child, attachmentBaseUrl);
-      }
-    }
-
-    // If no link text was provided, use the href as the text
+    }    // If no link text was provided after processing all children, use a fallback
     if (!linkText) {
-      linkText = href;
+      // For page links, the link text should preferably be the original page title
+      const pageNode = Array.from(element.childNodes)
+        .find(child => (child as Element).nodeName?.toLowerCase() === 'ri:page') as Element;
+      
+      if (pageNode) {
+        // Use the original page title from ri:content-title
+        const pageTitle = pageNode.getAttribute('ri:content-title') || '';
+        if (pageTitle) {
+          linkText = pageTitle;
+        }
+      }
+      
+      // If we still don't have link text, try to extract it from the href
+      if (!linkText) {
+        const match = href.match(/\/([^\/]+)\.html$/);
+        if (match) {
+          // Convert the filename back to a readable title
+          const filename = match[1];
+          // Replace underscores with spaces
+          linkText = filename.replace(/_/g, ' ');
+        } else {
+          // Last resort: fallback to using href
+          linkText = href;
+        }
+      }
     }
 
     // Add anchor if specified
@@ -769,13 +802,12 @@ export class ConfluenceConverter {
     result += '</div>';
     return result;
   }
-
   /**
    * Process resource identifier element
    * @param element The ri: element
    * @param attachmentBaseUrl Base URL for attachment references
-   * @returns The HTML representation
-   */  private static processResourceIdentifier(element: Element, attachmentBaseUrl: string): string {
+   * @returns The HTML representation or an object with href and title (for page links)
+   */  private static processResourceIdentifier(element: Element, attachmentBaseUrl: string): string | { href: string, title: string } {
     const nodeName = element.nodeName.toLowerCase();
     
     switch (nodeName) {
@@ -793,13 +825,20 @@ export class ConfluenceConverter {
         const safeFilename = pageTitle.replace(/[^a-zA-Z0-9-_.]/g, '_');
         
         // For dry run previews, create a relative path to the page file
+        let href;
         if (spaceKey) {
           // Link to another space
-          return `../${spaceKey}/${safeFilename}.html`;
+          href = `../${spaceKey}/${safeFilename}.html`;
         } else {
           // Link within the same space, use the current directory
-          return `./${safeFilename}.html`;
+          href = `./${safeFilename}.html`;
         }
+        
+        // Return both the URL and the original page title
+        return {
+          href,
+          title: pageTitle
+        };
       
       default:
         // For unhandled resource identifiers, return empty string
