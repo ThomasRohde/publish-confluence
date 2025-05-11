@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>{{title}} - Confluence Preview</title>
+<head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>{{title}} - Confluence Preview</title>
   <link rel="stylesheet" href="../confluence-styles.css">
+  <link rel="stylesheet" href="../style-overrides.css">
   <style>
     :root {
       --primary-color: #0052CC;
@@ -453,16 +452,11 @@
       </div>
     {{/if}}
   </main>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM fully loaded');
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {      console.log('DOM fully loaded');
       
       // Setup expand/collapse functionality for Confluence expand macros
       setupExpandMacros();
-      
-      // Setup tabs functionality
-      setupTabs();
       
       // Add syntax highlighting to code blocks
       highlightCodeBlocks();
@@ -470,8 +464,7 @@
       // Mobile menu toggle
       const menuToggle = document.querySelector('.menu-toggle');
       const sidebar = document.querySelector('.sidebar');
-      
-      if (menuToggle && sidebar) {
+        if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function() {
           sidebar.classList.toggle('active');
         });
@@ -516,34 +509,7 @@
             } else {
               macro.classList.add('expanded');
               content.style.display = 'block';
-            }
-          });
-        }
-      });
-    }
-    
-    // Setup tabs functionality
-    function setupTabs() {
-      const tabContainers = document.querySelectorAll('.tabs-container');
-      tabContainers.forEach(container => {
-        const tabs = container.querySelectorAll('.tab');
-        const tabContents = container.querySelectorAll('.tab-content');
-        
-        tabs.forEach((tab, index) => {
-          tab.addEventListener('click', function() {
-            // Remove active class from all tabs and hide content
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(content => content.style.display = 'none');
-            
-            // Activate clicked tab and show content
-            tab.classList.add('active');
-            tabContents[index].style.display = 'block';
-          });
-        });
-        
-        // Activate first tab by default
-        if (tabs.length > 0) {
-          tabs[0].click();
+            }          });
         }
       });
     }

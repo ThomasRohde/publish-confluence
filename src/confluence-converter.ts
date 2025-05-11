@@ -531,64 +531,39 @@ export class ConfluenceConverter {
     result += '</div>';
     
     return result;
-  }
-
-  /**
+  }  /**
    * Process Confluence tabs-group macro
    * @param element The tabs-group macro element
    * @param attachmentBaseUrl Base URL for attachment references
    * @returns The HTML tabs group
    */
   private static processTabsGroupMacro(element: Element, attachmentBaseUrl: string): string {
-    // Extract parameters
-    let disposition = 'horizontal';
-    let outline = false;
-    let color = '';
+    // Extract content only
     let content = '';
     
-    // Process child nodes to find parameters and tabs content
+    // Process child nodes to find content
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
       
       const nodeName = child.nodeName.toLowerCase();
       
-      if (nodeName === 'ac:parameter') {
-        const paramName = child.getAttribute('ac:name');
-        if (paramName === 'disposition') {
-          disposition = (child.textContent || 'horizontal').trim();
-        } else if (paramName === 'outline') {
-          outline = (child.textContent || 'false').trim() === 'true';
-        } else if (paramName === 'color') {
-          color = (child.textContent || '').trim();
-        }
-      }
-      else if (nodeName === 'ac:rich-text-body') {
+      if (nodeName === 'ac:rich-text-body') {
         content = this.processChildren(child, attachmentBaseUrl);
       }
     }
 
-    // Build HTML representation
-    const outlineClass = outline ? 'tabs-outline' : '';
-    const colorAttr = color ? `data-tab-color="${color}"` : '';
-    
-    return `<div class="confluence-tabs confluence-tabs-${disposition} ${outlineClass}" ${colorAttr}>
-      <div class="tabs-menu"></div>
-      <div class="tabs-content">${content}</div>
-    </div>`;
-  }
-
-  /**
+    // Minimal implementation - just a div with the content
+    return `<div class="tab-group-container">${content}</div>`;
+  }  /**
    * Process Confluence tab-pane macro
    * @param element The tab-pane macro element
    * @param attachmentBaseUrl Base URL for attachment references
    * @returns The HTML tab pane
    */
   private static processTabPaneMacro(element: Element, attachmentBaseUrl: string): string {
-    // Extract parameters
+    // Extract parameters and content
     let name = 'Tab';
-    let icon = '';
-    let anchor = '';
     let content = '';
     
     // Process child nodes to find parameters and content
@@ -602,10 +577,6 @@ export class ConfluenceConverter {
         const paramName = child.getAttribute('ac:name');
         if (paramName === 'name') {
           name = (child.textContent || 'Tab').trim();
-        } else if (paramName === 'icon') {
-          icon = (child.textContent || '').trim();
-        } else if (paramName === 'anchor') {
-          anchor = (child.textContent || '').trim();
         }
       }
       else if (nodeName === 'ac:rich-text-body') {
@@ -613,31 +584,11 @@ export class ConfluenceConverter {
       }
     }
 
-    // Build HTML representation
-    // Note: We create both the menu item and content, which will be properly
-    // organized by JavaScript in the browser
-    const iconHtml = icon ? `<span class="tab-menu-icon ${icon}"></span>` : '';
-    const tabContent = `<div class="tab-content">${content}</div>`;
-    
-    // Insert the menu item into the tabs-menu and the content into tabs-content
-    // This will be handled via JavaScript in the browser
-    const script = `
-      <script>
-        (function() {
-          const tabContent = document.currentScript.previousElementSibling;
-          const tabsContent = tabContent.parentElement;
-          const tabsGroup = tabsContent.parentElement;
-          const tabsMenu = tabsGroup.querySelector('.tabs-menu');
-          const menuItem = document.createElement('div');
-          menuItem.className = 'tab-menu-item';
-          menuItem.dataset.anchor = '${anchor}';
-          menuItem.innerHTML = '${iconHtml}${name}';
-          tabsMenu.appendChild(menuItem);
-        })();
-      </script>
-    `;
-    
-    return tabContent + script;
+    // Super minimal implementation - just a header and content
+    return `<div class="tab-pane">
+      <h3>${name}</h3>
+      ${content}
+    </div>`;
   }
 
   /**

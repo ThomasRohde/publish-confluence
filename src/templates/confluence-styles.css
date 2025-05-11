@@ -51,6 +51,33 @@
   font-size: 1.5em;
 }
 
+/* Simple Tab Group Styles */
+.tab-group-container {
+  margin: 1.5rem 0;
+  border: 1px solid var(--confluence-border);
+  border-radius: 3px;
+  background-color: var(--confluence-panel);
+  padding: 0;
+}
+
+.tab-pane {
+  border-bottom: 1px solid var(--confluence-border);
+  padding: 0 15px 15px 15px;
+}
+
+.tab-pane:last-child {
+  border-bottom: none;
+}
+
+.tab-pane h3 {
+  background-color: var(--confluence-background);
+  margin: 0 -15px 15px -15px;
+  padding: 10px 15px;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+}
+
 .confluence-content h3 {
   font-size: 1.25em;
 }
