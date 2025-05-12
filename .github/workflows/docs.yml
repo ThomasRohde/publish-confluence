@@ -27,14 +27,9 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - name: Clean npm cache
-        run: npm cache clean --force
-
-      - name: Install dependencies and generate lock file
+      - name: Install dependencies 
         run: |
-          npm install -g npm@latest
-          npm install  # Generates package-lock.json and installs dependencies
-          ls -la  # Debug: Verify package-lock.json exists
+          npm ci
 
       - name: Build publish-confluence
         run: npm run build

@@ -57,11 +57,9 @@ test-results/
 # Miscelaneous
 .DS_Store
 *.pem
-package-lock.json
 docs/dry-run/
 docs/dry/
 samples/target-architecture-template/
-package-lock.json
 log.txt
 dry/
 samples/macro-showcase/package-lock.json
