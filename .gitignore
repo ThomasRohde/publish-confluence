@@ -64,5 +64,4 @@ samples/target-architecture-template/
 package-lock.json
 log.txt
 dry/
-package-lock.json
 samples/macro-showcase/package-lock.json
