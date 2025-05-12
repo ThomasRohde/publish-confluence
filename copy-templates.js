@@ -16,6 +16,22 @@ const __dirname = path.dirname(__filename);
 const srcTemplatesDir = path.resolve(__dirname, 'src/templates');
 const distTemplatesDir = path.resolve(__dirname, 'dist/templates');
 
+// Recursively copy a directory (including subdirectories and files)
+async function copyDir(srcDir, destDir) {
+  await fs.mkdir(destDir, { recursive: true });
+  const entries = await fs.readdir(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name);
+    const destPath = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      await copyDir(srcPath, destPath);
+    } else if (entry.isFile()) {
+      await fs.copyFile(srcPath, destPath);
+      console.log(`Copied template file: ${destPath}`);
+    }
+  }
+}
+
 async function copyTemplateFiles() {
   try {
     // Check if source directory exists
@@ -26,52 +42,9 @@ async function copyTemplateFiles() {
       process.exit(1);
     }
 
-    // Ensure destination directory exists
-    await fs.mkdir(distTemplatesDir, { recursive: true });
-    
-    // Get template files
-    let files;
-    try {
-      files = await fs.readdir(srcTemplatesDir);
-    } catch (error) {
-      console.error(`Failed to read source templates directory: ${error.message}`);
-      process.exit(1);
-    }
-    
-    if (files.length === 0) {
-      console.warn(`No template files found in ${srcTemplatesDir}`);
-    }
-    
-    let copySuccess = true;
-    for (const file of files) {
-      const srcFilePath = path.join(srcTemplatesDir, file);
-      const destFilePath = path.join(distTemplatesDir, file);
-      
-      // Check if it's a file
-      try {
-        const stats = await fs.stat(srcFilePath);
-        if (stats.isFile()) {
-          // Copy the file
-          try {
-            await fs.copyFile(srcFilePath, destFilePath);
-            console.log(`Copied template file: ${file}`);
-          } catch (error) {
-            console.error(`Failed to copy file ${file}: ${error.message}`);
-            copySuccess = false;
-          }
-        }
-      } catch (error) {
-        console.error(`Failed to check file stats for ${file}: ${error.message}`);
-        copySuccess = false;
-      }
-    }
-    
-    if (copySuccess) {
-      console.log('All template files copied successfully!');
-    } else {
-      console.warn('Some template files could not be copied. Check the logs for details.');
-      process.exit(1);
-    }
+    // Recursively copy all templates and partials
+    await copyDir(srcTemplatesDir, distTemplatesDir);
+    console.log('All template files (including partials) copied successfully!');
   } catch (error) {
     console.error('Error copying template files:', error);
     process.exit(1);

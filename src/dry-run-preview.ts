@@ -74,51 +74,51 @@ interface PageData {
 export async function generatePreview(context: DryRunContext): Promise<string> {
   try {
     log.info('[DRY-RUN] Generating HTML preview...');
-    
+
     // Create the preview directory
     const previewDir = path.join(context.baseDir, 'preview');
     await fs.mkdir(previewDir, { recursive: true });
-    
+
     // Copy template files
     await copyTemplateFiles(previewDir);
-    
+
     // Create space directories
     const spacesDir = path.join(context.baseDir, 'spaces');
     const spaces = await fs.readdir(spacesDir);
-    
+
     // Initialize spaces data
     const spacesData: SpacesData = {
       spaces: []
     };
-    
+
     // Process each space
     for (const spaceKey of spaces) {
       const spaceDir = path.join(spacesDir, spaceKey);
       const spacePreviewDir = path.join(previewDir, spaceKey);
       await fs.mkdir(spacePreviewDir, { recursive: true });
-      
+
       // Get all pages in this space
       const pageTree = await buildPageTree(spaceDir, spaceKey);
-      
+
       // Add to spaces data
       spacesData.spaces.push({
         key: spaceKey,
         pages: pageTree
       });
-      
+
       // Generate preview for each page
       await generatePagesForSpace(context, spaceDir, spacePreviewDir, spaceKey, pageTree, spacesData);
     }
-    
+
     // Write spaces data to JSON file
     await fs.writeFile(
       path.join(previewDir, 'spacesData.json'),
       JSON.stringify(spacesData, null, 2)
     );
-    
+
     const indexHtmlPath = path.join(previewDir, 'index.html');
     log.info(`[DRY-RUN] Preview generated successfully. Open ${indexHtmlPath} to view.`);
-    
+
     return indexHtmlPath;
   } catch (error) {
     log.error(`[DRY-RUN] Failed to generate preview: ${(error as Error).message}`);
@@ -131,42 +131,42 @@ export async function generatePreview(context: DryRunContext): Promise<string> {
  * @param previewDir The preview directory
  */
 async function copyTemplateFiles(previewDir: string): Promise<void> {
-  try {    
+  try {
     // In development mode (running with tsx), template paths are relative to src
     // In production (built with vite), they're in dist/templates
     const isProduction = !process.argv[0].includes('tsx');
     const dirname = getDirname(); // Use the getDirname helper consistently
-    
+
     // We'll try multiple template locations in order
     const templateLocations = [
       // Primary locations based on environment
       isProduction
         ? path.resolve(path.dirname(process.argv[1]), 'templates')  // dist/templates
         : path.resolve(process.cwd(), 'src', 'templates'),          // src/templates
-      
+
       // Alternative locations to try as fallbacks
       path.resolve(process.cwd(), 'dist', 'templates'),             // Project root dist/templates
       path.resolve(process.cwd(), 'src', 'templates'),              // Project root src/templates
       path.resolve(dirname, '..', 'templates'),                     // Relative to this file
       path.resolve(dirname, 'templates')                            // Direct templates subdirectory
     ];
-    
+
     // Add this after initializing templateLocations
     log.debug(`[DRY-RUN] Looking for templates in the following locations:`);
     templateLocations.forEach(location => {
       log.debug(`[DRY-RUN] - ${location}`);
     });
-    
+
     // Try each location until we find the template files
     let templatesFound = false;
     let templateDir = '';
-    
+
     for (const location of templateLocations) {
       try {
         // Check if the directory exists and contains index.html
         const indexHtmlPath = path.resolve(location, 'index.html');
         await fs.access(indexHtmlPath);
-        
+
         // Found a valid template directory
         templateDir = location;
         templatesFound = true;
@@ -177,26 +177,26 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
         log.debug(`[DRY-RUN] Templates not found in: ${location}`);
       }
     }
-    
+
     // Copy template files
     try {
       if (!templatesFound) {
         throw new Error("No template directory found after checking multiple locations");
       }
-      
+
       // Copy index.html
       const indexHtmlPath = path.resolve(templateDir, 'index.html');
       const indexHtmlContent = await fs.readFile(indexHtmlPath, 'utf8');
       await fs.writeFile(path.join(previewDir, 'index.html'), indexHtmlContent);
       log.verbose(`[DRY-RUN] Copied index.html from ${indexHtmlPath}`);
-        
+
       // Copy CSS file
       try {
         const cssPath = path.resolve(templateDir, 'confluence-styles.css');
         const cssContent = await fs.readFile(cssPath, 'utf8');
         await fs.writeFile(path.join(previewDir, 'confluence-styles.css'), cssContent);
         log.verbose(`[DRY-RUN] Copied confluence-styles.css from ${cssPath}`);
-        
+
       } catch (error) {
         log.warn(`[DRY-RUN] Failed to copy confluence-styles.css: ${(error as Error).message}`);
       }
@@ -213,11 +213,11 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
         throw error;
       }
     }
-    
+
     log.verbose('[DRY-RUN] Copied template files to preview directory');
   } catch (error) {
     log.warn(`[DRY-RUN] Failed to copy template files: ${(error as Error).message}`);
-    
+
     // Create a simple index.html if templates aren't available
     const simpleIndexHtml = `
       <!DOCTYPE html>
@@ -257,7 +257,7 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
       </body>
       </html>
     `;
-    
+
     await fs.writeFile(path.join(previewDir, 'index.html'), simpleIndexHtml);
   }
 }
@@ -271,19 +271,19 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
 async function buildPageTree(spaceDir: string, spaceKey: string): Promise<PreviewPage[]> {
   // Get all page directories
   const pages = await getAllPages(spaceDir);
-  
+
   log.debug(`[DRY-RUN] Found ${pages.length} pages in space ${spaceKey}`);
   pages.forEach(page => {
     log.debug(`[DRY-RUN] Page: ${page.title} (ID: ${page.id}), Parent: ${page.parentId || 'none'}`);
   });
-  
+
   // Build parent-child relationships
   const rootPages: PreviewPage[] = [];
   const pageMap = new Map<string, PreviewPage>();
-  
+
   // Find the root page (should be the one without numbers at the beginning)
   const rootPage = pages.find(page => !page.title.match(/^\d+\.\s/));
-  
+
   // First pass: create page objects
   for (const page of pages) {
     const pageObj: PreviewPage = {
@@ -291,15 +291,15 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
       title: page.title,
       children: []
     };
-    
+
     pageMap.set(page.id, pageObj);
   }
-      // Second pass: build tree
+  // Second pass: build tree
   for (const page of pages) {
     const pageObj = pageMap.get(page.id);
-    
+
     if (!pageObj) continue;
-    
+
     // If this is the identified root page, always add it to root pages first
     if (rootPage && page.id === rootPage.id) {
       // If it's already in rootPages, don't add it again
@@ -309,7 +309,7 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
       }
       continue;
     }
-    
+
     if (page.parentId) {
       const parentPage = pageMap.get(page.parentId);
       if (parentPage) {
@@ -326,12 +326,12 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
       log.debug(`[DRY-RUN] Added ${page.title} as root page`);
     }
   }
-  
+
   log.debug(`[DRY-RUN] Root pages: ${rootPages.length}`);
   rootPages.forEach(page => {
     log.debug(`[DRY-RUN] Root page: ${page.title} with ${page.children.length} children`);
   });
-  
+
   return rootPages;
 }
 
@@ -340,15 +340,15 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
  * @param spaceDir The space directory
  * @returns An array of pages with their metadata
  */
-async function getAllPages(spaceDir: string): Promise<Array<{id: string, title: string, parentId?: string}>> {
-  const pages: Array<{id: string, title: string, parentId?: string}> = [];
-  
+async function getAllPages(spaceDir: string): Promise<Array<{ id: string, title: string, parentId?: string }>> {
+  const pages: Array<{ id: string, title: string, parentId?: string }> = [];
+
   // Recursively search for pages
   async function searchDirectory(dirPath: string): Promise<void> {
     try {
       log.debug(`[DRY-RUN] Searching directory: ${dirPath}`);
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
-      
+
       // Check if this directory has a metadata.json file
       for (const entry of entries) {
         if (entry.isFile() && entry.name === 'metadata.json') {
@@ -356,28 +356,28 @@ async function getAllPages(spaceDir: string): Promise<Array<{id: string, title: 
             const metadataPath = path.join(dirPath, entry.name);
             const metadataContent = await fs.readFile(metadataPath, 'utf8');
             const metadata = JSON.parse(metadataContent);
-            
+
             // Found a page
             log.debug(`[DRY-RUN] Found page in directory: ${dirPath}`);
-            
+
             // Add additional logging to help diagnose root page issues
             if (!metadata.parentId) {
               log.debug(`[DRY-RUN] Found possible root page: ${metadata.title} (ID: ${metadata.id})`);
             }
-            
+
             pages.push({
               id: metadata.id,
               title: metadata.title,
               parentId: metadata.parentId
             });
-            
+
             // Don't break - continue to look for subdirectories
           } catch (error) {
             log.debug(`[DRY-RUN] Error reading metadata: ${(error as Error).message}`);
           }
         }
       }
-      
+
       // Look in all subdirectories
       for (const entry of entries) {
         if (entry.isDirectory()) {
@@ -390,7 +390,7 @@ async function getAllPages(spaceDir: string): Promise<Array<{id: string, title: 
       log.debug(`[DRY-RUN] Error reading directory: ${(error as Error).message}`);
     }
   }
-  
+
   await searchDirectory(spaceDir);
   log.debug(`[DRY-RUN] Found ${pages.length} total pages`);
   return pages;
@@ -420,15 +420,15 @@ async function generatePagesForSpace(
       if (isRootPage) {
         log.debug(`[DRY-RUN] Processing root page: ${page.title}`);
       }
-      
+
       await generatePagePreview(context, spaceDir, spacePreviewDir, spaceKey, page, spacesData);
-      
+
       if (page.children.length > 0) {
         await processPages(page.children);
       }
     }
   }
-  
+
   await processPages(pages);
 }
 
@@ -452,52 +452,52 @@ async function generatePagePreview(
   try {
     // Find the page directory
     const pageDirPath = await findPageDirById(context, spaceDir, page.id);
-    
+
     if (!pageDirPath) {
       log.warn(`[DRY-RUN] Could not find directory for page ${page.title} (ID: ${page.id})`);
       return;
     }
-    
+
     // Read page metadata and content
     const metadataPath = path.join(pageDirPath, 'metadata.json');
     const contentPath = path.join(pageDirPath, 'content.html');
-    
+
     const metadataContent = await fs.readFile(metadataPath, 'utf8');
-    const metadata = JSON.parse(metadataContent);    const content = await fs.readFile(contentPath, 'utf8');
-      // Convert Confluence storage format to HTML
+    const metadata = JSON.parse(metadataContent); const content = await fs.readFile(contentPath, 'utf8');
+    // Convert Confluence storage format to HTML
     const attachmentsDir = path.join(pageDirPath, 'attachments');
     const attachmentBaseUrl = `./attachments/${page.id}`;
-    
+
     // Use the LocalPreviewConverter to handle placeholders like {{{scripts}}} and {{{styles}}}
     const convertedContent = await LocalPreviewConverter.convertForPreview(
-      content, 
-      attachmentBaseUrl, 
+      content,
+      attachmentBaseUrl,
       page.id,
       spaceKey
     );
-    
+
     // Get attachments
-    const attachments: Array<{name: string, path: string, size: string}> = [];
-    
+    const attachments: Array<{ name: string, path: string, size: string }> = [];
+
     try {
       // Create attachments directory in preview folder
       const previewAttachmentsDir = path.join(spacePreviewDir, 'attachments', page.id);
       await fs.mkdir(previewAttachmentsDir, { recursive: true });
-      
+
       const attachmentEntries = await fs.readdir(attachmentsDir, { withFileTypes: true });
-      
+
       for (const entry of attachmentEntries) {
         if (entry.isFile()) {
           const sourcePath = path.join(attachmentsDir, entry.name);
           const targetPath = path.join(previewAttachmentsDir, entry.name);
-          
+
           // Copy attachment file
           await fs.copyFile(sourcePath, targetPath);
-          
+
           // Get file size
           const stats = await fs.stat(sourcePath);
           const size = formatFileSize(stats.size);
-            attachments.push({
+          attachments.push({
             name: entry.name,
             path: `./attachments/${page.id}/${entry.name}`,
             size
@@ -508,12 +508,12 @@ async function generatePagePreview(
       // No attachments or error reading attachments directory
       log.debug(`[DRY-RUN] No attachments or error reading attachments: ${(error as Error).message}`);
     }
-    
+
     // Copy active flag to page tree
     markActivePage(spacesData, spaceKey, page.id);
-      // Find parent info for navigation links
+    // Find parent info for navigation links
     let parentInfo: { id: string, title: string } | undefined;
-    
+
     // Get the parent information using the metadata
     if (metadata.parentId) {
       // Find the parent page in our tree
@@ -522,7 +522,7 @@ async function generatePagePreview(
           if (p.id === metadata.parentId) {
             return p;
           }
-          
+
           if (p.children.length > 0) {
             const found = findParent(p.children);
             if (found) return found;
@@ -530,9 +530,9 @@ async function generatePagePreview(
         }
         return null;
       };
-      
+
       const parent = findParent(spacesData.spaces.find(s => s.key === spaceKey)?.pages || []);
-      
+
       if (parent) {
         parentInfo = {
           id: parent.id,
@@ -540,7 +540,7 @@ async function generatePagePreview(
         };
       }
     }
-    
+
     // Prepare template data
     const pageData: PageData = {
       id: page.id,
@@ -552,16 +552,16 @@ async function generatePagePreview(
       spaces: spacesData.spaces,
       parentInfo
     };
-      // Compile template
+    // Compile template
     const previewHtml = await renderPreviewTemplate(pageData);
-    
+
     // Write preview HTML file
     // Use a more URL-safe filename by replacing problematic characters
     // instead of relying on encodeURIComponent, which creates issues with some HTTP servers
     const safeFilename = page.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
     const previewFilePath = path.join(spacePreviewDir, `${safeFilename}.html`);
     await fs.writeFile(previewFilePath, previewHtml);
-    
+
     log.verbose(`[DRY-RUN] Generated preview for page: ${page.title}`);
   } catch (error) {
     log.warn(`[DRY-RUN] Failed to generate preview for page ${page.title}: ${(error as Error).message}`);
@@ -588,38 +588,38 @@ async function findPageDirById(
       return await findDirRecursively(spaceDir);
     }
   }
-  
+
   // Recursively search for directory with matching ID in metadata
   return await findDirRecursively(spaceDir);
-  
+
   // Helper function to recursively search directories
   async function findDirRecursively(dirPath: string): Promise<string | null> {
     try {
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         if (entry.isDirectory()) {
           const entryPath = path.join(dirPath, entry.name);
-          
+
           // Check if this directory has metadata.json
           try {
             const metadataPath = path.join(entryPath, 'metadata.json');
             const metadataContent = await fs.readFile(metadataPath, 'utf8');
             const metadata = JSON.parse(metadataContent);
-            
+
             if (metadata.id === pageId) {
               return entryPath;
             }
           } catch (error) {
             // Not a page directory or error reading metadata
           }
-          
+
           // Recursively search subdirectories
           const result = await findDirRecursively(entryPath);
           if (result) return result;
         }
       }
-      
+
       return null;
     } catch (error) {
       return null;
@@ -650,33 +650,33 @@ function formatFileSize(sizeInBytes: number): string {
  * @returns The rendered HTML
  */
 async function renderPreviewTemplate(pageData: PageData): Promise<string> {
-  try {    
+  try {
     const dirname = getDirname(); // Get dirname consistently
-    
+
     // We'll try multiple template locations in order
     const templateLocations = [
       // Primary locations based on environment
       !process.argv[0].includes('tsx')
         ? path.resolve(path.dirname(process.argv[1]), 'templates')  // dist/templates
         : path.resolve(process.cwd(), 'src', 'templates'),          // src/templates
-      
+
       // Alternative locations to try as fallbacks
       path.resolve(process.cwd(), 'dist', 'templates'),             // Project root dist/templates
       path.resolve(process.cwd(), 'src', 'templates'),              // Project root src/templates
       path.resolve(dirname, '..', 'templates'),                     // Relative to this file
       path.resolve(dirname, 'templates')                            // Direct templates subdirectory
     ];
-    
+
     // Add this after initializing templateLocations
     log.debug(`[DRY-RUN] Looking for templates in the following locations:`);
     templateLocations.forEach(location => {
       log.debug(`[DRY-RUN] - ${location}`);
     });
-    
+
     // Try each location until we find the template file
     let templateContent: string | null = null;
     let templatePath: string = '';
-    
+
     for (const location of templateLocations) {
       try {
         // Try to read template file
@@ -691,11 +691,11 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
         log.debug(`[DRY-RUN] Preview template not found in: ${location}`);
       }
     }
-    
+
     // If no template found after trying all locations, use a fallback
     if (!templateContent) {
       log.warn(`[DRY-RUN] Failed to find preview template in any location`);
-      
+
       // Create a simple template as fallback
       templateContent = `
         <!DOCTYPE html>
@@ -728,56 +728,55 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
       `;
       log.info('[DRY-RUN] Using fallback preview template');
     }    // Register helpers
-    Handlebars.registerHelper('encode', function(str) {
+    Handlebars.registerHelper('encode', function (str) {
       if (typeof str !== 'string') {
         return '';
       }
-      
+
       // Replace problematic characters with underscores for URL safety
       // This has to match the same encoding used in generatePagePreview when writing the files
       return str.replace(/[^a-zA-Z0-9-_.]/g, '_');
     });
-    
+
     // Add helper to find space by key
-    Handlebars.registerHelper('find', function(array, key) {
+    Handlebars.registerHelper('find', function (array, key) {
       if (!Array.isArray(array) || typeof key !== 'string') {
         return null;
       }
       return array.find(item => item.key === key);
     });
-    
+
     // Add helper for lookup
-    Handlebars.registerHelper('lookup', function(obj, prop) {
+    Handlebars.registerHelper('lookup', function (obj, prop) {
       if (obj && typeof obj === 'object' && prop in obj) {
         return obj[prop];
       }
       return null;
     });
-    
+
     // Try to load partial templates
     try {
       for (const location of templateLocations) {
         try {
           const partialsDir = path.resolve(location, 'partials');
-          
           // Check if the partials directory exists
           await fs.access(partialsDir);
-          
+
           // Load all partial templates
           const partialFiles = await fs.readdir(partialsDir);
-          
+
           for (const partialFile of partialFiles) {
             if (partialFile.endsWith('.hbs')) {
               const partialPath = path.join(partialsDir, partialFile);
               const partialContent = await fs.readFile(partialPath, 'utf8');
               const partialName = path.basename(partialFile, '.hbs');
-              
+              log.info(`[DRY-RUN] Loading partial: ${partialName} from ${partialPath}`);
               // Register the partial
               Handlebars.registerPartial(partialName, partialContent);
               log.verbose(`[DRY-RUN] Registered partial template: ${partialName}`);
             }
           }
-          
+
           break; // Successfully loaded partials, no need to check other locations
         } catch (error) {
           // No partials directory or error reading partials, try next location
@@ -787,8 +786,10 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
     } catch (error) {
       log.debug(`[DRY-RUN] Error loading partial templates: ${(error as Error).message}`);
     }
-      // Define the recursive page tree partial inline if it wasn't loaded from a file
-    if (!Handlebars.partials['recursivePageTree']) {      Handlebars.registerPartial('recursivePageTree', `
+    // Define the recursive page tree partial inline if it wasn't loaded from a file
+
+    if (!Handlebars.partials['recursivePageTree']) {
+      Handlebars.registerPartial('recursivePageTree', `
         {{#each pages}}
           <div class="page-item {{#if isActive}}active-parent{{/if}}">
             <div class="page-item-header">
@@ -806,10 +807,10 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
       `);
       log.verbose(`[DRY-RUN] Registered inline recursivePageTree partial`);
     }
-    
+
     // Log availability of partials
     log.debug(`[DRY-RUN] Available Handlebars partials: ${Object.keys(Handlebars.partials).join(', ')}`);
-    
+
     // Log page data for debugging
     log.debug(`[DRY-RUN] Rendering template for page: ${pageData.title}`);
     log.debug(`[DRY-RUN] Page has ${pageData.spaces.length} spaces`);
@@ -819,7 +820,7 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
         logPageHierarchy(page, 1);
       });
     });
-    
+
     // Helper function to log page hierarchy
     function logPageHierarchy(page: PreviewPage, level: number) {
       const indent = '  '.repeat(level);
@@ -828,15 +829,15 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
         logPageHierarchy(child, level + 1);
       });
     }
-    
+
     // Compile the template
     const template = Handlebars.compile(templateContent);
-    
+
     // Render the template
     return template(pageData);
   } catch (error) {
     log.warn(`[DRY-RUN] Failed to render preview template: ${(error as Error).message}`);
-    
+
     // Create a simple HTML page
     return `
       <!DOCTYPE html>
@@ -889,7 +890,7 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
 function markActivePage(spacesData: SpacesData, spaceKey: string, pageId: string): void {
   const space = spacesData.spaces.find(s => s.key === spaceKey);
   if (!space) return;
-  
+
   // Reset all pages first
   const resetAllPages = (pages: PreviewPage[]) => {
     for (const page of pages) {
@@ -899,9 +900,9 @@ function markActivePage(spacesData: SpacesData, spaceKey: string, pageId: string
       }
     }
   };
-  
+
   resetAllPages(space.pages);
-  
+
   // Set the active page and its parent chain
   const setActivePage = (pages: PreviewPage[]): boolean => {
     for (const page of pages) {
@@ -909,7 +910,7 @@ function markActivePage(spacesData: SpacesData, spaceKey: string, pageId: string
         page.isActive = true;
         return true;
       }
-      
+
       if (page.children.length > 0) {
         const hasActiveChild = setActivePage(page.children);
         if (hasActiveChild) {
@@ -919,9 +920,9 @@ function markActivePage(spacesData: SpacesData, spaceKey: string, pageId: string
         }
       }
     }
-    
+
     return false;
   };
-  
+
   setActivePage(space.pages);
 }
