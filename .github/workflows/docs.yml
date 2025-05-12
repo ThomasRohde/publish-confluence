@@ -24,11 +24,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # Upgrade to latest LTS version
+          node-version: 20 # Use LTS version
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm clean-install || (
+            echo "npm clean-install failed, retrying without package-lock.json..."
+            rm -f package-lock.json
+            npm install
+          )
 
       - name: Build publish-confluence
         run: npm run build
