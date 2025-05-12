@@ -38,8 +38,8 @@ jobs:
         run: |
           cd docs
           mkdir -p docs-output
-          node ./dist/cli.js --dry-run ./docs-output
-          node ./dist/cli.js --dry-run ./docs-output
+          node ../dist/cli.js --dry-run ./docs-output
+          node ../dist/cli.js --dry-run ./docs-output
           
       - name: Update index.html with docs link
         run: |
@@ -55,7 +55,13 @@ jobs:
           cp -r docs-output/* _site/
           cp -r index.html *.css *.js _site/ 2>/dev/null || :
           echo "Site directory tree:"
-          find _site -print | sed -e 's|[^/]*/|   |g'
+
+      - name: Print Folder Tree
+        uses: jaywcjlove/github-action-folder-tree@main
+        with:
+          exclude: "node_modules|dist|.git|.husky"
+          path: ./_site
+          depth: 2
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
