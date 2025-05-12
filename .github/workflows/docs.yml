@@ -38,33 +38,27 @@ jobs:
           cd docs
           npm ci
           npm run build:diagram
-          cd ..
-
+          cd ..      - name: Run dry-run on docs directory
       - name: Run dry-run on docs directory
         run: |
           mkdir -p docs-output
-          node ./dist/cli.js --dry-run docs-output ./docs
-          node ./dist/cli.js --dry-run docs-output/child-pages ./docs/child-pages
-          # Removed redundant second run unless necessary
+          node ./dist/cli.js publish --dry-run docs-output ./docs
+          node ./dist/cli.js publish --dry-run docs-output ./docs
 
       - name: Update index.html with docs link
         run: |
           cp index.html index.html.bak
           # Consider using a Node.js script or tool like `cheerio` for robust HTML manipulation
-          sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="docs-output/index.html">Documentation</a></li>' index.html
-
+            sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="docs-output/index.html">Documentation</a></li>' index.html
+        
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v2 # Updated to v2
-        with:
-          source: ./
-          destination: ./_site
-
-      - name: Copy docs-output to _site
+      - name: Prepare site directory
         run: |
-          cp -r docs-output _site/
+          mkdir -p _site
+          cp -r docs-output/* _site/
+          cp -r index.html *.css *.js _site/ 2>/dev/null || :
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
