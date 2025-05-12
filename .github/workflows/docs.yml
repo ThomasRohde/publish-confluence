@@ -1,0 +1,96 @@
+name: Build Docs and Deploy to Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build publish-confluence
+        run: npm run build
+      
+      - name: Build documentation diagrams
+        run: |
+          cd docs
+          npm ci
+          npm run build:diagram
+          cd ..
+      
+      - name: Run dry-run on docs directory
+        run: |
+          # Create output directory for docs
+          mkdir -p docs-output
+          
+          # Generate main documentation
+          node ./dist/cli.js --dry-run docs-output ./docs
+          
+          # Generate child pages (run twice as mentioned in the requirements)
+          node ./dist/cli.js --dry-run docs-output/child-pages ./docs/child-pages
+          node ./dist/cli.js --dry-run docs-output/child-pages ./docs/child-pages
+      
+      - name: Update index.html with docs link
+        run: |
+          # Create a backup of the original index.html
+          cp index.html index.html.bak
+          
+          # Insert docs link into the navigation
+          sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="docs-output/index.html">Documentation</a></li>' index.html
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      
+      - name: Copy docs-output to _site
+        run: |
+          cp -r docs-output _site/
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
