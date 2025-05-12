@@ -37,8 +37,8 @@ jobs:
       - name: Run dry-run on docs directory
         run: |
           mkdir -p docs-output
-          node ./dist/cli.js --dry-run docs-output ./docs
-          node ./dist/cli.js --dry-run docs-output ./docs
+          node ./dist/cli.js --dry-run ./docs
+          node ./dist/cli.js --dry-run ./docs
 
       - name: Update index.html with docs link
         run: |
@@ -51,7 +51,7 @@ jobs:
       - name: Prepare site directory
         run: |
           mkdir -p _site
-          cp -r docs-output/* _site/
+          cp -r docs/* _site/
           cp -r index.html *.css *.js _site/ 2>/dev/null || :
 
       - name: Upload artifact
