@@ -40,8 +40,8 @@ jobs:
       - name: Run dry-run on docs directory
         run: |
           mkdir -p docs-output
-          node ./dist/cli.js publish --dry-run docs-output ./docs
-          node ./dist/cli.js publish --dry-run docs-output ./docs
+          node ./dist/cli.js --dry-run docs-output ./docs
+          node ./dist/cli.js --dry-run docs-output ./docs
 
       - name: Update index.html with docs link
         run: |
