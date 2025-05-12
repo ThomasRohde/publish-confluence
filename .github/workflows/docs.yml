@@ -30,24 +30,26 @@ jobs:
       - name: Install dependencies 
         run: |
           npm ci
-
       - name: Build publish-confluence
         run: npm run build
 
+      - name: Run dry-run on docs directory
+        run: |
+          mkdir -p docs-output
+          node ./dist/cli.js --dry-run ./docs-output
+          node ./dist/cli.js --dry-run ./docs-output
       - name: Update index.html with docs link
         run: |
           cp index.html index.html.bak
-          sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="output/index.html">Documentation</a></li>' index.html
-
+          sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="docs-output/preview/~thro/Publish_Confluence_documentation.html">Documentation</a></li>' index.html
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Prepare site directory
         run: |
-          mkdir -p _site/output
-          cp -r docs/output/* _site/output/
-          cp index.html *.css *.js _site/ 2>/dev/null || :
-
+          mkdir -p _site
+          cp -r docs.output/* _site/
+          cp -r index.html *.css *.js _site/ 2>/dev/null || :
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 

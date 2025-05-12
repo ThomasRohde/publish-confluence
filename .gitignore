@@ -63,3 +63,4 @@ samples/target-architecture-template/
 log.txt
 dry/
 samples/macro-showcase/package-lock.json
+docs-output/
