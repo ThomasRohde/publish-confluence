@@ -190,7 +190,7 @@ program
     });
   });
 
-/* // Fetch command
+// Fetch command
 program
   .command('fetch')
   .description('Fetch content from a Confluence page')
@@ -202,6 +202,12 @@ program
     // Merge command options with global options
     const options = { ...program.opts(), ...cmdOptions };
     configureCommandOptions(options);
+    
+    // Validate the format option
+    if (options.format && !['storage', 'json'].includes(options.format)) {
+      log.error(`Invalid format: ${options.format}. Must be "storage" or "json".`);
+      process.exit(1);
+    }
     
     // Use the fetchPageContent function imported at the top of the file
     fetchPageContent({
@@ -218,7 +224,7 @@ program
       log.debug((err as Error).stack || 'No stack trace available');
       process.exit(1);
     });
-  }); */
+  });
 
 // Generate prompt command
 program

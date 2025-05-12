@@ -1,9 +1,7 @@
 // src/fetch.ts
-import { program } from 'commander';
 import { config } from 'dotenv';
 import { promises as fs } from 'fs';
 import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
 import { ConfluenceClient } from './client';
 import { createLogger, setVerbosityLevel, VERBOSITY } from './logger';
 import { ConfluenceApiCredentials } from './types';
@@ -127,53 +125,9 @@ export async function fetchPageContent(options: {
       process.stdout.write(contentToSave + '\n');
       log.debug(`Outputting ${outputFormat} content to stdout`);
       log.success(`Successfully fetched page content.`);
-    }
-  } catch (error) {
+    }  } catch (error) {
     log.error(`Failed to fetch page content: ${(error as Error).message}`);
     log.debug((error as Error).stack || 'No stack trace available');
-    process.exit(1);
+    throw error; // Rethrow error instead of exiting process
   }
-}
-
-// ES Module-compatible entry point detection
-const isMainModule = typeof import.meta.url === 'string' && 
-  import.meta.url === `file://${fileURLToPath(import.meta.url)}`;
-
-if (isMainModule) {
-  // Set up the command line interface
-  program
-    .description('Fetch content from a Confluence page')
-    .requiredOption('-s, --space-key <key>', 'Confluence space key (required)')
-    .requiredOption('-p, --page-title <title>', 'Title of the page to fetch (required)')
-    .option('-f, --format <format>', 'Output format: "storage" (default) or "json"', 'storage')
-    .option('-o, --output <file>', 'Save output to a file instead of stdout')
-    .option('-q, --quiet', 'Suppress all output except errors', false)
-    .option('-v, --verbose', 'Enable verbose output', false)
-    .option('-d, --debug', 'Enable debug output (includes verbose)', false)
-    .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
-    .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates')
-    .parse(process.argv);
-
-  const options = program.opts();
-  
-  // Validate the format option
-  if (options.format && !['storage', 'json'].includes(options.format)) {
-    log.error(`Invalid format: ${options.format}. Must be "storage" or "json".`);
-    process.exit(1);
-  }
-
-  // Run the fetch command
-  fetchPageContent({
-    spaceKey: options.spaceKey,
-    pageTitle: options.pageTitle,
-    outputFormat: options.format,
-    outputFile: options.output,
-    quiet: options.quiet,
-    verbose: options.verbose,
-    debug: options.debug,
-    allowSelfSigned: options.allowSelfSigned
-  }).catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
 }
