@@ -6,6 +6,8 @@
   ## Overview
 
   **publish-confluence** is a powerful solution for embedding interactive web applications, dashboards, and widgets directly into Confluence. With a single command, you can push your latest build to a Confluence page, complete with all required assets and custom layout. No more manual uploads, brittle macros, or copy-paste workflows.
+  
+  📚 **[View the complete documentation](https://thomasrohde.github.io/publish-confluence/docs)** for detailed guides, examples, and API references.
 
   Designed for rapid iteration, publish-confluence lets you update your app, rebuild, and immediately publish changes to Confluence—making it ideal for fast feedback, demos, and continuous delivery. The tool's flexible template system and smart asset management enable you to deliver rich, production-quality experiences inside Confluence, while keeping your workflow simple and repeatable.
 
@@ -28,6 +30,20 @@
 - **Supports Modern Workflows:** Designed for modern JavaScript/TypeScript projects and build tools (Vite, Webpack, Rollup, etc.), with first-class support for rapid development and testing.
 - **Robust CLI Experience:** Includes commands for project scaffolding, content fetching, and prompt generation for AI-assisted workflows.
 - **Flexible Logging:** Choose your preferred verbosity level for clean output or detailed debugging.
+
+## Documentation
+
+The complete documentation for publish-confluence is available at [https://thomasrohde.github.io/publish-confluence/docs](https://thomasrohde.github.io/publish-confluence/docs). The documentation is automatically built and published from the `docs/` directory whenever changes are pushed to the main branch.
+
+If you'd like to preview the documentation locally, you can run:
+
+```bash
+npm run build
+cd docs
+node ../dist/cli.js publish --dry-run ./docs-output
+```
+
+This will generate HTML documentation in the `docs-output` directory that you can view in your browser. The same command is used in our GitHub Actions workflow to automatically publish the documentation to GitHub Pages.
 
 ## Installation
 
@@ -761,6 +777,11 @@ If you encounter issues:
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+When contributing, please note that:
+1. All documentation in the `docs/` directory is automatically built and published to GitHub Pages using our GitHub Actions workflow
+2. The workflow builds the tool, runs it on the docs directory in dry-run mode, and publishes the resulting HTML to GitHub Pages
+3. When updating documentation, you can preview it locally using the steps in the Documentation section
 
 ## License
 

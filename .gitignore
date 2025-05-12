@@ -19,6 +19,8 @@ dist/
 build/
 lib/
 out/
+docs/output/
+docs-output/
 
 # Coverage reports
 coverage/
