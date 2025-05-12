@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20 # Use LTS version
+          node-version: 22 # Use LTS version
           cache: 'npm'
 
       - name: Install dependencies and generate lock file
