@@ -15,6 +15,7 @@ const __dirname = path.dirname(__filename);
 // Path to source and destination directories
 const srcTemplatesDir = path.resolve(__dirname, 'src/templates');
 const distTemplatesDir = path.resolve(__dirname, 'dist/templates');
+const distScriptsDir = path.resolve(__dirname, 'dist/templates/scripts');
 
 // Recursively copy a directory (including subdirectories and files)
 async function copyDir(srcDir, destDir) {
@@ -41,6 +42,10 @@ async function copyTemplateFiles() {
       console.error(`Source templates directory not found: ${srcTemplatesDir}`);
       process.exit(1);
     }
+
+    // Create scripts directory
+    await fs.mkdir(distScriptsDir, { recursive: true });
+    console.log(`Created template scripts directory: ${distScriptsDir}`);
 
     // Recursively copy all templates and partials
     await copyDir(srcTemplatesDir, distTemplatesDir);

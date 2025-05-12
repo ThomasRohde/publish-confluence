@@ -23,8 +23,7 @@
       <a href="../index.html" class="back-link">← Back to Spaces</a>
     </div>
   </aside>
-  
-  <main class="main-content">
+    <main class="main-content">
     <div class="page-header">
       <h1>{{title}}</h1>
       <div class="metadata">
@@ -54,119 +53,6 @@
         </ul>
       </div>
     {{/if}}
-  </main>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {      console.log('DOM fully loaded');
-      
-      // Setup expand/collapse functionality for Confluence expand macros
-      setupExpandMacros();
-      
-      // Add syntax highlighting to code blocks
-      highlightCodeBlocks();
-      
-      // Mobile menu toggle
-      const menuToggle = document.querySelector('.menu-toggle');
-      const sidebar = document.querySelector('.sidebar');
-        if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
-          sidebar.classList.toggle('active');
-        });
-      }
-
-      // Mark active page for highlighting
-      const currentPagePath = window.location.pathname;
-      const currentPageFilename = currentPagePath.split('/').pop();
-      
-      if (currentPageFilename) {
-        // Find the page link that matches the current page
-        const pageLinks = document.querySelectorAll('.page-link');
-        pageLinks.forEach(link => {
-          const linkUrl = link.getAttribute('href');
-          if (linkUrl && linkUrl.endsWith(currentPageFilename)) {
-            link.classList.add('active');
-            
-            // Make sure parents are visible
-            let parent = link.closest('.page-children');
-            while (parent) {
-              parent.style.display = 'block';
-              parent = parent.parentElement.closest('.page-children');
-            }
-          }
-        });
-      }
-    });
-    
-    // Setup expand/collapse functionality for Confluence expand macros
-    function setupExpandMacros() {
-      const expandMacros = document.querySelectorAll('.expand-container');
-      expandMacros.forEach(macro => {
-        const header = macro.querySelector('.expand-header');
-        const content = macro.querySelector('.expand-content');
-        
-        if (header && content) {
-          header.addEventListener('click', function() {
-            const isExpanded = macro.classList.contains('expanded');
-            if (isExpanded) {
-              macro.classList.remove('expanded');
-              content.style.display = 'none';
-            } else {
-              macro.classList.add('expanded');
-              content.style.display = 'block';
-            }          });
-        }
-      });
-    }
-    
-    // Add syntax highlighting to code blocks
-    function highlightCodeBlocks() {
-      const codeBlocks = document.querySelectorAll('pre code');
-      codeBlocks.forEach(block => {
-        const language = block.className.replace('language-', '').trim();
-        if (language) {
-          applyBasicHighlighting(block, language);
-        }
-      });
-    }
-    
-    // Simple syntax highlighting function
-    function applyBasicHighlighting(codeElement, language) {
-      // Basic syntax highlighting patterns for common languages
-      const patterns = {
-        'javascript': /\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|extends|new|this|import|export|from|as|async|await|try|catch|finally)\b/g,
-        'typescript': /\b(const|let|var|function|return|if|else|for|while|switch|case|break|class|extends|interface|type|enum|namespace|implements|readonly|private|protected|public|static|new|this|import|export|from|as|async|await|try|catch|finally)\b/g,
-        'python': /\b(def|class|if|elif|else|for|while|try|except|finally|with|import|from|as|return|yield|pass|break|continue|in|is|not|and|or|True|False|None)\b/g,
-        'html': /(&lt;[\/]?[a-z][\w-]*(?:\s+[\w-]+=(?:"[^"]*"|'[^']*'))*\s*&gt;)/g,
-        'css': /([.#][\w-]+|@media|@keyframes)/g,
-        'bash': /\b(if|then|else|elif|fi|for|while|do|done|case|esac|function|return|in)\b/g,
-        'generic': /\b(function|return|if|else|for|while|class|new|this)\b/g
-      };
-      
-      // Get the content
-      let content = codeElement.textContent;
-      
-      // Apply language-specific highlighting or generic if not found
-      const pattern = patterns[language] || patterns.generic;
-      content = content.replace(pattern, '<span style="color: #0052CC;">$1</span>');
-      
-      // Highlight strings
-      content = content.replace(/(["'])(.*?)\1/g, '<span style="color: #00875A;">$1$2$1</span>');
-      
-      // Highlight comments for specific languages
-      if (language === 'javascript' || language === 'typescript') {
-        content = content.replace(/(\/\/.*$)/gm, '<span style="color: #626F86;">$1</span>');
-        content = content.replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color: #626F86;">$1</span>');
-      } else if (language === 'python') {
-        content = content.replace(/(#.*$)/gm, '<span style="color: #626F86;">$1</span>');
-      }
-      
-      // Set the highlighted content
-      codeElement.innerHTML = content;
-    }
-    
-    // Helper function to find an object in an array by property
-    function find(array, key) {
-      return array.find(item => item.key === key);
-    }
-  </script>
+  </main>  <script type="module" src="../templates/scripts/template-scripts.js"></script>
 </body>
 </html>

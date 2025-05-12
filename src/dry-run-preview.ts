@@ -188,9 +188,7 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
       const indexHtmlPath = path.resolve(templateDir, 'index.html');
       const indexHtmlContent = await fs.readFile(indexHtmlPath, 'utf8');
       await fs.writeFile(path.join(previewDir, 'index.html'), indexHtmlContent);
-      log.verbose(`[DRY-RUN] Copied index.html from ${indexHtmlPath}`);
-
-      // Copy CSS file
+      log.verbose(`[DRY-RUN] Copied index.html from ${indexHtmlPath}`);      // Copy CSS file
       try {
         const cssPath = path.resolve(templateDir, 'confluence-styles.css');
         const cssContent = await fs.readFile(cssPath, 'utf8');
@@ -199,6 +197,32 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
 
       } catch (error) {
         log.warn(`[DRY-RUN] Failed to copy confluence-styles.css: ${(error as Error).message}`);
+      }
+      
+      // Copy template scripts
+      try {
+        // Check if the scripts directory exists and create it in the preview directory
+        const scriptsDir = path.resolve(templateDir, 'scripts');
+        const previewScriptsDir = path.join(previewDir, 'templates', 'scripts');
+        await fs.mkdir(previewScriptsDir, { recursive: true });
+        
+        // Copy template-scripts.js
+        const scriptsPath = path.resolve(scriptsDir, 'template-scripts.js');
+        const scriptsContent = await fs.readFile(scriptsPath, 'utf8');
+        await fs.writeFile(path.join(previewScriptsDir, 'template-scripts.js'), scriptsContent);
+        log.verbose(`[DRY-RUN] Copied template-scripts.js from ${scriptsPath}`);
+        
+        // Copy source map if it exists
+        try {
+          const sourceMapPath = path.resolve(scriptsDir, 'template-scripts.js.map');
+          const sourceMapContent = await fs.readFile(sourceMapPath, 'utf8');
+          await fs.writeFile(path.join(previewScriptsDir, 'template-scripts.js.map'), sourceMapContent);
+          log.verbose(`[DRY-RUN] Copied template-scripts.js.map from ${sourceMapPath}`);
+        } catch (mapError) {
+          log.debug(`[DRY-RUN] Source map not found or not copied: ${(mapError as Error).message}`);
+        }
+      } catch (error) {
+        log.warn(`[DRY-RUN] Failed to copy template scripts: ${(error as Error).message}`);
       }
     } catch (error) {
       log.warn(`[DRY-RUN] Failed to copy index.html: ${(error as Error).message}`);
@@ -744,14 +768,20 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
         return null;
       }
       return array.find(item => item.key === key);
-    });
-
-    // Add helper for lookup
+    });    // Add helper for lookup
     Handlebars.registerHelper('lookup', function (obj, prop) {
       if (obj && typeof obj === 'object' && prop in obj) {
         return obj[prop];
       }
       return null;
+    });
+    
+    // Add a helper to check if a title has a numeric prefix (e.g., "1. Title")
+    Handlebars.registerHelper('hasNumericPrefix', function (title) {
+      if (typeof title !== 'string') {
+        return false;
+      }
+      return /^\d+\.\s/.test(title);
     });
 
     // Try to load partial templates
@@ -785,8 +815,7 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
       }
     } catch (error) {
       log.debug(`[DRY-RUN] Error loading partial templates: ${(error as Error).message}`);
-    }
-    // Define the recursive page tree partial inline if it wasn't loaded from a file
+    }    // Define the recursive page tree partial inline if it wasn't loaded from a file
 
     if (!Handlebars.partials['recursivePageTree']) {
       Handlebars.registerPartial('recursivePageTree', `
@@ -794,7 +823,9 @@ async function renderPreviewTemplate(pageData: PageData): Promise<string> {
           <div class="page-item {{#if isActive}}active-parent{{/if}}">
             <div class="page-item-header">
               <a href="../{{../spaceKey}}/{{encode title}}.html" class="page-link {{#if isActive}}active{{/if}}" data-id="{{id}}">
+                {{#unless (hasNumericPrefix title)}}📄 <strong>{{/unless}}
                 {{title}}
+                {{#unless (hasNumericPrefix title)}}</strong>{{/unless}}
               </a>
             </div>
             {{#if children.length}}
