@@ -197,15 +197,6 @@ async function copyTemplateFiles(previewDir: string): Promise<void> {
         await fs.writeFile(path.join(previewDir, 'confluence-styles.css'), cssContent);
         log.verbose(`[DRY-RUN] Copied confluence-styles.css from ${cssPath}`);
         
-        // Also copy our style overrides if they exist
-        try {
-          const overridesCssPath = path.resolve(templateDir, 'style-overrides.css');
-          const overridesCssContent = await fs.readFile(overridesCssPath, 'utf8');
-          await fs.writeFile(path.join(previewDir, 'style-overrides.css'), overridesCssContent);
-          log.verbose(`[DRY-RUN] Copied style-overrides.css from ${overridesCssPath}`);
-        } catch (overrideError) {
-          log.debug(`[DRY-RUN] No style-overrides.css found: ${(overrideError as Error).message}`);
-        }
       } catch (error) {
         log.warn(`[DRY-RUN] Failed to copy confluence-styles.css: ${(error as Error).message}`);
       }
