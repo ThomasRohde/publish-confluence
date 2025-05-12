@@ -1,6 +1,6 @@
 {
     "name": "publish-confluence",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "CLI tool to publish JavaScript builds and HTML content to Confluence",
     "type": "module",
     "bin": {
@@ -16,13 +16,13 @@
     },
     "files": [
         "dist"
-    ],
-    "scripts": {
-        "dev": "vite build --watch",
-        "build": "tsc --noEmit && vite build",
+    ],    "scripts": {
+        "dev": "vite build --watch && npm run copy-templates",
+        "build": "tsc --noEmit && vite build && npm run copy-templates",
+        "copy-templates": "node copy-templates.js",
+        "postbuild": "npm run copy-templates",
         "prepublishOnly": "npm run build",
         "start": "node ./dist/cli.js",
-        "test-publish-js": "node test-publish.js",
         "publish-npm": "npm publish",
         "publish-npm-beta": "npm publish --tag beta"
     },
@@ -35,8 +35,7 @@
         "node"
     ],
     "author": "Thomas Klok Rohde <thomas@rohde.name>",
-    "license": "MIT",
-    "dependencies": {
+    "license": "MIT",    "dependencies": {
         "axios": "^1.7.7",
         "chalk": "^5.3.0",
         "commander": "^13.1.0",
@@ -44,12 +43,14 @@
         "form-data": "^4.0.0",
         "globby": "^14.1.0",
         "handlebars": "^4.7.8",
+        "xmldom": "^0.6.0",
         "zod": "^3.24.2"
-    },
-    "devDependencies": {
+    },    "devDependencies": {
         "@types/handlebars": "^4.1.0",
         "@types/node": "^22.7.4",
+        "@types/xmldom": "^0.1.34",
         "typescript": "^5.6.2",
+        "tsx": "^4.7.1",
         "vite": "^6.3.0",
         "vite-plugin-dts": "^4.2.3"
     },

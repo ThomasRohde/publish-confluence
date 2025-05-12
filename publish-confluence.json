@@ -1,0 +1,11 @@
+{
+  "spaceKey": "TEST",
+  "parentTitle": "Publish-Confluence Test",
+  "title": "CLI Dry Run Test",
+  "baseUrl": "https://example.confluence.com",
+  "username": "test-user",
+  "password": "placeholder",
+  "content": {
+    "main": "./README.md"
+  }
+}

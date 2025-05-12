@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confluence Preview - Space Index</title>
+  <link rel="stylesheet" href="confluence-styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Confluence Preview</h1>
+      <span class="dry-run-badge">DRY RUN</span>
+    </header>
+
+    <div class="welcome">
+      <h2>Welcome to Confluence Preview</h2>
+      <p>This is a preview of your Confluence pages created in dry-run mode. Select a space to view its pages.</p>
+    </div>
+
+    <div id="content">
+      <!-- Content will be loaded dynamically here -->
+      <div class="info-box">Loading spaces and pages...</div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const contentElement = document.getElementById('content');
+      
+      // Function to display error
+      function showError(message) {
+        contentElement.innerHTML = `
+          <div class="error-box">
+            <h3>Error</h3>
+            <p>${message}</p>
+          </div>
+        `;
+      }
+
+      // Function to fetch spaces and pages data
+      async function fetchSpacesAndPages() {
+        try {
+          const response = await fetch('spacesData.json');
+          if (!response.ok) {
+            throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
+          }
+          
+          const data = await response.json();
+          // Display spaces and pages
+          displaySpacesAndPages(data);
+        } catch (error) {
+          showError(error.message);
+        }
+      }
+
+      // Function to display spaces and pages
+      function displaySpacesAndPages(data) {
+        if (data.spaces.length === 0) {
+          contentElement.innerHTML = `
+            <div class="spaces-grid">
+              <div class="no-spaces">
+                <h3>No spaces found</h3>
+                <p>No Confluence spaces have been created in dry-run mode yet.</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '<div class="spaces-grid">';
+        
+        data.spaces.forEach(space => {
+          // Find root page if exists
+          const rootPage = space.pages.find(p => !p.title.match(/^\d+\.\s/));
+          
+          // Get total page count
+          const pageCount = space.pages.length;
+          
+          // Get a subset of pages to display (up to 5)
+          const displayPages = space.pages.slice(0, 5);
+          
+          html += `
+            <div class="space-card">
+              <div class="space-header">
+                <h2>${space.key}</h2>
+                <div class="page-count">${pageCount} page${pageCount !== 1 ? 's' : ''}</div>
+              </div>
+              <div class="space-pages">
+          `;
+          
+          if (displayPages.length === 0) {
+            html += '<p>No pages in this space yet.</p>';
+          } else {
+            html += '<ul class="page-list">';
+            
+            // If we have a root page, show it first
+            if (rootPage) {
+              const rootSafeFilename = rootPage.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
+              html += `
+                <li class="page-item root-page">
+                  <a href="${space.key}/${rootSafeFilename}.html" class="page-link page-link-root"><strong>📄 ${rootPage.title}</strong></a>
+                </li>
+              `;
+              
+              // Remove root page from display pages if it's there
+              const rootIndex = displayPages.findIndex(p => p.id === rootPage.id);
+              if (rootIndex !== -1) {
+                displayPages.splice(rootIndex, 1);
+              }
+            }
+            
+            // Add remaining display pages
+            displayPages.forEach(page => {
+              const safeFilename = page.title.replace(/[^a-zA-Z0-9-_.]/g, '_');
+              html += `
+                <li class="page-item">
+                  <a href="${space.key}/${safeFilename}.html" class="page-link">${page.title}</a>
+                </li>
+              `;
+            });
+            
+            html += '</ul>';
+          }
+          
+          html += `
+              </div>
+              <div class="space-footer">
+                <a href="${space.key}/${rootPage ? rootPage.title.replace(/[^a-zA-Z0-9-_.]/g, '_') : ''}.html" class="view-all-link">Browse Space</a>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += '</div>';
+        contentElement.innerHTML = html;
+      }
+
+      // Initialize
+      fetchSpacesAndPages();
+    });
+  </script>
+</body>
+</html>

@@ -58,5 +58,11 @@ test-results/
 .DS_Store
 *.pem
 package-lock.json
-samples/target-architecture-template
+docs/dry-run/
+docs/dry/
+samples/target-architecture-template/
+package-lock.json
 log.txt
+dry/
+package-lock.json
+samples/macro-showcase/package-lock.json

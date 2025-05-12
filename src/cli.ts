@@ -128,6 +128,9 @@ async function generatePromptCommand(): Promise<void> {
 function runPublishCommand(options: any): void {
   configureCommandOptions(options);
   
+  // Re-register macro helpers with complete options including command-specific options
+  registerMacroHelpers(Handlebars, options);
+  
   publishToConfluence(options).catch(err => {
     log.error(err);
     process.exit(1);
@@ -138,7 +141,7 @@ function runPublishCommand(options: any): void {
 program
   .name('publish-confluence')
   .description('Publish JavaScript builds and HTML content to Confluence')
-  .version('1.1.0')
+  .version('1.2.0')
   .showHelpAfterError('(add --help for additional information)')
   .helpOption('-h, --help', 'display help for command')
   .addHelpText('after', '\nWhen run without a command, publish-confluence will execute the "publish" command by default.')
@@ -151,7 +154,6 @@ program
   .option('-q, --quiet', 'Suppress all output except errors', false)
   .option('-v, --verbose', 'Enable verbose output', false)
   .option('-d, --debug', 'Enable debug output (includes verbose)', false)
-  .option('-c, --comment', 'Display content with comment flags in info macros', false)
   .option('--log-file [path]', 'Enable logging to file with optional custom path')
   .option('--allow-self-signed', 'Allow self-signed SSL certificates (default: true)', true)
   .option('--no-allow-self-signed', 'Disallow self-signed SSL certificates');
@@ -165,6 +167,9 @@ program.hook('preAction', () => {
 program
   .command('publish', { isDefault: true })
   .description('Publish JavaScript builds and HTML content to Confluence (default)')
+  .option('-c, --comment', 'Display content with comment flags in info macros', false)
+  .option('--dry-run [dir]', 'Generate storage files locally instead of publishing to Confluence')
+  .option('--no-preview', 'Disable HTML preview generation in dry-run mode')
   .action((cmdOptions) => {
     const options = { ...program.opts(), ...cmdOptions };
     runPublishCommand(options);

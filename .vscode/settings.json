@@ -1,0 +1,7 @@
+{
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Generate commit messages using the Conventional Commits format with emojis."
+    }
+  ]
+}

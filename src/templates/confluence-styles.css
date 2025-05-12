@@ -1,0 +1,1173 @@
+/* Confluence-style CSS for preview */
+:root {
+  --confluence-blue: #0052CC;
+  --confluence-blue-light: #4C9AFF;
+  --confluence-background: #F4F5F7;
+  --confluence-text: #172B4D;
+  --confluence-text-light: #6B778C;
+  --confluence-border: #DFE1E6;
+  --confluence-success: #36B37E;
+  --confluence-warning: #FFAB00;
+  --confluence-error: #FF5630;
+  --confluence-info: #00B8D9;
+  --confluence-panel: #FFFFFF;
+  --confluence-code-bg: #F4F5F7;
+  --confluence-hover: #E9E9E9;
+  --confluence-code-text: #172B4D;
+  --confluence-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Main content area */
+.confluence-content {
+  font-family: var(--confluence-font);
+  color: var(--confluence-text);
+  line-height: 1.5;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.confluence-content h1, 
+.confluence-content h2, 
+.confluence-content h3, 
+.confluence-content h4, 
+.confluence-content h5, 
+.confluence-content h6 {
+  color: var(--confluence-text);
+  margin: 1.5em 0 0.5em 0;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.confluence-content h1 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--confluence-border);
+  padding-bottom: 0.3em;
+  margin-top: 0;
+}
+
+.confluence-content h2 {
+  font-size: 1.5em;
+}
+
+/* Simple Tab Group Styles */
+.tab-group-container {
+  margin: 1.5rem 0;
+  border: 1px solid var(--confluence-border);
+  border-radius: 3px;
+  background-color: var(--confluence-panel);
+  padding: 0;
+}
+
+.tab-pane {
+  border-bottom: 1px solid var(--confluence-border);
+  padding: 0 15px 15px 15px;
+}
+
+.tab-pane:last-child {
+  border-bottom: none;
+}
+
+.tab-pane h3 {
+  background-color: var(--confluence-background);
+  margin: 0 -15px 15px -15px;
+  padding: 10px 15px;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+}
+
+.confluence-content h3 {
+  font-size: 1.25em;
+}
+
+.confluence-content p {
+  margin: 0.5em 0 1em;
+}
+
+.confluence-content a {
+  color: var(--confluence-blue);
+  text-decoration: none;
+}
+
+.confluence-content a:hover {
+  text-decoration: underline;
+}
+
+/* Confluence Table Styles */
+.confluence-table-wrapper {
+  margin: 1em 0;
+  overflow-x: auto;
+}
+
+.confluenceTable {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0;
+  border: 1px solid var(--confluence-border);
+}
+
+.confluenceTh {
+  background-color: #f4f5f7;
+  text-align: left;
+  padding: 7px 10px;
+  border: 1px solid var(--confluence-border);
+  font-weight: bold;
+}
+
+.confluenceTd {
+  padding: 7px 10px;
+  border: 1px solid var(--confluence-border);
+  vertical-align: top;
+}
+
+/* Admonitions (Info, Note, Warning, Tip) */
+.admonition {
+  margin: 1em 0;
+  padding: 0;
+  border-radius: 3px;
+  border-left: 5px solid;
+  background-color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.admonition-title {
+  padding: 8px 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.admonition-content {
+  padding: 8px 16px 16px;
+}
+
+.admonition-info {
+  border-left-color: var(--confluence-info);
+}
+
+.admonition-info .admonition-title::before {
+  content: "ℹ️";
+  margin-right: 8px;
+}
+
+.admonition-note {
+  border-left-color: var(--confluence-blue);
+}
+
+.admonition-note .admonition-title::before {
+  content: "📝";
+  margin-right: 8px;
+}
+
+.admonition-warning {
+  border-left-color: var(--confluence-warning);
+}
+
+.admonition-warning .admonition-title::before {
+  content: "⚠️";
+  margin-right: 8px;
+}
+
+.admonition-tip {
+  border-left-color: var(--confluence-success);
+}
+
+.admonition-tip .admonition-title::before {
+  content: "💡";
+  margin-right: 8px;
+}
+
+/* Code Blocks */
+.code-block {
+  margin: 1em 0;
+  background-color: var(--confluence-code-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.code-title {
+  padding: 8px 16px;
+  background-color: rgba(9, 30, 66, 0.08);
+  border-bottom: 1px solid var(--confluence-border);
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.code-block code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 0.9em;
+  color: var(--confluence-code-text);
+}
+
+/* Panels */
+.panel {
+  margin: 1em 0;
+  border: 1px solid var(--confluence-border);
+  border-radius: 3px;
+  background-color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.panel-heading {
+  padding: 10px 15px;
+  background-color: #f4f5f7;
+  border-bottom: 1px solid var(--confluence-border);
+  font-weight: bold;
+}
+
+.panel-body {
+  padding: 15px;
+}
+
+/* Panel types */
+.panel-note {
+  border-left: 5px solid var(--confluence-blue);
+}
+
+.panel-tip {
+  border-left: 5px solid var(--confluence-success);
+}
+
+.panel-warning {
+  border-left: 5px solid var(--confluence-warning);
+}
+
+.panel-info {
+  border-left: 5px solid var(--confluence-info);
+}
+
+/* Expand macro */
+.confluence-expand-macro {
+  margin: 1em 0;
+  border: 1px solid var(--confluence-border);
+  border-radius: 3px;
+  background-color: white;
+}
+
+.expand-header {
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.expand-header:hover {
+  background-color: var(--confluence-hover);
+}
+
+.expand-icon {
+  margin-right: 8px;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.confluence-expand-macro.expanded .expand-icon {
+  transform: rotate(90deg);
+}
+
+.expand-content {
+  padding: 0 15px;
+  display: none;
+  border-top: 1px solid var(--confluence-border);
+}
+
+.confluence-expand-macro.expanded .expand-content {
+  display: block;
+  padding: 15px;
+}
+
+/* Status macros */
+.confluence-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: white;
+}
+
+.confluence-status-green {
+  background-color: var(--confluence-success);
+}
+
+.confluence-status-yellow {
+  background-color: var(--confluence-warning);
+}
+
+.confluence-status-red {
+  background-color: var(--confluence-error);
+}
+
+.confluence-status-blue {
+  background-color: var(--confluence-blue);
+}
+
+.confluence-status-grey {
+  background-color: var(--confluence-text-light);
+}
+
+/* Task lists */
+.task-list {
+  margin: 1em 0;
+}
+
+.task {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.task input[type="checkbox"] {
+  margin-right: 8px;
+  margin-top: 3px;
+}
+
+.task-body {
+  flex: 1;
+}
+
+/* Tabs Group */
+.confluence-tabs {
+  margin: 1em 0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confluence-tabs-horizontal .tabs-menu {
+  display: flex;
+  border-bottom: 1px solid var(--confluence-border);
+  background-color: #f4f5f7;
+}
+
+.confluence-tabs-vertical {
+  display: flex;
+}
+
+.confluence-tabs-vertical .tabs-menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  border-right: 1px solid var(--confluence-border);
+  background-color: #f4f5f7;
+}
+
+.confluence-tabs-vertical .tabs-content {
+  flex: 1;
+}
+
+.confluence-tabs.tabs-outline {
+  border: 1px solid var(--confluence-border);
+}
+
+.tab-menu-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.tab-menu-item:hover {
+  background-color: rgba(9, 30, 66, 0.08);
+}
+
+.tab-menu-item.active {
+  background-color: white;
+}
+
+.confluence-tabs-horizontal .tab-menu-item.active {
+  border-bottom: 2px solid var(--tab-color, var(--confluence-blue));
+  margin-bottom: -1px;
+}
+
+.confluence-tabs-vertical .tab-menu-item.active {
+  border-right: 2px solid var(--tab-color, var(--confluence-blue));
+  margin-right: -1px;
+}
+
+.tab-menu-icon {
+  margin-right: 8px;
+  font-size: 1em;
+}
+
+.tab-content {
+  display: none;
+  padding: 15px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Confluence layout */
+.confluence-layout {
+  margin: 1em 0;
+}
+
+.layout-section {
+  display: flex;
+  margin-bottom: 1em;
+}
+
+.layout-section-single > .layout-cell {
+  width: 100%;
+}
+
+.layout-section-two_equal > .layout-cell {
+  width: 50%;
+  padding-right: 10px;
+}
+
+.layout-section-two_equal > .layout-cell:last-child {
+  padding-right: 0;
+  padding-left: 10px;
+}
+
+.layout-section-two_left_sidebar > .layout-cell:first-child {
+  width: 30%;
+  padding-right: 10px;
+}
+
+.layout-section-two_left_sidebar > .layout-cell:last-child {
+  width: 70%;
+  padding-left: 10px;
+}
+
+.layout-section-two_right_sidebar > .layout-cell:first-child {
+  width: 70%;
+  padding-right: 10px;
+}
+
+.layout-section-two_right_sidebar > .layout-cell:last-child {
+  width: 30%;
+  padding-left: 10px;
+}
+
+.layout-section-three_equal > .layout-cell {
+  width: 33.33%;
+  padding-right: 10px;
+}
+
+.layout-section-three_equal > .layout-cell:last-child {
+  padding-right: 0;
+}
+
+/* Emoticons */
+.emoticon {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 1.2em;
+}
+
+/* Table of Contents */
+.confluence-toc {
+  margin: 1em 0;
+  padding: 15px;
+  background-color: #f4f5f7;
+  border-radius: 3px;
+  border: 1px solid var(--confluence-border);
+}
+
+.toc-header {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* HTML Macro */
+.html-macro {
+  margin: 1em 0;
+}
+
+/* Confluence macros */
+.confluence-macro {
+  margin: 1em 0;
+  padding: 15px;
+  background-color: #f4f5f7;
+  border-radius: 3px;
+  border: 1px solid var(--confluence-border);
+}
+
+.macro-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--confluence-text-light);
+}
+
+.macro-body {
+  background-color: white;
+  padding: 10px;
+  border-radius: 3px;
+  border: 1px solid var(--confluence-border);
+}
+
+/* Error messages */
+.error {
+  color: var(--confluence-error);
+  padding: 15px;
+  margin: 1em 0;
+  background-color: #FFF5F5;
+  border-left: 5px solid var(--confluence-error);
+  border-radius: 3px;
+}
+
+/* Attachments section */
+.confluence-attachments {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--confluence-border);
+}
+
+.attachments-header {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.attachment-list {
+  list-style: none;
+  padding: 0;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 3px;
+}
+
+.attachment-item:hover {
+  background-color: var(--confluence-hover);
+}
+
+.attachment-icon {
+  margin-right: 10px;
+  color: var(--confluence-text-light);
+}
+
+.attachment-name {
+  flex: 1;
+}
+
+.attachment-size {
+  color: var(--confluence-text-light);
+  font-size: 0.85em;
+}
+
+/* Charts placeholder */
+.confluence-chart-placeholder {
+  margin: 1em 0;
+  padding: 20px;
+  background-color: #f4f5f7;
+  border: 1px dashed var(--confluence-border);
+  text-align: center;
+  color: var(--confluence-text-light);
+  border-radius: 3px;
+}
+
+/* Styles moved from index.html */
+:root {
+      --primary-color: #0052CC;
+      --primary-light: #4C9AFF;
+      --primary-dark: #0747A6;
+      --secondary-color: #6554C0;
+      --background-color: #F4F5F7;
+      --text-color: #172B4D;
+      --light-text: #6B778C;
+      --border-color: #DFE1E6;
+      --success-color: #36B37E;
+      --warning-color: #FFAB00;
+      --error-color: #FF5630;
+      --info-color: #00B8D9;
+      --panel-background: #FFFFFF;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --border-radius: 3px;
+      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.5;
+      font-size: 14px;
+      padding: var(--spacing-lg);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: var(--spacing-lg);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    .dry-run-badge {
+      background-color: #FF8B00;
+      color: white;
+      font-size: 14px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+    }
+
+    .welcome {
+      background-color: var(--panel-background);
+      padding: var(--spacing-lg);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-lg);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .spaces-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--spacing-lg);
+    }
+
+    .space-card {
+      background-color: var(--panel-background);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .space-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .space-header {
+      background-color: var(--primary-light);
+      color: white;
+      padding: var(--spacing-md);
+    }
+
+    .space-header h2 {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .space-pages {
+      padding: var(--spacing-md);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .space-footer {
+      padding: var(--spacing-md);
+      background-color: var(--background-color);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .page-list {
+      list-style: none;
+      margin-bottom: var(--spacing-md);
+      flex: 1;
+    }
+
+    .page-item {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .page-link {
+      display: block;
+      padding: var(--spacing-sm);
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      transition: background-color 0.2s;
+    }
+
+    .page-link:hover {
+      background-color: var(--background-color);
+    }
+    
+    .page-link-root {
+      background-color: rgba(76, 154, 255, 0.1);
+      border-left: 3px solid var(--primary-color);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .root-page {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .view-all-link {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .view-all-link:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .no-spaces {
+      background-color: var(--panel-background);
+      padding: var(--spacing-lg);
+      border-radius: var(--border-radius);
+      text-align: center;
+      grid-column: 1 / -1;
+    }
+
+    .info-box {
+      background-color: rgba(0, 184, 217, 0.1);
+      border-left: 4px solid var(--info-color);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    }
+
+    .error-box {
+      background-color: rgba(255, 86, 48, 0.1);
+      border-left: 4px solid var(--error-color);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    }
+
+    .page-count {
+      margin-top: var(--spacing-sm);
+      color: var(--light-text);
+      font-size: 13px;
+    }
+
+/* Styles moved from preview.hbs */
+    /* :root definition from preview.hbs - this will override previous :root variables if names clash, which is intended for preview.hbs context */
+    :root {
+      --primary-color: #0052CC;
+      --primary-light: #4C9AFF;
+      --primary-dark: #0747A6;
+      --secondary-color: #6554C0;
+      --background-color: #F4F5F7;
+      --text-color: #172B4D;
+      --light-text: #6B778C;
+      --border-color: #DFE1E6;
+      --success-color: #36B37E;
+      --warning-color: #FFAB00;
+      --error-color: #FF5630;
+      --info-color: #00B8D9;
+      --panel-background: #FFFFFF;
+      --sidebar-width: 280px;
+      --header-height: 60px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --border-radius: 3px;
+      --font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen, Ubuntu, Cantarell, \'Open Sans\', \'Helvetica Neue\', sans-serif;
+    }
+
+    /* Global reset and body styles from preview.hbs */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.preview-body { /* Added .preview-body to scope these body rules if needed, assuming preview.hbs body tag gets this class */
+      font-family: var(--font-family);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.5;
+      font-size: 14px;
+      display: grid;
+      grid-template-areas:
+        "header header"
+        "sidebar main"
+        "footer footer";
+      grid-template-columns: var(--sidebar-width) 1fr;
+      grid-template-rows: var(--header-height) 1fr auto;
+      min-height: 100vh;
+    }
+
+    /* Header styles from preview.hbs */
+    .header {
+      grid-area: header;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0 var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .space-badge {
+      background-color: var(--primary-dark);
+      color: white;
+      font-size: 12px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      margin-left: var(--spacing-sm);
+    }
+
+    /* .dry-run-badge is already defined from index.html styles, ensure preview.hbs version is compatible or specific if needed */
+    /* For preview.hbs, it was:
+    .dry-run-badge {
+      background-color: #FF8B00;
+      color: white;
+      font-size: 12px; 
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+    } */
+
+    /* Sidebar styles from preview.hbs */
+    .sidebar {
+      grid-area: sidebar;
+      background-color: var(--panel-background);
+      border-right: 1px solid var(--border-color);
+      padding: var(--spacing-md);
+      overflow-y: auto;
+    }
+
+    .pages-nav {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .pages-nav h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: var(--spacing-md);
+      color: var(--primary-dark);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-sm);
+    }
+
+    /* .page-item and .page-link are also in index.html styles. These are preview.hbs versions. */
+    .page-item {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .page-link {
+      display: block;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+
+    .page-link.has-children {
+      padding-left: var(--spacing-md);
+    }
+    
+    .page-link:hover {
+      background-color: var(--background-color);
+    }
+
+    .page-link.active {
+      background-color: var(--primary-light);
+      color: white;
+    }
+    
+    .page-link-root {
+      background-color: rgba(76, 154, 255, 0.1);
+      border-left: 3px solid var(--primary-color);
+      margin-bottom: var(--spacing-sm);
+      font-weight: 500;
+    }
+    
+    .root-page {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .page-children {
+      margin-left: var(--spacing-lg);
+      margin-top: var(--spacing-xs);
+      border-left: 1px solid var(--border-color);
+      padding-left: var(--spacing-sm);
+      display: block !important; 
+      background-color: rgba(76, 154, 255, 0.05);
+    }
+
+    /* Main content styles from preview.hbs */
+    .main-content {
+      grid-area: main;
+      background-color: var(--panel-background);
+      padding: var(--spacing-xl);
+      overflow-y: auto;
+      margin: var(--spacing-md);
+      border-radius: var(--border-radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header {
+      margin-bottom: var(--spacing-xl);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-md);
+    }
+
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .metadata {
+      color: var(--light-text);
+      font-size: 12px;
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    /* Styles for .page-content, which is used alongside .confluence-content in preview.hbs */
+    .page-content {
+      line-height: 1.6;
+    }
+
+    .page-content h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin: var(--spacing-lg) 0 var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .page-content h2 {
+      font-size: 20px;
+      font-weight: 500;
+      margin: var(--spacing-lg) 0 var(--spacing-md);
+    }
+
+    .page-content h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin: var(--spacing-md) 0;
+    }
+
+    .page-content h4, .page-content h5, .page-content h6 {
+      font-size: 14px;
+      font-weight: 500;
+      margin: var(--spacing-md) 0;
+    }
+
+    .page-content p {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .page-content ul, .page-content ol {
+      margin-bottom: var(--spacing-md);
+      padding-left: var(--spacing-xl);
+    }
+
+    .page-content li {
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .page-content code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background-color: var(--background-color);
+      padding: 0 var(--spacing-xs);
+      border-radius: var(--border-radius);
+    }
+
+    .page-content pre {
+      background-color: var(--background-color);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius);
+      overflow-x: auto;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .page-content pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+
+    .page-content blockquote {
+      border-left: 4px solid var(--primary-light);
+      padding-left: var(--spacing-md);
+      margin-left: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+      color: var(--light-text);
+    }
+
+    .page-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .page-content th, .page-content td {
+      border: 1px solid var(--border-color);
+      padding: var(--spacing-sm);
+      text-align: left;
+    }
+
+    .page-content th {
+      background-color: var(--background-color);
+      font-weight: 500;
+    }
+
+    .page-content a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .page-content a:hover {
+      text-decoration: underline;
+    }
+
+    /* Attachments section from preview.hbs */
+    .attachments {
+      margin-top: var(--spacing-xl);
+      border-top: 1px solid var(--border-color);
+      padding-top: var(--spacing-md);
+    }
+
+    .attachments h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .attachment-item {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-sm);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .attachment-icon {
+      margin-right: var(--spacing-sm);
+      color: var(--light-text);
+    }
+
+    .attachment-info {
+      flex: 1;
+    }
+
+    .attachment-name {
+      font-weight: 500;
+    }
+
+    .attachment-size {
+      font-size: 12px;
+      color: var(--light-text);
+    }
+
+    .attachment-action {
+      margin-left: var(--spacing-sm);
+    }
+
+    .attachment-action a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: var(--spacing-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      background-color: var(--border-color);
+    }
+
+    /* Responsive adjustments from preview.hbs */
+    @media (max-width: 768px) {
+      body.preview-body { /* Scoped to .preview-body */
+        grid-template-areas:
+          "header header"
+          "main main"
+          "footer footer";
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar { /* This will hide the sidebar on mobile for preview.hbs */
+        display: none;
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        height: calc(100vh - var(--header-height));
+        width: 100%;
+        z-index: 10;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar.active {
+        display: block;
+      }
+
+      .menu-toggle { /* This will show the toggle on mobile for preview.hbs */
+        display: block;
+      }
+    }
+
+    /* For mobile sidebar toggle from preview.hbs */
+    .menu-toggle {
+      display: none; /* Hidden by default, shown by @media query */
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }

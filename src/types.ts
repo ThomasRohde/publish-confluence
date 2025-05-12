@@ -64,6 +64,10 @@ export interface PublishOptions {
   allowSelfSigned: boolean;
   /** Display content with comment flags in info macros */
   comment?: boolean;
+  /** Path to the directory for dry-run output (if set, no actual API calls will be made) */
+  dryRun?: string;
+  /** Enable HTML preview generation in dry-run mode (defaults to true) */
+  preview?: boolean;
 }
 
 /**
