@@ -141,7 +141,7 @@ function runPublishCommand(options: any): void {
 program
   .name('publish-confluence')
   .description('Publish JavaScript builds and HTML content to Confluence')
-  .version('1.1.0')
+  .version('1.2.0')
   .showHelpAfterError('(add --help for additional information)')
   .helpOption('-h, --help', 'display help for command')
   .addHelpText('after', '\nWhen run without a command, publish-confluence will execute the "publish" command by default.')
