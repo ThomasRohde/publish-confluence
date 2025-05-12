@@ -32,11 +32,7 @@ jobs:
           npm ci
 
       - name: Build publish-confluence
-        run: npm run build      - name: Run dry-run on docs directory
-        run: |
-          cd ./docs
-          node ../dist/cli.js --dry-run ./output
-          node ../dist/cli.js --dry-run ./output
+        run: npm run build
 
       - name: Update index.html with docs link
         run: |
