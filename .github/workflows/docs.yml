@@ -48,7 +48,7 @@ jobs:
       - name: Prepare site directory
         run: |
           mkdir -p _site
-          cp -r docs.output/* _site/
+          cp -r docs-output/* _site/
           cp -r index.html *.css *.js _site/ 2>/dev/null || :
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
