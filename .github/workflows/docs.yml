@@ -27,12 +27,11 @@ jobs:
           node-version: 20 # Use LTS version
           cache: 'npm'
 
-      - name: Clear npm cache and install dependencies
+      - name: Install dependencies and generate lock file
         run: |
-          npm cache clean --force
           npm install -g npm@latest
-          npm install @types/resolve
-          npm install
+          npm install --package-lock-only
+          npm ci
 
       - name: Build publish-confluence
         run: npm run build
