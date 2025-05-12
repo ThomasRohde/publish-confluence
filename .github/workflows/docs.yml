@@ -24,14 +24,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # Use LTS version
+          node-version: 22
           cache: 'npm'
+
+      - name: Clean npm cache
+        run: npm cache clean --force
 
       - name: Install dependencies and generate lock file
         run: |
           npm install -g npm@latest
-          npm install --package-lock-only
-          npm ci
+          npm install  # Generates package-lock.json and installs dependencies
+          ls -la  # Debug: Verify package-lock.json exists
 
       - name: Build publish-confluence
         run: npm run build
@@ -45,9 +48,8 @@ jobs:
       - name: Update index.html with docs link
         run: |
           cp index.html index.html.bak
-          # Consider using a Node.js script or tool like `cheerio` for robust HTML manipulation
-            sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="docs-output/index.html">Documentation</a></li>' index.html
-        
+          sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="docs-output/index.html">Documentation</a></li>' index.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
