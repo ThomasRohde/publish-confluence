@@ -37,15 +37,6 @@ jobs:
       - name: Build publish-confluence
         run: npm run build
 
-      - name: Build documentation diagrams
-        run: |
-          cd docs
-          npm cache clean --force
-          npm install -g npm@latest
-          npm install
-          npm run build:diagram
-          cd ..
-
       - name: Run dry-run on docs directory
         run: |
           mkdir -p docs-output
