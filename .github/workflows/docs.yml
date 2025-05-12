@@ -30,11 +30,13 @@ jobs:
       - name: Install dependencies 
         run: |
           npm ci
+
       - name: Build publish-confluence
         run: npm run build
 
       - name: Run dry-run on docs directory
         run: |
+          cd docs
           mkdir -p docs-output
           node ./dist/cli.js --dry-run ./docs-output
           node ./dist/cli.js --dry-run ./docs-output
@@ -43,7 +45,7 @@ jobs:
         run: |
           cp index.html index.html.bak
           sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="docs-output/preview/~thro/Publish_Confluence_documentation.html">Documentation</a></li>' index.html
-          
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -53,7 +55,7 @@ jobs:
           cp -r docs-output/* _site/
           cp -r index.html *.css *.js _site/ 2>/dev/null || :
           echo "Site directory tree:"
-          ls -R _site
+          find _site -print | sed -e 's|[^/]*/|   |g'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
