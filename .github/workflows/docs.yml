@@ -44,7 +44,7 @@ jobs:
       - name: Update index.html with docs link
         run: |
           cp index.html index.html.bak
-          sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="docs-output/preview/~thro/Publish_Confluence_documentation.html">Documentation</a></li>' index.html
+          sed -i '/<li><a href="#cta">Get Started<\/a><\/li>/a \                <li><a href="./preview/~thro/Publish_Confluence_documentation.html">Documentation</a></li>' index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
