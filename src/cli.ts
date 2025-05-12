@@ -190,7 +190,7 @@ program
     });
   });
 
-// Fetch command
+/* // Fetch command
 program
   .command('fetch')
   .description('Fetch content from a Confluence page')
@@ -218,7 +218,7 @@ program
       log.debug((err as Error).stack || 'No stack trace available');
       process.exit(1);
     });
-  });
+  }); */
 
 // Generate prompt command
 program
