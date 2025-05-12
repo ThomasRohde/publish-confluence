@@ -15,7 +15,6 @@ export class ConfluenceConverter {
       fatalError: (msg) => log.error(`Fatal XML Parse Error: ${msg}`)
     }
   });
-
   /**
    * Converts the Confluence storage format to proper HTML
    * @param content The Confluence storage format content
@@ -24,20 +23,16 @@ export class ConfluenceConverter {
    */
   static convertStorageToHtml(content: string, attachmentBaseUrl: string): string {
     try {
-      // Handle special XML entities that might be in the content
+      // Handle special XML entities that might be in the content, but in a more targeted way
+      // We don't want to convert all entity references as those in code blocks should remain escaped
       const sanitizedContent = content
         .replace(/&nbsp;/g, '\u00A0')  // Non-breaking space
         .replace(/&mdash;/g, '—')
         .replace(/&ndash;/g, '–')
-        .replace(/&[a-z]+;/g, (match) => {
-          // Only basic entity handling for now - a more comprehensive solution would use a dedicated library
-          if (match === '&lt;') return '<';
-          if (match === '&gt;') return '>';
-          if (match === '&amp;') return '&';
-          if (match === '&quot;') return '"';
-          if (match === '&apos;') return "'";
-          return match; // Keep unrecognized entities as-is
-        });
+        // Only convert essential XML entities outside of code blocks
+        // This improved approach preserves HTML entities in code contexts
+        .replace(/&lt;(\/?)code(\s+[^>]*)?>/gi, '<$1code$2>') // Special handling for code tags
+        .replace(/&amp;([a-z]+);/g, '&$1;'); // Fix double-escaped entities
 
       // Wrap in a root element if not already present to ensure valid XML
       const xmlContent = sanitizedContent.trim().startsWith('<')
@@ -54,7 +49,6 @@ export class ConfluenceConverter {
         `<pre>${content}</pre>`;
     }
   }
-
   /**
    * Recursively processes XML nodes to convert to HTML
    * @param node The XML node to process
@@ -71,7 +65,9 @@ export class ConfluenceConverter {
     }
 
     const element = node as Element;
-    const nodeName = element.nodeName.toLowerCase();    // Handle Confluence-specific elements
+    const nodeName = element.nodeName.toLowerCase();
+    
+    // Handle Confluence-specific elements
     if (nodeName.startsWith('ac:')) {
       return this.processConfluenceElement(element, attachmentBaseUrl);
     }
@@ -89,6 +85,30 @@ export class ConfluenceConverter {
     // Handle Confluence tables
     if (nodeName === 'table') {
       return this.processConfluenceTable(element, attachmentBaseUrl);
+    }
+
+    // Special handling for code elements - we need to escape HTML inside them
+    if (nodeName === 'code') {
+      // Create the opening tag
+      let result = '<code';
+      if (element.attributes) {
+        for (let i = 0; i < element.attributes.length; i++) {
+          const attr = element.attributes[i];
+          result += ` ${attr.name}="${attr.value}"`;
+        }
+      }
+      result += '>';
+      
+      // Escape the content inside code elements
+      for (let i = 0; i < element.childNodes.length; i++) {
+        if (element.childNodes[i].nodeType === 3) { // Text node
+          result += this.escapeHtml(element.childNodes[i].nodeValue || '');
+        } else {
+          result += this.processNode(element.childNodes[i], attachmentBaseUrl);
+        }
+      }
+      
+      return `${result}</code>`;
     }
 
     // For standard HTML elements, recreate them with their attributes
@@ -416,8 +436,7 @@ export class ConfluenceConverter {
    * @param element The code macro element
    * @param attachmentBaseUrl Base URL for attachment references
    * @returns The HTML code block
-   */
-  private static processCodeMacro(element: Element, attachmentBaseUrl: string): string {
+   */  private static processCodeMacro(element: Element, attachmentBaseUrl: string): string {
     // Extract parameters
     let language = 'text';
     let title = '';
@@ -454,6 +473,7 @@ export class ConfluenceConverter {
     if (title) {
       result += `<div class="code-title">${title}</div>`;
     }
+    // Double escape the code content to ensure HTML in code blocks displays correctly
     result += `<pre class="language-${language}"><code>${this.escapeHtml(code)}</code></pre>`;
     result += '</div>';
     
@@ -860,18 +880,35 @@ export class ConfluenceConverter {
     
     return result;
   }
-
   /**
    * Escape HTML special characters
    * @param html The HTML string to escape
    * @returns The escaped HTML string
    */
   private static escapeHtml(html: string): string {
-    return html
+    // Ensure we don't double-escape entities that are already escaped
+    // First temporarily replace already escaped entities
+    const tempHtml = html
+      .replace(/&amp;/g, '__AMP__')
+      .replace(/&lt;/g, '__LT__')
+      .replace(/&gt;/g, '__GT__')
+      .replace(/&quot;/g, '__QUOT__')
+      .replace(/&#039;/g, '__APOS__');
+    
+    // Then escape all remaining special characters
+    const escaped = tempHtml
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+    
+    // Finally, restore the originally escaped entities
+    return escaped
+      .replace(/__AMP__/g, '&amp;')
+      .replace(/__LT__/g, '&lt;')
+      .replace(/__GT__/g, '&gt;')
+      .replace(/__QUOT__/g, '&quot;')
+      .replace(/__APOS__/g, '&#039;');
   }
 }
