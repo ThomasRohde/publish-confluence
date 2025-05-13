@@ -300,7 +300,6 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
   pages.forEach(page => {
     log.debug(`[DRY-RUN] Page: ${page.title} (ID: ${page.id}), Parent: ${page.parentId || 'none'}`);
   });
-
   // Build parent-child relationships
   const rootPages: PreviewPage[] = [];
   const pageMap = new Map<string, PreviewPage>();
@@ -350,11 +349,51 @@ async function buildPageTree(spaceDir: string, spaceKey: string): Promise<Previe
       log.debug(`[DRY-RUN] Added ${page.title} as root page`);
     }
   }
-
   log.debug(`[DRY-RUN] Root pages: ${rootPages.length}`);
   rootPages.forEach(page => {
     log.debug(`[DRY-RUN] Root page: ${page.title} with ${page.children.length} children`);
   });
+
+  // Sort the root pages with numerical prefixes
+  rootPages.sort((a, b) => {
+    // Function to extract numerical prefix if it exists
+    const extractNumber = (title: string): number => {
+      const match = title.match(/^(\d+)\.\s/);
+      return match ? parseInt(match[1]) : Number.MAX_SAFE_INTEGER; // Non-numeric prefixes go to the end
+    };
+    
+    const numA = extractNumber(a.title);
+    const numB = extractNumber(b.title);
+    
+    // Sort by extracted number
+    return numA - numB;
+  });
+  
+  // Also sort children recursively
+  const sortChildrenRecursively = (pages: PreviewPage[]): void => {
+    if (pages.length === 0) return;
+    
+    // Sort this level
+    pages.sort((a, b) => {
+      const extractNumber = (title: string): number => {
+        const match = title.match(/^(\d+)\.\s/);
+        return match ? parseInt(match[1]) : Number.MAX_SAFE_INTEGER;
+      };
+      
+      const numA = extractNumber(a.title);
+      const numB = extractNumber(b.title);
+      
+      return numA - numB;
+    });
+    
+    // Sort children recursively
+    for (const page of pages) {
+      sortChildrenRecursively(page.children);
+    }
+  };
+  
+  // Sort all children
+  sortChildrenRecursively(rootPages);
 
   return rootPages;
 }
