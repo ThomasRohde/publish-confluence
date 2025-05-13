@@ -4,7 +4,7 @@ import Handlebars from 'handlebars';
 import path from 'path';
 import { ConfluenceClient } from './client';
 import { loadConfiguration } from './config';
-import { createLogger } from './logger';
+import { createLogger, shutdownLogger } from './logger';
 import { ConfluenceApiCredentials, PublishConfig, PublishOptions } from './types';
 import { generateUuid } from './utils';
 
@@ -752,12 +752,13 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
     log.debug(options.dryRun 
       ? 'Dry-run client initialized, no actual API calls will be made'
       : 'Confluence client initialized with custom error handling');
-    
-    await publishPageRecursive(client, rootConfig, options);
+      await publishPageRecursive(client, rootConfig, options);
     log.success(options.dryRun
       ? 'All pages generated successfully in dry-run mode.'
-      : 'All pages published successfully.');  
-  } catch (error: any) {
+      : 'All pages published successfully.');
+    
+    // Shutdown the logger to ensure proper cleanup and process exit
+    shutdownLogger();  } catch (error: any) {
     // Check if this is a "page already exists" error that we can handle gracefully
     if (isPageAlreadyExistsError(error)) {
       // This is a special case where the page already exists but wasn't initially found
@@ -768,6 +769,7 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
       });
       
       log.success('All pages published successfully despite initial page existence conflict.');
+      shutdownLogger(); // Ensure logger is shutdown in this success path too
       return;
     }
     
@@ -791,6 +793,7 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
     };
     
     log.error(`Failed to publish to Confluence: ${error.message}`, errorContext);
+    shutdownLogger(); // Ensure logger is shutdown before exit
     process.exit(1);
   }
 }

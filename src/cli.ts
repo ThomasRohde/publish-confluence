@@ -7,7 +7,7 @@ import path from 'path';
 import * as readline from 'readline';
 import { fileURLToPath } from 'url';
 import { fetchPageContent } from './fetch';
-import { configureFileLogging, createLogger, VERBOSITY } from './logger';
+import { configureFileLogging, createLogger, VERBOSITY, shutdownLogger, setVerbosityLevel } from './logger';
 import { registerMacroHelpers } from './macro-helpers';
 import { createProject } from './project-creator';
 import { generatePrompt } from './prompt-generator';
@@ -41,16 +41,19 @@ function errorColor(str: string): string {
  * Configure command options and logging based on verbosity settings
  * @param options Command options
  */
-function configureCommandOptions(options: any): void {
-  // Set verbosity level based on options
+function configureCommandOptions(options: any): void {  // Set verbosity level based on options
   if (options.quiet) {
     verbosity = VERBOSITY.QUIET;
+    setVerbosityLevel(VERBOSITY.QUIET);
   } else if (options.debug) {
     verbosity = VERBOSITY.DEBUG;
+    setVerbosityLevel(VERBOSITY.DEBUG);
   } else if (options.verbose) {
     verbosity = VERBOSITY.VERBOSE;
+    setVerbosityLevel(VERBOSITY.VERBOSE);
   } else {
     verbosity = VERBOSITY.NORMAL;
+    setVerbosityLevel(VERBOSITY.NORMAL);
   }
   
   // Configure file logging if enabled
@@ -127,12 +130,12 @@ async function generatePromptCommand(): Promise<void> {
  */
 function runPublishCommand(options: any): void {
   configureCommandOptions(options);
-  
-  // Re-register macro helpers with complete options including command-specific options
+    // Re-register macro helpers with complete options including command-specific options
   registerMacroHelpers(Handlebars, options);
   
   publishToConfluence(options).catch(err => {
     log.error(err);
+    shutdownLogger(); // Ensure logger is shutdown before exit
     process.exit(1);
   });
 }
@@ -186,6 +189,7 @@ program
     // Use the extracted createProject function from project-creator.ts
     createProject(log).catch(err => {
       log.error(err);
+      shutdownLogger(); // Ensure proper cleanup before exit
       process.exit(1);
     });
   });
@@ -206,6 +210,7 @@ program
     // Validate the format option
     if (options.format && !['storage', 'json'].includes(options.format)) {
       log.error(`Invalid format: ${options.format}. Must be "storage" or "json".`);
+      shutdownLogger(); // Ensure proper cleanup before exit
       process.exit(1);
     }
     
@@ -222,6 +227,7 @@ program
     }).catch(err => {
       log.error(`Failed to execute fetch command: ${(err as Error).message}`);
       log.debug((err as Error).stack || 'No stack trace available');
+      shutdownLogger(); // Ensure proper cleanup before exit
       process.exit(1);
     });
   });
@@ -238,6 +244,7 @@ program
     
     generatePromptCommand().catch(err => {
       log.error(err);
+      shutdownLogger(); // Ensure proper cleanup before exit  
       process.exit(1);
     });
   });

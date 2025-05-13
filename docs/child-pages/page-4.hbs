@@ -510,7 +510,7 @@ Contact \{{confluence-user key="jsmith"}} for details.
 <!-- Include a component with dynamic content -->
 \{{confluence-include file="./templates/metrics-panel.html"}}
     {{/confluence-code}}
-    <p><em>Note: The content of the included file will be processed with Handlebars to handle any variables, but cannot contain recursive <code>{{confluence-include}}</code> calls.</em></p>
+    <p><em>Note: The content of the included file will be processed with Handlebars to handle any variables, but cannot contain recursive <code>\{{confluence-include}}</code> calls.</em></p>
 
     <h3>Raw</h3>
     <p>Outputs the content within the block without any Handlebars processing or HTML escaping. Use with extreme caution.</p>
