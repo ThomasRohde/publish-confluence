@@ -25,7 +25,6 @@
     {{/confluence-code}}
     <p><em>Note: The content inside <code>confluence-html</code> is the direct body of the HTML macro. Remember to include <code>\{{{styles}}}</code> and <code>\{{{scripts}}}</code> if you are using a <code>macroTemplatePath</code>.</em></p>
   {{/confluence-tab}}
-
   {{#confluence-tab name="URL Helper" icon="icon-sp-link"}}
     <h2>URL Helper</h2>
     <p>Generates a standard URL reference to a file attached to a Confluence page. This is useful for creating links to scripts, stylesheets, and images that have been attached to the page.</p>
@@ -41,20 +40,16 @@
     {{#confluence-code language="handlebars" title="URL Helper Examples"}}
 <!-- In a script tag -->
 <script src="\{{confluence-url file="app.js"}}"></script>
-
 <!-- In a stylesheet link -->
 <link rel="stylesheet" href="\{{confluence-url file="styles.css"}}">
-
 <!-- In an image source -->
 <img src="\{{confluence-url file="logo.png"}}" alt="Logo">
-
 <!-- To create a download link -->
 <a href="\{{confluence-url file="document.pdf"}}">Download PDF</a>
     {{/confluence-code}}
     <p><em>Note: The helper automatically builds the correct Confluence attachment URL format using the current page's <code>pageId</code> and <code>baseUrl</code> from the context.</em></p>
     <p><em>If <code>baseUrl</code> is available in the context, the helper generates an absolute URL (e.g., <code>https://example.atlassian.net/download/attachments/123456/file.js</code>). Otherwise, it falls back to a relative URL (e.g., <code>/download/attachments/123456/file.js</code>).</em></p>
   {{/confluence-tab}}
-
   {{#confluence-tab name="Panel Macro" icon="icon-sp-sitemap"}}
     <h2>Panel Macro</h2>
     <p>Creates a standard Confluence panel to highlight information.</p>
@@ -66,7 +61,7 @@
     <li>Like lists</li>
   </ul>
 \{{/confluence-panel}}
-    {{/confluence-code}}
+{{/confluence-code}}
     <p><strong>Parameters:</strong></p>
     <ul>
         <li><code>title</code> (String, Optional): The title displayed in the panel header.</li>
@@ -83,17 +78,14 @@
 \{{#confluence-panel title="Important Update"}}
   <p>Please review the latest project guidelines.</p>
 \{{/confluence-panel}}
-
 \{{#confluence-panel title="Developer Notes" borderStyle="dashed" borderColor="#FF0000" borderWidth="2" bgColor="#F5F5F5" titleBGColor="#E0E0E0" titleColor="#000000" comment=true}}
   <p>This panel will only be visible when running with the --comment flag.</p>
 \{{/confluence-panel}}
     {{/confluence-code}}
   {{/confluence-tab}}
-
   {{#confluence-tab name="Layout Macros" icon="icon-sp-database"}}
     <h2>Layout Macros</h2>
     <p>Used together to create multi-column layouts on the Confluence page.</p>
-
     <h3>Layout Container</h3>
     <p>The main wrapper for all layout sections.</p>
     <p><strong>Syntax:</strong></p>
@@ -103,7 +95,6 @@
 \{{/confluence-layout}}
     {{/confluence-code}}
     <p><strong>Parameters:</strong> None</p>
-
     <h3>Layout Section</h3>
     <p>Defines a row within the layout container, specifying the column structure.</p>
     <p><strong>Syntax:</strong></p>
@@ -116,7 +107,6 @@
     <ul>
         <li><code>type</code> (String, Required): The column layout type. Valid types: <code>single</code>, <code>two_equal</code>, <code>two_left_sidebar</code>, <code>two_right_sidebar</code>, <code>three_equal</code>, <code>three_with_sidebars</code>.</li>
     </ul>
-
     <h3>Layout Cell</h3>
     <p>Defines a single column (cell) within a layout section. The number of cells must match the parent section's type.</p>
     <p><strong>Syntax:</strong></p>
@@ -127,7 +117,6 @@
 \{{/layout-cell}}
     {{/confluence-code}}
     <p><strong>Parameters:</strong> None</p>
-
     <p><strong>Example Usage (Two Equal Columns):</strong></p>
     {{#confluence-code language="handlebars" title="Layout Example"}}
 \{{#confluence-layout}}
@@ -147,11 +136,9 @@
 \{{/confluence-layout}}
     {{/confluence-code}}
   {{/confluence-tab}}
-
   {{#confluence-tab name="Tabs Macros" icon="icon-sp-folder"}}
     <h2>Tabs Macros</h2>
     <p>Used together to create tabbed content sections on the Confluence page.</p>
-
     <h3>Tabs Group</h3>
     <p>The main container for a set of tabs.</p>
     <p><strong>Syntax:</strong></p>
@@ -166,7 +153,6 @@
         <li><code>outline</code> (Boolean, Optional): Whether to show a border around the tabs. Defaults to <code>false</code>.</li>
         <li><code>color</code> (String, Optional): Accent color for the tabs. Can be HTML color name or hex code.</li>
     </ul>
-
     <h3>Tab Pane</h3>
     <p>Defines an individual tab within a tabs group.</p>
     <p><strong>Syntax:</strong></p>
@@ -182,7 +168,6 @@
         <li><code>icon</code> (String, Optional): An icon to display alongside the tab name. Common icons include <code>icon-sp-lock</code>, <code>icon-sp-flag</code>, <code>icon-sp-star</code>, etc.</li>
         <li><code>anchor</code> (String, Optional): A unique ID for the tab, which can be used for linking directly to the tab. If not provided, a random ID is generated.</li>
     </ul>
-
     <p><strong>Example Usage:</strong></p>
     {{#confluence-code language="handlebars" title="Tabs Example"}}
 \{{#confluence-tabs disposition="horizontal" outline=true color="#FF5630"}}
@@ -190,7 +175,6 @@
     <h3>Project Overview</h3>
     <p>This is the main project description.</p>
   \{{/confluence-tab}}
-  
   \{{#confluence-tab name="Installation" icon="icon-sp-wrench"}}
     <h3>Installation Instructions</h3>
     <p>Follow these steps to install the application:</p>
@@ -200,7 +184,6 @@
       <li>Configure settings</li>
     </ol>
   \{{/confluence-tab}}
-  
   \{{#confluence-tab name="API Reference" icon="icon-sp-lock"}}
     <h3>API Documentation</h3>
     <p>Here's the API reference information.</p>
@@ -214,7 +197,6 @@
     {{/confluence-code}}
     <p><em>Note: The tabs container must include at least one tab pane. You can nest other macros within tab panes.</em></p>
   {{/confluence-tab}}
-
   {{#confluence-tab name="Code Block" icon="icon-sp-powerpoint"}}
     <h2>Code Block Macro</h2>
     <p>Displays code snippets with syntax highlighting.</p>
@@ -245,7 +227,6 @@ greet('World');
     {{/confluence-code}}
     <p><em>Note: The content inside the <code>confluence-code</code> block is automatically wrapped in CDATA.</em></p>
   {{/confluence-tab}}
-
   {{#confluence-tab name="TOC & Status" icon="icon-sp-menu"}}
     <h2>Table of Contents Macro</h2>
     <p>Generates a table of contents based on the headings (h1-h6) on the page.</p>
@@ -265,9 +246,7 @@ greet('World');
     {{#confluence-code language="handlebars" title="TOC Example"}}
 \{{confluence-toc minLevel=2 maxLevel=4 style="decimal"}}
     {{/confluence-code}}
-
     <hr />
-
     <h2>Status Macro</h2>
     <p>Displays a colored status lozenge.</p>
     <p><strong>Syntax:</strong></p>
@@ -286,7 +265,6 @@ Task Status: \{{confluence-status type="green" text="Completed"}}
 Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
     {{/confluence-code}}
   {{/confluence-tab}}
-
   {{#confluence-tab name="Image Macro" icon="icon-sp-picture"}}
     <h2>Image Macro</h2>
     <p>Embeds images in your Confluence pages with customizable attributes.</p>
@@ -311,13 +289,11 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
     {{#confluence-code language="handlebars" title="Image Examples"}}
 <!-- Attached image example -->
 \{{confluence-image src="logo.png" alt="Company Logo" width="300" height="200" align="center"}}
-
 <!-- External image example -->
 \{{confluence-image src="https://example.com/image.jpg" title="External Image" border=true thumbnail=true}}
     {{/confluence-code}}
     <p><em>Note: For attached images, the filename specified in <code>src</code> must match a file in your project's <code>distDir</code> that is included by the <code>includedFiles</code> setting.</em></p>
   {{/confluence-tab}}
-
   {{#confluence-tab name="Admonitions" icon="icon-sp-tag"}}
     <h2>Admonition Macros</h2>
     <p>Creates styled blocks for specific types of information (Info, Note, Warning, Tip). These are essentially pre-configured Panel macros.</p>
@@ -337,13 +313,11 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 \{{#confluence-warning title="Security Alert"}}
   <p>Do not share your API token publicly.</p>
 \{{/confluence-warning}}
-
 \{{#confluence-tip}}
   <p>Use the <code>--debug</code> flag for detailed logs.</p>
 \{{/confluence-tip}}
     {{/confluence-code}}
   {{/confluence-tab}}
-
   {{#confluence-tab name="Expand & Children" icon="icon-sp-list"}}
     <h2>Expand Macro</h2>
     <p>Creates a collapsible section of content.</p>
@@ -365,9 +339,7 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
   <p>Setting 2: Configure parameter Y.</p>
 \{{/confluence-expand}}
     {{/confluence-code}}
-
     <hr />
-
     <h2>Children Display Macro</h2>
     <p>Displays a list of child pages under the current page.</p>
     <p><strong>Syntax:</strong></p>
@@ -381,7 +353,6 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
 \{{confluence-children}}
     {{/confluence-code}}
   {{/confluence-tab}}
-
   {{#confluence-tab name="Link Macro" icon="icon-sp-link"}}
     <h2>Link Macro</h2>
     <p>Creates links to various Confluence entities (pages, attachments, anchors) or external URLs.</p>
@@ -389,7 +360,6 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
     {{#confluence-code language="handlebars" title="Link Macro Syntax"}}
 <!-- Plain text link -->
 \{{confluence-link type="page" pageTitle="Target Page" text="Link to page" tooltip="Optional tooltip"}}
-
 <!-- Block usage with image or other content -->
 \{{#confluence-link type="page" pageTitle="Target Page"}}
   \{{confluence-image src="logo.png" width="30"}}
@@ -416,36 +386,28 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
     {{#confluence-code language="handlebars" title="Link Examples"}}
 <!-- Link to another Confluence page -->
 \{{confluence-link type="page" pageTitle="Getting Started" text="View the Getting Started guide"}}
-
 <!-- Link to an attachment -->
 \{{confluence-link type="attachment" filename="report.pdf" text="Download Report" tooltip="PDF document, 2.3MB"}}
-
 <!-- Link to an external site -->
 \{{confluence-link type="url" url="https://example.com" text="Visit Example Website"}}
-
 <!-- Anchor link (same page) -->
 \{{confluence-link type="anchor" anchor="configuration-section" text="Jump to Configuration"}}
-
 <!-- Anchor link (another page) -->
 \{{confluence-link type="pageAnchor" pageTitle="API Reference" anchor="authentication" text="View Authentication API"}}
-
 <!-- Link with an embedded image for the body -->
 \{{#confluence-link type="page" pageTitle="Dashboard"}}
   \{{confluence-image src="dashboard-icon.png" width="24" height="24"}}
 \{{/confluence-link}}
     {{/confluence-code}}
   {{/confluence-tab}}
-
   {{#confluence-tab name="Other Helpers" icon="icon-sp-more"}}
     <h2>Other Helpers</h2>
-
     <h3>Divider</h3>
     <p>Inserts a horizontal rule.</p>
     <p><strong>Syntax:</strong></p>
     {{#confluence-code language="handlebars" title="Divider Syntax"}}
 \{{confluence-divider}}
     {{/confluence-code}}
-
     <h3>Date</h3>
     <p>Displays a formatted date using the Confluence Date macro.</p>
     <p><strong>Syntax:</strong></p>
@@ -461,7 +423,6 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
     {{#confluence-code language="handlebars" title="Date Example"}}
 \{{confluence-date date="2024-03-15" format="dd MMM yyyy"}}
     {{/confluence-code}}
-
     <h3>Anchor</h3>
     <p>Creates a named anchor point on the page.</p>
     <p><strong>Syntax:</strong></p>
@@ -476,7 +437,6 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
     {{#confluence-code language="handlebars" title="Anchor Example"}}
 \{{confluence-anchor name="installation-section"}}
     {{/confluence-code}}
-
     <h3>User Mention</h3>
     <p>Mentions a Confluence user, creating a link to their profile.</p>
     <p><strong>Syntax:</strong></p>
@@ -491,7 +451,6 @@ Project Health: \{{confluence-status type="yellow" text="At Risk" subtle=true}}
     {{#confluence-code language="handlebars" title="User Mention Example"}}
 Contact \{{confluence-user key="jsmith"}} for details.
     {{/confluence-code}}
-
     <h3>Include</h3>
     <p>Includes content from another file, useful for breaking up templates into modular components.</p>
     <p><strong>Syntax:</strong></p>
@@ -506,12 +465,10 @@ Contact \{{confluence-user key="jsmith"}} for details.
     {{#confluence-code language="handlebars" title="Include Example"}}
 <!-- Include a reusable footer -->
 \{{confluence-include file="./templates/footer.html"}}
-
 <!-- Include a component with dynamic content -->
 \{{confluence-include file="./templates/metrics-panel.html"}}
     {{/confluence-code}}
     <p><em>Note: The content of the included file will be processed with Handlebars to handle any variables, but cannot contain recursive <code>\{{confluence-include}}</code> calls.</em></p>
-
     <h3>Raw</h3>
     <p>Outputs the content within the block without any Handlebars processing or HTML escaping. Use with extreme caution.</p>
     <p><strong>Syntax:</strong></p>
@@ -525,6 +482,5 @@ Contact \{{confluence-user key="jsmith"}} for details.
     {{/confluence-code}}
   {{/confluence-tab}}
 {{/confluence-tabs}}
-
 <hr />
 <p><em>End of Macro Helper Reference. Last updated: {{currentDate}}</em></p>

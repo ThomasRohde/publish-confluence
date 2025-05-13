@@ -27,6 +27,9 @@ export function initPreview(): void {
 
   // Mark active page for highlighting
   highlightActivePage();
+
+  // Setup interactive tabs
+  setupTabs();
   
   // Mark as initialized
   window.previewLoaded = true;
@@ -147,6 +150,35 @@ function highlightActivePage(): void {
 }
 
 /**
+ * Setup interactive tabs functionality
+ */
+function setupTabs(): void {
+  const tabGroups = document.querySelectorAll('.confluence-tabs');
+  tabGroups.forEach(group => {
+    const menuItems = group.querySelectorAll('.tabs-menu .tab-menu-item');
+    const tabContents = group.querySelectorAll('.tab-content');
+
+    menuItems.forEach(menuItem => {
+      menuItem.addEventListener('click', (event) => {
+        event.preventDefault();
+        const targetTabId = menuItem.getAttribute('data-tab-id');
+
+        // Deactivate all menu items and contents in this group
+        menuItems.forEach(item => item.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+
+        // Activate the clicked menu item and corresponding content
+        menuItem.classList.add('active');
+        const targetContent = group.querySelector(`.tab-content[data-tab-id="${targetTabId}"]`);
+        if (targetContent) {
+          targetContent.classList.add('active');
+        }
+      });
+    });
+  });
+}
+
+/**
  * Helper function to find an object in an array by property
  */
 export function find(array: any[], key: string): any {
@@ -160,6 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Export everything for global access if needed
 export {
-    applyBasicHighlighting, highlightActivePage, highlightCodeBlocks, setupExpandMacros, setupMobileMenu
+    applyBasicHighlighting, highlightActivePage, highlightCodeBlocks, setupExpandMacros, setupMobileMenu, setupTabs
 };
 
