@@ -62,25 +62,11 @@
         /* Smooth scrolling */
         html {
             scroll-behavior: smooth;
-        }
-
-        /* Style for active tab label */
-        .tabs input[type="radio"]:checked + label {
-             border-bottom-color: #3b82f6; /* Tailwind blue-500 */
-             color: #3b82f6;
-        }
-
-        /* Basic tab content visibility */
+        }        /* Tab system base styles */
         .tabs input[type="radio"] {
             display: none;
         }
-        .tab-content {
-            display: none;
-        }
-        .tabs input[type="radio"]:checked + label + .tab-content {
-            display: block;
-        }
-
+        
         /* Simple panel styling for macro examples */
         .output-example .panel { border-left: 3px solid #3b82f6; padding-left: 10px; background: #f3f4f6; margin: 5px 0; border-radius: 4px; }
         .output-example .code-block { background: #1f2937; padding: 10px; border-radius: 4px; color: #d1d5db; font-family: monospace; white-space: pre-wrap;}
@@ -100,14 +86,25 @@
                 <a href="#macros" class="text-gray-600 hover:text-blue-600 transition duration-150 ease-in-out">Macros</a>
                 <a href="#cli" class="text-gray-600 hover:text-blue-600 transition duration-150 ease-in-out">CLI</a>
                 <a href="#cta" class="text-gray-600 hover:text-blue-600 transition duration-150 ease-in-out">Get Started</a>
-                <a href="https://thomasrohde.github.io/publish-confluence/preview/~thro/Publish_Confluence_documentation.html" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-blue-600 transition duration-150 ease-in-out">Documentation</a>
-            </nav>
+                <a href="https://thomasrohde.github.io/publish-confluence/preview/~thro/Publish_Confluence_documentation.html" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-blue-600 transition duration-150 ease-in-out">Documentation</a>            </nav>
             <div class="md:hidden">
-                <button class="text-gray-600 hover:text-blue-600 focus:outline-none">
+                <button id="menuButton" class="text-gray-600 hover:text-blue-600 focus:outline-none" aria-label="Toggle menu">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
                     </svg>
                 </button>
+            </div>
+        </div>
+        <!-- Mobile menu, show/hide based on menu state -->
+        <div id="mobileMenu" class="transition-all duration-300 ease-in-out transform opacity-0 scale-95 h-0 md:hidden bg-white border-t border-gray-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#hero" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Home</a>
+                <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Features</a>
+                <a href="#quick-start" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Quick Start</a>
+                <a href="#macros" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Macros</a>
+                <a href="#cli" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">CLI</a>
+                <a href="#cta" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Get Started</a>
+                <a href="https://thomasrohde.github.io/publish-confluence/preview/~thro/Publish_Confluence_documentation.html" target="_blank" rel="noopener noreferrer" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Documentation</a>
             </div>
         </div>
     </header>
@@ -189,11 +186,6 @@
                         <div class="text-3xl mb-3">📄</div>
                         <h4 class="text-lg font-semibold text-gray-900 mb-2">Nested Page Structures</h4>
                         <p class="text-gray-600 text-sm">Manage complex documentation with nested child pages, all configured and published automatically.</p>
-                    </div>
-                     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 transition hover:shadow-md">
-                        <div class="text-3xl mb-3">📈</div>
-                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Mermaid.js Integration</h4>
-                        <p class="text-gray-600 text-sm">Embed Mermaid diagrams directly in your Confluence pages using a dedicated Handlebars helper.</p>
                     </div>
                 </div>
             </div>
@@ -412,141 +404,7 @@ npx publish-confluence</code></pre>
                 </div>
             </div>
         </section>
-
-        <section id="macros" class="py-12 sm:py-16 lg:py-20 bg-gray-100 border-b border-gray-200">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10 sm:mb-12">Interactive Showcase: Macro Helpers</h2>
-                 <div class="max-w-4xl mx-auto text-gray-700">
-                    <p class="mb-6 text-center"><code>publish-confluence</code> provides a rich set of Handlebars helpers that generate Confluence XHTML macros. This allows you to create well-structured and visually appealing Confluence pages programmatically.</p>
-                    <p class="mb-8 text-center text-sm">Below are some common helpers. Click a tab to see syntax and conceptual output.</p>
-
-                    <div class="macro-showcase bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <div class="tabs border-b border-gray-200 mb-6">
-                            <input type="radio" name="macro-tabs" id="tab-html" checked><label for="tab-html" class="inline-block px-4 py-2 cursor-pointer font-medium text-gray-500 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 transition duration-150 ease-in-out">HTML Macro</label>
-                            <input type="radio" name="macro-tabs" id="tab-panel"><label for="tab-panel" class="inline-block px-4 py-2 cursor-pointer font-medium text-gray-500 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 transition duration-150 ease-in-out">Panel</label>
-                            <input type="radio" name="macro-tabs" id="tab-layout"><label for="tab-layout" class="inline-block px-4 py-2 cursor-pointer font-medium text-gray-500 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 transition duration-150 ease-in-out">Layout</label>
-                            <input type="radio" name="macro-tabs" id="tab-code"><label for="tab-code" class="inline-block px-4 py-2 cursor-pointer font-medium text-gray-500 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 transition duration-150 ease-in-out">Code Block</label>
-                            <input type="radio" name="macro-tabs" id="tab-status"><label for="tab-status" class="inline-block px-4 py-2 cursor-pointer font-medium text-gray-500 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 transition duration-150 ease-in-out">Status</label>
-                            <input type="radio" name="macro-tabs" id="tab-image"><label for="tab-image" class="inline-block px-4 py-2 cursor-pointer font-medium text-gray-500 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 transition duration-150 ease-in-out">Image</label>
-                            <input type="radio" name="macro-tabs" id="tab-mermaid"><label for="tab-mermaid" class="inline-block px-4 py-2 cursor-pointer font-medium text-gray-500 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 transition duration-150 ease-in-out">Mermaid</label>
-
-                            <div class="tab-content pt-6 text-sm space-y-3">
-                                <h4 class="font-semibold text-gray-800"><code>{{#confluence-html}} ... {{/confluence-html}}</code></h4>
-                                <p>Embeds raw HTML, essential for JavaScript applications. This is where <code>{{{scripts}}}</code> and <code>{{{styles}}}</code> are typically used (often within <code>macro-template.html</code> which is then injected via <code>{{{macro}}}</code> in <code>confluence-template.html</code>).</p>
-                                <pre class="bg-gray-100 border border-gray-300 text-gray-800 p-3 rounded-md overflow-x-auto"><code class="language-handlebars">{{#confluence-html}}
-  &lt;div id="my-app-container"&gt;&lt;/div&gt;
-  &lt;!-- These are typically in macro-template.html --&gt;
-  &lt;!-- {{{styles}}} --&gt;
-  &lt;!-- {{{scripts}}} --&gt;
-{{/confluence-html}}</code></pre>
-                                <div class="output-example mt-4 p-4 border border-dashed border-gray-300 rounded-md bg-gray-50">
-                                    <p><strong>Conceptual Output:</strong> A Confluence HTML Macro block containing your specified HTML. The tool automatically links your uploaded CSS and JS files if <code>{{{styles}}}</code> and <code>{{{scripts}}}</code> are used within the macro template.</p>
-                                </div>
-                            </div>
-
-                            <div class="tab-content pt-6 text-sm space-y-3">
-                                <h4 class="font-semibold text-gray-800"><code>{{#confluence-panel title="..."}} ... {{/confluence-panel}}</code></h4>
-                                <p class="text-xs text-gray-500">Params: title, borderStyle, borderColor, borderWidth, bgColor, titleBGColor, titleColor</p>
-                                <pre class="bg-gray-100 border border-gray-300 text-gray-800 p-3 rounded-md overflow-x-auto"><code class="language-handlebars">{{#confluence-panel title="Important Note" bgColor="#eff6ff"}}
-  &lt;p&gt;This is some important information for the team.&lt;/p&gt;
-{{/confluence-panel}}</code></pre>
-                                <div class="output-example mt-4 p-4 border border-dashed border-gray-300 rounded-md bg-gray-50">
-                                    <p><strong>Conceptual Output:</strong></p>
-                                    <div class="panel bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-                                        <strong class="font-semibold text-blue-800">Important Note</strong>
-                                        <p class="text-blue-700 mt-1">This is some important information for the team.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-content pt-6 text-sm space-y-3">
-                                <h4 class="font-semibold text-gray-800"><code>{{#confluence-layout}} ... {{/confluence-layout}}</code></h4>
-                                 <p class="text-xs text-gray-500">Section types: single, two_equal, two_left_sidebar, two_right_sidebar, three_equal</p>
-                                <pre class="bg-gray-100 border border-gray-300 text-gray-800 p-3 rounded-md overflow-x-auto"><code class="language-handlebars">{{#confluence-layout}}
-  {{#layout-section type="two_equal"}}
-    {{#layout-cell}}
-      &lt;p&gt;Content for Left Column&lt;/p&gt;
-    {{/layout-cell}}
-    {{#layout-cell}}
-      &lt;p&gt;Content for Right Column&lt;/p&gt;
-    {{/layout-cell}}
-  {{/layout-section}}
-{{/confluence-layout}}</code></pre>
-                                <div class="output-example mt-4 p-4 border border-dashed border-gray-300 rounded-md bg-gray-50">
-                                    <p><strong>Conceptual Output:</strong> A two-column layout section on the Confluence page.</p>
-                                    <div class="flex gap-4 mt-2">
-                                        <div class="flex-1 border border-gray-300 p-2 rounded bg-white">Content for Left Column</div>
-                                        <div class="flex-1 border border-gray-300 p-2 rounded bg-white">Content for Right Column</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-content pt-6 text-sm space-y-3">
-                                <h4 class="font-semibold text-gray-800"><code>{{#confluence-code language="..."}} ... {{/confluence-code}}</code></h4>
-                                <p class="text-xs text-gray-500">Params: language, title, linenumbers</p>
-                                <pre class="bg-gray-100 border border-gray-300 text-gray-800 p-3 rounded-md overflow-x-auto"><code class="language-handlebars">{{#confluence-code language="javascript" title="Example.js" linenumbers=true}}
-function greet(name) {
-  console.log("Hello, " + name + "!");
-}
-{{/confluence-code}}</code></pre>
-                                <div class="output-example mt-4 p-4 border border-dashed border-gray-300 rounded-md bg-gray-50">
-                                    <p><strong>Conceptual Output:</strong> A Confluence code block with JavaScript syntax highlighting, a title, and line numbers.</p>
-                                    <div class="code-block mt-2">
-                                        <strong class="text-gray-400 block mb-1">Example.js</strong>
-                                        <span class="text-gray-500 mr-2">1</span>function greet(name) {<br>
-                                        <span class="text-gray-500 mr-2">2</span>  console.log("Hello, " + name + "!");<br>
-                                        <span class="text-gray-500 mr-2">3</span>}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-content pt-6 text-sm space-y-3">
-                                <h4 class="font-semibold text-gray-800"><code>{{confluence-status type="..." text="..."}}</code></h4>
-                                <p class="text-xs text-gray-500">Params: type (green, yellow, red, blue, grey), text</p>
-                                <pre class="bg-gray-100 border border-gray-300 text-gray-800 p-3 rounded-md overflow-x-auto"><code class="language-handlebars">{{confluence-status type="green" text="Completed"}}
-{{confluence-status type="blue" text="In Progress"}}</code></pre>
-                                <div class="output-example mt-4 p-4 border border-dashed border-gray-300 rounded-md bg-gray-50">
-                                    <p><strong>Conceptual Output:</strong></p>
-                                    <p><span class="inline-block px-2 py-0.5 rounded bg-green-100 text-green-800 text-xs font-medium">Completed</span></p>
-                                    <p><span class="inline-block px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-xs font-medium">In Progress</span></p>
-                                </div>
-                            </div>
-
-                            <div class="tab-content pt-6 text-sm space-y-3">
-                                <h4 class="font-semibold text-gray-800"><code>{{confluence-image src="..."}}</code></h4>
-                                <p class="text-xs text-gray-500">Params: src (filename or URL), alt, title, width, height, align, border, thumbnail, class, style</p>
-                                <pre class="bg-gray-100 border border-gray-300 text-gray-800 p-3 rounded-md overflow-x-auto"><code class="language-handlebars">{{confluence-image src="logo.png" alt="Company Logo" width="150"}}
-{{confluence-image src="https://placehold.co/100x50/e2e8f0/94a3b8?text=External" title="External Placeholder"}}</code></pre>
-                                <div class="output-example mt-4 p-4 border border-dashed border-gray-300 rounded-md bg-gray-50">
-                                    <p><strong>Conceptual Output:</strong> An image embedded on the page. If <code>src</code> is a filename, it refers to an attached file. If it's a URL, it's an external image.</p>
-                                    <p class="mt-2">[Image: logo.png, 150px wide]</p>
-                                    <p class="mt-2"><img src="https://placehold.co/100x50/e2e8f0/94a3b8?text=External" alt="External Placeholder" title="External Placeholder" class="inline-block border border-gray-300 rounded"></p>
-                                </div>
-                            </div>
-
-                            <div class="tab-content pt-6 text-sm space-y-3">
-                                <h4 class="font-semibold text-gray-800"><code>{{#confluence-mermaid}} ... {{/confluence-mermaid}}</code></h4>
-                                <p>Renders MermaidJS diagrams. Requires Mermaid JS files in your project's distribution directory.</p>
-                                <pre class="bg-gray-100 border border-gray-300 text-gray-800 p-3 rounded-md overflow-x-auto"><code class="language-handlebars">{{#confluence-mermaid theme="neutral"}}
-graph TD
-    A[Start] --&gt; B(Process);
-    B --&gt; C{Decision};
-    C --&gt;|Yes| D[End];
-    C --&gt;|No| B;
-{{/confluence-mermaid}}</code></pre>
-                                <div class="output-example mt-4 p-4 border border-dashed border-gray-300 rounded-md bg-gray-50">
-                                    <p><strong>Conceptual Output:</strong> A rendered Mermaid diagram on the Confluence page. The tool handles including the Mermaid library (if configured) and the diagram definition within an HTML macro.</p>
-                                    <p class="mt-2">[Mermaid Diagram Rendered Here]</p>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mt-6 text-center text-sm text-gray-500">...and many more, including TOC, Links, Admonitions (Info, Note, Warning, Tip), Tabs, Expand, and more!</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="cli" class="py-12 sm:py-16 lg:py-20 border-b border-gray-200">
+        <section id="cli"class="py-12 sm:py-16 lg:py-20 border-b border-gray-200">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10 sm:mb-12">Command Line Power</h2>
                  <div class="max-w-3xl mx-auto text-gray-700 space-y-8">
@@ -635,9 +493,74 @@ publish-confluence generate-prompt --file ./my-project-idea.md</code></pre>
 
     <footer class="bg-gray-100 border-t border-gray-200 py-8">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
-            <p>&copy; 2025 Thomas Klok Rohde. All rights reserved.</p> <p class="mt-2">This presentation is a conceptual overview. For detailed documentation, please refer to the <a href="https://github.com/thomasrohde/publish-confluence" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">official GitHub repository</a>.</p>
-        </div>
-    </footer>
+            <p>&copy; 2025 Thomas Klok Rohde. All rights reserved.</p> <p class="mt-2">This presentation is a conceptual overview. For detailed documentation, please refer to the <a href="https://github.com/thomasrohde/publish-confluence" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">official GitHub repository</a>.</p>        </div>
+    </footer>    <script>
+        // Mobile menu functionality
+        const menuButton = document.getElementById('menuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const navbar = document.getElementById('navbar');
+        let isMenuOpen = false;
+        let lastScrollY = window.scrollY;        function openMenu() {
+            isMenuOpen = true;
+            mobileMenu.classList.remove('opacity-0', 'scale-95', 'h-0');
+            mobileMenu.classList.add('opacity-100', 'scale-100');
+            requestAnimationFrame(() => {
+                mobileMenu.style.height = 'auto';
+            });
+        }
 
+        function closeMenu() {
+            if (!isMenuOpen) return;
+            isMenuOpen = false;
+            mobileMenu.classList.remove('opacity-100', 'scale-100');
+            mobileMenu.classList.add('opacity-0', 'scale-95');
+            const height = mobileMenu.offsetHeight;
+            mobileMenu.style.height = height + 'px';
+            requestAnimationFrame(() => {
+                mobileMenu.style.height = '0';
+            });
+        }        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Allow menu to open regardless of scroll position
+            if (isMenuOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+
+        // Close menu when clicking on a link or outside the menu
+        document.addEventListener('click', (e) => {
+            if (!menuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
+                closeMenu();
+            }
+        });
+
+        // Close menu when clicking on a link
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                closeMenu();
+            });
+        });        // Throttled scroll handler for mobile menu
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            if (scrollTimeout) {
+                window.cancelAnimationFrame(scrollTimeout);
+            }
+
+            scrollTimeout = window.requestAnimationFrame(() => {
+                // We no longer auto-close the menu on scroll
+                // Just update the lastScrollY value
+                lastScrollY = window.scrollY;
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) { // md breakpoint in Tailwind
+                closeMenu();
+            }
+        });
+    </script>
 </body>
 </html>
