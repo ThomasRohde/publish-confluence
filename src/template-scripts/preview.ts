@@ -158,6 +158,14 @@ function setupTabs(): void {
     const menuItems = group.querySelectorAll('.tabs-menu .tab-menu-item');
     const tabContents = group.querySelectorAll('.tab-content');
 
+    // Initialize first tab as active if none is active
+    if (menuItems.length > 0 && !Array.from(menuItems).some(item => item.classList.contains('active'))) {
+      menuItems[0].classList.add('active');
+      if (tabContents.length > 0) {
+        tabContents[0].classList.add('active');
+      }
+    }
+
     menuItems.forEach(menuItem => {
       menuItem.addEventListener('click', (event) => {
         event.preventDefault();

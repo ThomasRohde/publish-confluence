@@ -558,23 +558,93 @@ export class ConfluenceConverter {
    * @returns The HTML tabs group
    */
   private static processTabsGroupMacro(element: Element, attachmentBaseUrl: string): string {
-    // Extract content only
+    // Extract parameters and content
+    let disposition = 'horizontal';
+    let outline = false;
+    let color = '';
     let content = '';
     
-    // Process child nodes to find content
+    // Process child nodes to find parameters and content
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
       
       const nodeName = child.nodeName.toLowerCase();
       
-      if (nodeName === 'ac:rich-text-body') {
+      if (nodeName === 'ac:parameter') {
+        const paramName = child.getAttribute('ac:name');
+        if (paramName === 'disposition') {
+          disposition = (child.textContent || 'horizontal').trim().toLowerCase();
+        } else if (paramName === 'outline') {
+          const outlineText = (child.textContent || 'false').trim().toLowerCase();
+          outline = outlineText === 'true';
+        } else if (paramName === 'color') {
+          color = (child.textContent || '').trim();
+        }
+      }
+      else if (nodeName === 'ac:rich-text-body') {
         content = this.processChildren(child, attachmentBaseUrl);
       }
     }
 
-    // Minimal implementation - just a div with the content
-    return `<div class="tab-group-container">${content}</div>`;
+    // Generate a unique ID for this tab group
+    const tabGroupId = `tabs-${Math.random().toString(36).substring(2, 9)}`;
+    
+    // Build HTML representation that matches the expected structure in preview.ts
+    return `<div id="${tabGroupId}" class="confluence-tabs confluence-tabs-${disposition} ${outline ? 'with-outline' : ''}" ${color ? `style="--primary-color:${color}"` : ''}>
+      <div class="tabs-menu"></div>
+      <div class="tabs-content">${content}</div>
+    </div>
+    <script>
+      // Post-processing to organize tabs correctly
+      (function() {
+        const tabGroup = document.getElementById('${tabGroupId}');
+        if (!tabGroup) return;
+        
+        const tabsMenu = tabGroup.querySelector('.tabs-menu');
+        const tabsContent = tabGroup.querySelector('.tabs-content');
+        
+        if (!tabsMenu || !tabsContent) return;
+        
+        // Find all tab panes and move them properly
+        const tabPanes = Array.from(tabsContent.querySelectorAll('.tab-pane'));
+        
+        // Clear the current content (we'll rebuild it)
+        tabsContent.innerHTML = '';
+        
+        // Process each tab pane
+        tabPanes.forEach((pane, index) => {
+          const title = pane.querySelector('h3');
+          const content = pane.querySelector('.tab-content');
+          
+          if (title && content) {
+            // Create tab ID
+            const tabId = \`${tabGroupId}-tab-\${index}\`;
+            
+            // Create tab menu item
+            const menuItem = document.createElement('div');
+            menuItem.className = 'tab-menu-item';
+            menuItem.setAttribute('data-tab-id', tabId);
+            menuItem.textContent = title.textContent || \`Tab \${index+1}\`;
+            
+            // Set the first tab as active
+            if (index === 0) {
+              menuItem.className += ' active';
+            }
+            
+            // Set ID on content
+            content.setAttribute('data-tab-id', tabId);
+            if (index === 0) {
+              content.className += ' active';
+            }
+            
+            // Add to DOM
+            tabsMenu.appendChild(menuItem);
+            tabsContent.appendChild(content);
+          }
+        });
+      })();
+    </script>`;
   }  /**
    * Process Confluence tab-pane macro
    * @param element The tab-pane macro element
@@ -604,10 +674,12 @@ export class ConfluenceConverter {
       }
     }
 
-    // Super minimal implementation - just a header and content
+    // Create structured output that matches expected format in preview.ts
     return `<div class="tab-pane">
       <h3>${name}</h3>
-      ${content}
+      <div class="tab-content">
+        ${content}
+      </div>
     </div>`;
   }
 
