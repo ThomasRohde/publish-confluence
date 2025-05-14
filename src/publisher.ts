@@ -7,6 +7,9 @@ import { loadConfiguration } from './config';
 import { createLogger, shutdownLogger } from './logger';
 import { ConfluenceApiCredentials, PublishConfig, PublishOptions } from './types';
 import { generateUuid } from './utils';
+import { preprocessContent } from './preprocessor/index';
+// Register the preprocessors
+import './preprocessor/markdown-preprocessor';
 
 // Initialize logger
 const log = createLogger();
@@ -43,14 +46,22 @@ function escapeForConfluence(content: string): string {
  * 
  * @param templatePath - Path to the template file
  * @param defaultTemplate - Default template content to use if file is not found
+ * @param format - Optional format to preprocess template content (e.g., 'markdown')
  * @returns The loaded template content or default template
  * @throws Error if there's an issue reading the file for reasons other than the file not existing
  */
-async function loadTemplate(templatePath: string, defaultTemplate: string): Promise<string> {
+async function loadTemplate(templatePath: string, defaultTemplate: string, format?: string): Promise<string> {
   try {
     const resolvedPath = path.resolve(process.cwd(), templatePath);
     const content = await fs.readFile(resolvedPath, 'utf8');
     log.verbose(`Loaded template from ${templatePath}`);
+    
+    // If format is specified, preprocess the content
+    if (format) {
+      log.verbose(`Preprocessing template with format: ${format}`);
+      return preprocessContent(format, content);
+    }
+    
     return content;
   } catch (error) {
     log.verbose(`Template file ${templatePath} not found, using default template`);
@@ -171,11 +182,11 @@ export async function processMacroTemplates(
     log.verbose('No macro template path provided, skipping macro generation');
     return ''; // Return empty string if no macro template path
   }
-
   // Load the macro template
   const macroTemplate = await loadTemplate(
     config.macroTemplatePath, 
-    DEFAULT_MACRO_TEMPLATE
+    DEFAULT_MACRO_TEMPLATE,
+    config.format
   );
   
   // Update context with script and style tags if we have a page ID
@@ -398,15 +409,14 @@ async function publishPageRecursive(
     styles?: string;
     comment?: boolean;
   }
-  
-  // Initial context setup for templates with proper typing
+    // Initial context setup for templates with proper typing
   const context: TemplateContext = { 
     pageTitle: cfg.pageTitle, 
     currentDate: new Date().toISOString().split('T')[0]
   };
   
   // Load page template
-  const pageTpl = await loadTemplate(cfg.templatePath, DEFAULT_PAGE_TEMPLATE);
+  const pageTpl = await loadTemplate(cfg.templatePath, DEFAULT_PAGE_TEMPLATE, cfg.format);
   const compile = Handlebars.compile(pageTpl);
   
   // First, search for existing page to determine if this is create or update

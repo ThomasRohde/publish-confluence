@@ -1,6 +1,11 @@
 // src/types.ts
 
 /**
+ * Supported file formats for templates
+ */
+export type FileFormat = 'html' | 'markdown';
+
+/**
  * Authentication credentials for the Confluence API
  */
 export interface ConfluenceApiCredentials {
@@ -46,6 +51,8 @@ export interface PublishConfig {
   excludedFiles: string[];
   /** Directory containing build output files (defaults to './dist') */
   distDir: string;
+  /** Format of the template files, either 'html' or 'markdown' (defaults to 'html') */
+  format?: FileFormat;
   /** Nested child pages to publish under this page */
   childPages?: PublishConfig[];
 }

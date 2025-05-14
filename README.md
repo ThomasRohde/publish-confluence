@@ -765,3 +765,63 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 MIT
+
+## Writing Pages in Markdown
+
+In addition to HTML templates, publish-confluence supports Markdown templates. You can write your page content in Markdown and have it automatically converted to Confluence-compatible HTML/XHTML during the publishing process.
+
+To use Markdown templates, add a `format` property to your configuration:
+
+```json
+{
+  "spaceKey": "DEV",
+  "pageTitle": "My Documentation",
+  "templatePath": "./README.md",
+  "format": "markdown",
+  "macroTemplatePath": null,
+  "includedFiles": [],
+  "excludedFiles": []
+}
+```
+
+With the `format` set to `"markdown"`, the content of your template file will be preprocessed from Markdown to Confluence-compatible XHTML before being published.
+
+### Markdown to Confluence Macro Mapping
+
+The Markdown processor automatically converts certain Markdown constructs to their equivalent Confluence macros:
+
+| Markdown Syntax | Confluence Output |
+|------------------|-------------------|
+| `# Heading` | `<h1>Heading</h1>` |
+| `## Heading` | `<h2>Heading</h2>` |
+| Code blocks with triple backticks | Confluence code macro with language selection |
+| Blockquotes with `>` | Confluence info macro |
+| Images with `![alt](url)` | Confluence image macro |
+
+This allows you to write documentation in familiar Markdown syntax while still benefiting from Confluence's rich display capabilities.
+
+### Inheritance for Child Pages
+
+The `format` property can be inherited by child pages. If a child page does not specify its own format, it will inherit the format from its parent page. For example:
+
+```json
+{
+  "spaceKey": "DEV",
+  "pageTitle": "Documentation",
+  "templatePath": "./docs/index.md", 
+  "format": "markdown",
+  "childPages": [
+    {
+      "pageTitle": "Getting Started",
+      "templatePath": "./docs/getting-started.md"
+      // No format specified, inherits "markdown" from parent
+    },
+    {
+      "pageTitle": "API Reference",
+      "templatePath": "./docs/api.html",
+      "format": "html"
+      // Explicitly overrides the parent's format
+    }
+  ]
+}
+```

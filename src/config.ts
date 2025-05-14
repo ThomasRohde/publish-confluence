@@ -17,6 +17,7 @@ const pageConfigSchema: ZodTypeAny = z.lazy(() => z.object({
   includedFiles: z.array(z.string()).default([]),
   excludedFiles: z.array(z.string()).default([]),
   distDir: z.string().default('./dist'),
+  format: z.enum(['html', 'markdown']).optional().default('html'),
   childPages: z.array(pageConfigSchema).optional()
 }));
 
@@ -32,7 +33,8 @@ export const DEFAULT_CONFIG: Partial<PublishConfig> = {
   macroTemplatePath: null, // Changed from './macro-template.html' to null
   includedFiles: [],
   excludedFiles: [],
-  distDir: './dist'
+  distDir: './dist',
+  format: 'html'
 };
 
 /**
@@ -107,8 +109,7 @@ function processConfigInheritance(config: Partial<PublishConfig>, parentConfig?:
 
   // For child configs, inherit properties from parent if they're missing
   const inheritedConfig = { ...config };
-  
-  // Properties that should be inherited if not specified in child
+    // Properties that should be inherited if not specified in child
   if (!inheritedConfig.spaceKey && parentConfig.spaceKey) {
     inheritedConfig.spaceKey = parentConfig.spaceKey;
     log.verbose(`Child page "${inheritedConfig.pageTitle}" inherited spaceKey "${parentConfig.spaceKey}" from parent`);
@@ -121,6 +122,12 @@ function processConfigInheritance(config: Partial<PublishConfig>, parentConfig?:
   
   if (!('macroTemplatePath' in inheritedConfig) && 'macroTemplatePath' in parentConfig) {
     inheritedConfig.macroTemplatePath = parentConfig.macroTemplatePath;
+  }
+
+  // Inherit format if not specified in child
+  if (!inheritedConfig.format && parentConfig.format) {
+    inheritedConfig.format = parentConfig.format;
+    log.verbose(`Child page "${inheritedConfig.pageTitle}" inherited format "${parentConfig.format}" from parent`);
   }
 
   // Process nested child pages recursively
