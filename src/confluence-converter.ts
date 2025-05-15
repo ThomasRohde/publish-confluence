@@ -452,7 +452,7 @@ export class ConfluenceConverter {
 
         if (anchorName) {
           // Create an anchor element with id attribute (not href)
-          return `<a id="${anchorName}" class="confluence-anchor" data-anchor-name="${anchorName}"></a>`;
+          return `<a id="${anchorName}" data-anchor-name="${anchorName}"></a>`;
         }
         return ''; // If no anchor name found, render nothing
 
