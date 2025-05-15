@@ -31,9 +31,6 @@ export function initPreview(): void {
   // Setup interactive tabs
   setupTabs();
   
-  // Setup developer mode toggle
-  setupDevMode();
-
   // Mark as initialized
   window.previewLoaded = true;
 }
@@ -189,43 +186,7 @@ function setupTabs(): void {
   });
 }
 
-/**
- * Setup developer mode toggle for visualizing anchors and other debug elements
- */
-function setupDevMode(): void {
-  // Check for saved preference
-  const devModeEnabled = localStorage.getItem('confluence-preview-dev-mode') === 'true';
-  
-  // Create the toggle button
-  const devModeToggle = document.createElement('div');
-  devModeToggle.className = 'dev-mode-toggle';
-  devModeToggle.innerHTML = `
-    <label class="switch">
-      <input type="checkbox" id="dev-mode-checkbox" ${devModeEnabled ? 'checked' : ''}>
-      <span class="slider round"></span>
-    </label>
-    <span class="toggle-label">Developer Mode</span>
-  `;
-  
-  // Add it to the header
-  const header = document.querySelector('header');
-  if (header) {
-    header.appendChild(devModeToggle);
-  }
-  
-  // Apply initial state
-  document.body.classList.toggle('dev-mode', devModeEnabled);
-  
-  // Add event listener
-  const checkbox = document.getElementById('dev-mode-checkbox');
-  if (checkbox) {
-    checkbox.addEventListener('change', function(e) {
-      const isChecked = (e.target as HTMLInputElement).checked;
-      document.body.classList.toggle('dev-mode', isChecked);
-      localStorage.setItem('confluence-preview-dev-mode', isChecked.toString());
-    });
-  }
-}
+
 
 /**
  * Helper function to find an object in an array by property
@@ -242,6 +203,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // Export everything for global access if needed
 export {
   applyBasicHighlighting, highlightActivePage, highlightCodeBlocks,
-  setupDevMode, setupExpandMacros, setupMobileMenu, setupTabs
+  setupExpandMacros, setupMobileMenu, setupTabs
 };
 
