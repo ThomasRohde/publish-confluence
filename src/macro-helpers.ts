@@ -754,6 +754,34 @@ export function registerMacroHelpers(handlebars: typeof Handlebars, options?: an
   });
 
   /**
+   * Anchor macro - Creates an anchor point that can be linked to
+   * 
+   * Usage:
+   * ```handlebars
+   * {{confluence-anchor name="section-heading"}}
+   * <h2>Section Heading</h2>
+   * ```
+   * 
+   * @param name - The name/ID of the anchor for linking purposes
+   */
+  handlebars.registerHelper('confluence-anchor', function(this: any, options: Handlebars.HelperOptions) {
+    const macroId = generateUuid();
+    const name = options.hash.name;
+    
+    // Ensure name parameter is provided
+    if (!name) {
+      console.warn('Warning: confluence-anchor helper called without required "name" parameter');
+      return '';
+    }
+    
+    return new handlebars.SafeString(
+      `<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:macro-id="${macroId}">
+        <ac:parameter ac:name="">${name}</ac:parameter>
+      </ac:structured-macro>`
+    );
+  });
+
+  /**
    * Date macro - Displays a formatted date using the Confluence Date macro
    * 
    * Usage:

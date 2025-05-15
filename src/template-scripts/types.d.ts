@@ -7,4 +7,5 @@
  */
 interface Window {
   previewLoaded?: boolean;
+  devModeEnabled?: boolean;
 }

@@ -10,7 +10,7 @@ const log = createLogger();
 export class ConfluenceConverter {
   private static readonly DOM_PARSER = new DOMParser({
     errorHandler: {
-      warning: () => {}, // Suppress warnings
+      warning: () => { }, // Suppress warnings
       error: (msg) => log.debug(`XML Parse Error: ${msg}`),
       fatalError: (msg) => log.error(`Fatal XML Parse Error: ${msg}`)
     }
@@ -40,12 +40,12 @@ export class ConfluenceConverter {
         : sanitizedContent;
 
       const doc = this.DOM_PARSER.parseFromString(xmlContent, 'text/xml');
-      
+
       // Process Confluence-specific elements
       return this.processNode(doc.documentElement, attachmentBaseUrl);
     } catch (error) {
       log.error(`Error converting Confluence storage format: ${(error as Error).message}`);
-      return `<div class="error">Error converting content: ${(error as Error).message}</div>` + 
+      return `<div class="error">Error converting content: ${(error as Error).message}</div>` +
         `<pre>${content}</pre>`;
     }
   }
@@ -66,7 +66,7 @@ export class ConfluenceConverter {
 
     const element = node as Element;
     const nodeName = element.nodeName.toLowerCase();
-    
+
     // Handle Confluence-specific elements
     if (nodeName.startsWith('ac:')) {
       return this.processConfluenceElement(element, attachmentBaseUrl);
@@ -98,7 +98,7 @@ export class ConfluenceConverter {
         }
       }
       result += '>';
-      
+
       // Escape the content inside code elements
       for (let i = 0; i < element.childNodes.length; i++) {
         if (element.childNodes[i].nodeType === 3) { // Text node
@@ -107,13 +107,13 @@ export class ConfluenceConverter {
           result += this.processNode(element.childNodes[i], attachmentBaseUrl);
         }
       }
-      
+
       return `${result}</code>`;
     }
 
     // For standard HTML elements, recreate them with their attributes
     let result = `<${nodeName}`;
-    
+
     // Copy attributes
     if (element.attributes) {
       for (let i = 0; i < element.attributes.length; i++) {
@@ -145,12 +145,12 @@ export class ConfluenceConverter {
    */
   private static processConfluenceElement(element: Element, attachmentBaseUrl: string): string {
     const nodeName = element.nodeName.toLowerCase();
-    
+
     // Handle specific Confluence elements
     switch (nodeName) {
       case 'ac:image':
         return this.processConfluenceImage(element, attachmentBaseUrl);
-      
+
       case 'ac:link':
         return this.processConfluenceLink(element, attachmentBaseUrl);
 
@@ -203,7 +203,7 @@ export class ConfluenceConverter {
   private static processConfluenceImage(element: Element, attachmentBaseUrl: string): string {
     let imgSrc = '#';
     let altText = 'Image';
-    
+
     // Extract attributes
     const attributes: Record<string, string> = {};
     for (let i = 0; i < element.attributes.length; i++) {
@@ -216,13 +216,13 @@ export class ConfluenceConverter {
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ri:url') {
         const value = child.getAttribute('ri:value');
         if (value) imgSrc = value;
-      } 
+      }
       else if (nodeName === 'ri:attachment') {
         const filename = child.getAttribute('ri:filename');
         if (filename) {
@@ -233,13 +233,13 @@ export class ConfluenceConverter {
 
     // Build the img tag with attributes
     let imgHtml = `<img src="${imgSrc}" alt="${attributes.alt || altText}"`;
-    
+
     if (attributes.height) imgHtml += ` height="${attributes.height}"`;
     if (attributes.width) imgHtml += ` width="${attributes.width}"`;
     if (attributes.title) imgHtml += ` title="${attributes.title}"`;
     if (attributes.class) imgHtml += ` class="${attributes.class}"`;
     if (attributes.style) imgHtml += ` style="${attributes.style}"`;
-    
+
     return imgHtml + ' />';
   }
   /**
@@ -247,31 +247,30 @@ export class ConfluenceConverter {
    * @param element The ac:link element
    * @param attachmentBaseUrl Base URL for attachment references
    * @returns The HTML anchor tag
-   */
-  private static processConfluenceLink(element: Element, attachmentBaseUrl: string): string {
+   */  private static processConfluenceLink(element: Element, attachmentBaseUrl: string): string {
     let href = '#';
     let linkText = '';
+    // Get anchor from the direct attribute (for <ac:link ac:anchor="xxx">)
     let anchorName = element.getAttribute('ac:anchor') || '';
 
     // Process child nodes to extract link details
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-        if (nodeName === 'ri:page') {
+      if (nodeName === 'ri:page') {
         const pageTitle = child.getAttribute('ri:content-title') || '';
         const spaceKey = child.getAttribute('ri:space-key') || '';
-        
         // Store the original page title for use as link text if no explicit text is provided
         if (!linkText) {
           linkText = pageTitle;
         }
-        
+
         // In dry run, we need to link directly to the HTML files
         // Use a more URL-safe filename by replacing problematic characters
         const safeFilename = pageTitle.replace(/[^a-zA-Z0-9-_.]/g, '_');
-        
+
         // For dry run previews, create a relative path to the page file
         if (spaceKey) {
           // Link to another space
@@ -285,7 +284,7 @@ export class ConfluenceConverter {
         if (filename) {
           href = `${attachmentBaseUrl}/${filename}`;
         }
-      }      else if (nodeName === 'ac:plain-text-link-body' || nodeName === 'ac:link-body') {
+      } else if (nodeName === 'ac:plain-text-link-body' || nodeName === 'ac:link-body') {
         // Process the link body to get the displayed text
         const processedLinkText = this.processNode(child, attachmentBaseUrl);
         // Only use this if it's non-empty (could be an empty self-closing tag)
@@ -298,7 +297,7 @@ export class ConfluenceConverter {
       // For page links, the link text should preferably be the original page title
       const pageNode = Array.from(element.childNodes)
         .find(child => (child as Element).nodeName?.toLowerCase() === 'ri:page') as Element;
-      
+
       if (pageNode) {
         // Use the original page title from ri:content-title
         const pageTitle = pageNode.getAttribute('ri:content-title') || '';
@@ -306,7 +305,7 @@ export class ConfluenceConverter {
           linkText = pageTitle;
         }
       }
-      
+
       // If we still don't have link text, try to extract it from the href
       if (!linkText) {
         const match = href.match(/\/([^\/]+)\.html$/);
@@ -320,12 +319,26 @@ export class ConfluenceConverter {
           linkText = href;
         }
       }
+    }    // Add anchor if specified - this is for links to anchors (ac:link with ac:anchor attribute)
+    if (anchorName) {
+      // When ac:anchor is the only attribute, it's a link to an anchor on the same page
+      if (href === '#') {
+        href = `#${anchorName}`;
+      }
+      // When href is already set (e.g., for page links), add the anchor
+      else if (!href.includes('#')) {
+        href = `${href}#${anchorName}`;
+      }
+      // If href already has a # (which should not happen in properly formatted Confluence XML),
+      // replace the existing href to avoid double hashes
+      else {
+        // Split by # and take the first part (before any hash), then add a single hash
+        href = `${href.split('#')[0]}#${anchorName}`;
+      }
     }
 
-    // Add anchor if specified
-    if (anchorName) {
-      href += `#${anchorName}`;
-    }
+    // Final safety check - ensure there are no double hashes
+    href = href.replace('##', '#');
 
     return `<a href="${href}">${linkText}</a>`;
   }
@@ -341,52 +354,52 @@ export class ConfluenceConverter {
     switch (macroName) {
       case 'code':
         return this.processCodeMacro(element, attachmentBaseUrl);
-      
+
       case 'html':
         return this.processHtmlMacro(element);
-      
+
       case 'panel':
         return this.processPanelMacro(element, attachmentBaseUrl);
-      
+
       case 'tabs-group':
         return this.processTabsGroupMacro(element, attachmentBaseUrl);
-        
+
       case 'tab-pane':
         return this.processTabPaneMacro(element, attachmentBaseUrl);
-      
+
       case 'note':
       case 'info':
       case 'warning':
       case 'tip':
         return this.processAdmonitionMacro(element, macroName, attachmentBaseUrl);
-        
+
       case 'column':
         return `<div class="confluence-column">${this.processChildren(element, attachmentBaseUrl)}</div>`;
-        
+
       case 'section':
         return `<div class="confluence-section">${this.processChildren(element, attachmentBaseUrl)}</div>`;
-        
+
       case 'table-of-contents':
         return `<div class="confluence-toc"><div class="toc-header">Table of Contents</div><div class="toc-placeholder">[Table of Contents would appear here]</div></div>`;
-        
+
       case 'expand':
         let title = 'Click to expand...';
         let expandContent = '';
-        
+
         // Extract title and content
         for (let i = 0; i < element.childNodes.length; i++) {
           const child = element.childNodes[i] as Element;
           if (!child.nodeName) continue;
-          
+
           const nodeName = child.nodeName.toLowerCase();
-          
+
           if (nodeName === 'ac:parameter' && child.getAttribute('ac:name') === 'title') {
             title = child.textContent || title;
           } else if (nodeName === 'ac:rich-text-body') {
             expandContent = this.processChildren(child, attachmentBaseUrl);
           }
         }
-        
+
         return `
           <div class="confluence-expand-macro">
             <div class="expand-header" onclick="this.parentElement.classList.toggle('expanded')">
@@ -396,19 +409,19 @@ export class ConfluenceConverter {
             <div class="expand-content">${expandContent}</div>
           </div>
         `;
-      
+
       case 'status':
         let color = 'grey';
         let text = 'Status';
-        
+
         // Extract parameters
         for (let i = 0; i < element.childNodes.length; i++) {
           const child = element.childNodes[i] as Element;
           if (!child.nodeName) continue;
-          
+
           if (child.nodeName.toLowerCase() === 'ac:parameter') {
             const paramName = child.getAttribute('ac:name');
-            
+
             if (paramName === 'colour' || paramName === 'color') {
               color = (child.textContent || '').toLowerCase();
             } else if (paramName === 'title') {
@@ -416,12 +429,33 @@ export class ConfluenceConverter {
             }
           }
         }
-        
+
         return `<span class="confluence-status confluence-status-${color}">${text}</span>`;
-        
+
       case 'chart':
         return `<div class="confluence-chart-placeholder">[Chart: ${element.getAttribute('ac:name')}]</div>`;
-                
+      case 'anchor':
+        // Process anchor macro for dry-run preview
+        let anchorName = '';
+
+        // Extract the anchor name from the parameter with empty name
+        for (let i = 0; i < element.childNodes.length; i++) {
+          const child = element.childNodes[i] as Element;
+          if (!child.nodeName) continue;
+
+          if (child.nodeName.toLowerCase() === 'ac:parameter' &&
+            (child.getAttribute('ac:name') === '' || child.getAttribute('ac:name') === null)) {
+            anchorName = child.textContent || '';
+            break;
+          }
+        }
+
+        if (anchorName) {
+          // Create an anchor element with id attribute (not href)
+          return `<a id="${anchorName}" class="confluence-anchor" data-anchor-name="${anchorName}"></a>`;
+        }
+        return ''; // If no anchor name found, render nothing
+
       default:
         // For unhandled macros, display a placeholder with the macro name
         return `<div class="confluence-macro confluence-macro-${macroName}">
@@ -441,14 +475,14 @@ export class ConfluenceConverter {
     let language = 'text';
     let title = '';
     let code = '';
-    
+
     // Process child nodes to find parameters and content
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ac:parameter') {
         const paramName = child.getAttribute('ac:name');
         if (paramName === 'language') {
@@ -476,7 +510,7 @@ export class ConfluenceConverter {
     // Double escape the code content to ensure HTML in code blocks displays correctly
     result += `<pre class="language-${language}"><code>${this.escapeHtml(code)}</code></pre>`;
     result += '</div>';
-    
+
     return result;
   }
 
@@ -487,14 +521,14 @@ export class ConfluenceConverter {
    */
   private static processHtmlMacro(element: Element): string {
     let html = '';
-    
+
     // Process child nodes to find the HTML content
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ac:plain-text-body') {
         // Extract CDATA content
         const cdataNodes = Array.from(child.childNodes).filter(node => node.nodeType === 4);
@@ -521,14 +555,14 @@ export class ConfluenceConverter {
     let title = '';
     let content = '';
     let panelType = '';
-    
+
     // Process child nodes to find parameters and content
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ac:parameter') {
         const paramName = child.getAttribute('ac:name');
         if (paramName === 'title') {
@@ -549,7 +583,7 @@ export class ConfluenceConverter {
     }
     result += `<div class="panel-body">${content}</div>`;
     result += '</div>';
-    
+
     return result;
   }  /**
    * Process Confluence tabs-group macro
@@ -563,14 +597,14 @@ export class ConfluenceConverter {
     let outline = false;
     let color = '';
     let content = '';
-    
+
     // Process child nodes to find parameters and content
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ac:parameter') {
         const paramName = child.getAttribute('ac:name');
         if (paramName === 'disposition') {
@@ -589,7 +623,7 @@ export class ConfluenceConverter {
 
     // Generate a unique ID for this tab group
     const tabGroupId = `tabs-${Math.random().toString(36).substring(2, 9)}`;
-    
+
     // Build HTML representation that matches the expected structure in preview.ts
     return `<div id="${tabGroupId}" class="confluence-tabs confluence-tabs-${disposition} ${outline ? 'with-outline' : ''}" ${color ? `style="--primary-color:${color}"` : ''}>
       <div class="tabs-menu"></div>
@@ -655,14 +689,14 @@ export class ConfluenceConverter {
     // Extract parameters and content
     let name = 'Tab';
     let content = '';
-    
+
     // Process child nodes to find parameters and content
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ac:parameter') {
         const paramName = child.getAttribute('ac:name');
         if (paramName === 'name') {
@@ -694,14 +728,14 @@ export class ConfluenceConverter {
     // Extract parameters
     let title = '';
     let content = '';
-    
+
     // Process child nodes to find parameters and content
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ac:parameter') {
         const paramName = child.getAttribute('ac:name');
         if (paramName === 'title') {
@@ -738,25 +772,25 @@ export class ConfluenceConverter {
    */
   private static processConfluenceTaskList(element: Element, attachmentBaseUrl: string): string {
     let result = '<div class="task-list">';
-    
+
     // Process each task
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ac:task') {
         let status = 'incomplete';
         let body = '';
-        
+
         // Extract task status and body
         for (let j = 0; j < child.childNodes.length; j++) {
           const taskChild = child.childNodes[j] as Element;
           if (!taskChild.nodeName) continue;
-          
+
           const taskNodeName = taskChild.nodeName.toLowerCase();
-          
+
           if (taskNodeName === 'ac:task-status') {
             status = (taskChild.textContent || '').trim();
           }
@@ -772,7 +806,7 @@ export class ConfluenceConverter {
         </div>`;
       }
     }
-    
+
     result += '</div>';
     return result;
   }
@@ -784,7 +818,7 @@ export class ConfluenceConverter {
    */
   private static processConfluenceEmoticon(element: Element): string {
     const name = element.getAttribute('ac:name') || '';
-    
+
     // Map emoticon names to emoji
     const emojiMap: Record<string, string> = {
       'smile': '😊',
@@ -799,7 +833,7 @@ export class ConfluenceConverter {
       'cross': '❌',
       'warning': '⚠️'
     };
-    
+
     const emoji = emojiMap[name] || `(${name})`;
     return `<span class="emoticon emoticon-${name}">${emoji}</span>`;
   }
@@ -812,36 +846,36 @@ export class ConfluenceConverter {
    */
   private static processConfluenceLayout(element: Element, attachmentBaseUrl: string): string {
     let result = '<div class="confluence-layout">';
-    
+
     // Process each section
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'ac:layout-section') {
         const sectionType = child.getAttribute('ac:type') || 'single';
         result += `<div class="layout-section layout-section-${sectionType}">`;
-        
+
         // Process each cell in the section
         for (let j = 0; j < child.childNodes.length; j++) {
           const cellChild = child.childNodes[j] as Element;
           if (!cellChild.nodeName) continue;
-          
+
           const cellNodeName = cellChild.nodeName.toLowerCase();
-          
+
           if (cellNodeName === 'ac:layout-cell') {
             result += `<div class="layout-cell">`;
             result += this.processChildren(cellChild, attachmentBaseUrl);
             result += `</div>`;
           }
         }
-        
+
         result += '</div>';
       }
     }
-    
+
     result += '</div>';
     return result;
   }
@@ -852,21 +886,21 @@ export class ConfluenceConverter {
    * @returns The HTML representation or an object with href and title (for page links)
    */  private static processResourceIdentifier(element: Element, attachmentBaseUrl: string): string | { href: string, title: string } {
     const nodeName = element.nodeName.toLowerCase();
-    
+
     switch (nodeName) {
       case 'ri:url':
         return element.getAttribute('ri:value') || '#';
       case 'ri:attachment':
         const filename = element.getAttribute('ri:filename');
         return filename ? `${attachmentBaseUrl}/${filename}` : '#';
-        case 'ri:page':
+      case 'ri:page':
         const pageTitle = element.getAttribute('ri:content-title') || '';
         const spaceKey = element.getAttribute('ri:space-key') || '';
-        
+
         // In dry run, we need to link directly to the HTML files
         // Use a more URL-safe filename by replacing problematic characters
         const safeFilename = pageTitle.replace(/[^a-zA-Z0-9-_.]/g, '_');
-        
+
         // For dry run previews, create a relative path to the page file
         let href;
         if (spaceKey) {
@@ -876,13 +910,13 @@ export class ConfluenceConverter {
           // Link within the same space, use the current directory
           href = `./${safeFilename}.html`;
         }
-        
+
         // Return both the URL and the original page title
         return {
           href,
           title: pageTitle
         };
-      
+
       default:
         // For unhandled resource identifiers, return empty string
         return '';
@@ -899,23 +933,23 @@ export class ConfluenceConverter {
     // Create a more Confluence-like table
     let result = '<div class="confluence-table-wrapper">';
     result += '<table class="confluenceTable">';
-    
+
     // Process thead and tbody
     let inHeader = false;
-    
+
     for (let i = 0; i < element.childNodes.length; i++) {
       const child = element.childNodes[i] as Element;
       if (!child.nodeName) continue;
-      
+
       const nodeName = child.nodeName.toLowerCase();
-      
+
       if (nodeName === 'thead') {
         inHeader = true;
         result += '<thead>';
         result += this.processChildren(child, attachmentBaseUrl);
         result += '</thead>';
         inHeader = false;
-      } 
+      }
       else if (nodeName === 'tbody') {
         result += '<tbody>';
         result += this.processChildren(child, attachmentBaseUrl);
@@ -923,33 +957,33 @@ export class ConfluenceConverter {
       }
       else if (nodeName === 'tr') {
         result += '<tr>';
-        
+
         // Process each cell
         for (let j = 0; j < child.childNodes.length; j++) {
           const cell = child.childNodes[j] as Element;
           if (!cell.nodeName) continue;
-          
+
           const cellName = cell.nodeName.toLowerCase();
-          
+
           if (cellName === 'th' || (inHeader && cellName === 'td')) {
             result += '<th class="confluenceTh">';
             result += this.processChildren(cell, attachmentBaseUrl);
             result += '</th>';
-          } 
+          }
           else if (cellName === 'td') {
             result += '<td class="confluenceTd">';
             result += this.processChildren(cell, attachmentBaseUrl);
             result += '</td>';
           }
         }
-        
+
         result += '</tr>';
       }
     }
-    
+
     result += '</table>';
     result += '</div>';
-    
+
     return result;
   }
   /**
@@ -966,7 +1000,7 @@ export class ConfluenceConverter {
       .replace(/&gt;/g, '__GT__')
       .replace(/&quot;/g, '__QUOT__')
       .replace(/&#039;/g, '__APOS__');
-    
+
     // Then escape all remaining special characters
     const escaped = tempHtml
       .replace(/&/g, '&amp;')
@@ -974,7 +1008,7 @@ export class ConfluenceConverter {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
-    
+
     // Finally, restore the originally escaped entities
     return escaped
       .replace(/__AMP__/g, '&amp;')
