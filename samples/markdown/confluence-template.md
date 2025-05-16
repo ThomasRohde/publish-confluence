@@ -156,9 +156,7 @@ Here's a simple footnote reference[^1].
 
 ## Emojis
 
-GitHub Flavored Markdown supports emoji shortcodes:
-
-:rocket: :smile: :thumbsup: :sparkles: :tada:
+🔗😂🪵🔊🔨📐🪟
 
 ## Handlebars Templates
 

@@ -83,26 +83,29 @@ hello-world/
   </ul>
 {{/confluence-expand}}
 
-{{#confluence-expand title="Markdown Sample - Documentation with Markdown Templates"}}
-  <p>This sample demonstrates how to use Markdown format for templates, which is automatically converted to Confluence-compatible XHTML during publishing.</p>
+{{#confluence-expand title="Markdown Sample - Documentation with Markdown Page Templates"}}
+  <p>This sample demonstrates how to use Markdown format for page templates, which is automatically converted to Confluence-compatible XHTML during publishing.</p>
+  
+  {{#confluence-warning title="Markdown Template Limitation"}}
+    <p>Markdown processing is only supported for page templates (specified with <code>templatePath</code>). Macro templates (specified with <code>macroTemplatePath</code>) must still be in HTML format.</p>
+  {{/confluence-warning}}
   
   <h3>Features</h3>
   <ul>
-    <li>Template written in GitHub Flavored Markdown</li>
+    <li>Page template written in GitHub Flavored Markdown</li>
     <li>Automatic conversion to Confluence XHTML</li>
     <li>Full support for markdown formatting features (tables, code blocks, lists)</li>
     <li>Demonstrates how to mix Confluence macros with markdown syntax</li>
     <li>Preserves Handlebars expressions within markdown content</li>
   </ul>
-  
-  <h3>Files and Structure</h3>
+    <h3>Files and Structure</h3>
   {{#confluence-code language="text" title="Project Structure" linenumbers=false}}
 markdown/
 ├── confluence-template.md      # Confluence page template in Markdown format
+├── macro-template.html         # HTML macro template (must be HTML, not MD)
 └── publish-confluence.json     # Publishing configuration
   {{/confluence-code}}
-  
-  <h3>Configuration</h3>
+    <h3>Configuration</h3>
   {{#confluence-code language="json" title="publish-confluence.json" linenumbers=true}}
 {
   "spaceKey": "~thro",
@@ -110,6 +113,7 @@ markdown/
   "parentPageTitle": "10. Samples",
   "distDir": "./dist",
   "templatePath": "./confluence-template.md",
+  "macroTemplatePath": "./macro-template.html",  // Must be HTML, not markdown
   "includedFiles": [],
   "excludedFiles": []
 }
@@ -122,14 +126,14 @@ markdown/
     <li>Review the <code>confluence-template.md</code> file to see markdown formatting examples</li>
     <li>Publish to Confluence: <code>publish-confluence</code></li>
   </ol>
-  
-  <h3>Key Learning Points</h3>
+    <h3>Key Learning Points</h3>
   <ul>
     <li>How to write readable documentation with Markdown syntax</li>
     <li>The automatic conversion of markdown to Confluence-compatible format</li>
     <li>Using Handlebars expressions within markdown content</li>
     <li>How to mix Confluence macros with markdown syntax when needed</li>
     <li>Support for GitHub Flavored Markdown features</li>
+    <li><strong>Important limitation:</strong> Markdown is only supported for page templates, not macro templates</li>
   </ul>
 {{/confluence-expand}}
 
@@ -332,13 +336,12 @@ npm run publish
     <td>Vanilla JS</td>
     <td>Basic HTML/CSS/JS</td>
     <td>Getting started, static content</td>
-  </tr>
-  <tr>
+  </tr>  <tr>
     <td>Markdown Sample</td>
     <td>Low</td>
     <td>None</td>
     <td>Markdown</td>
-    <td>Markdown templates</td>
+    <td>Markdown page templates</td>
     <td>Documentation, simple content</td>
   </tr>
   <tr>

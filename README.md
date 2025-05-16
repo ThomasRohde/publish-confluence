@@ -154,7 +154,7 @@ The tool uses two primary templates:
 1. **Page Template**: The overall Confluence page content, which includes the macro placeholder
 2. **Macro Template**: The HTML structure for the Confluence HTML macro
 
-Templates can be created using either HTML (`.html`, `.hbs`) or Markdown (`.md`) formats. Markdown templates are automatically processed into Confluence-compatible XHTML when published.
+Page templates can be created using either HTML (`.html`, `.hbs`) or Markdown (`.md`) formats. Markdown templates are automatically processed into Confluence-compatible XHTML when published.
 
 ### Page Template Variables
 
@@ -167,14 +167,16 @@ Templates can be created using either HTML (`.html`, `.hbs`) or Markdown (`.md`)
 - `{{{scripts}}}`: Expands to `<script>` tags for all attached JavaScript files. Remember to use triple braces to avoid HTML escaping.
 - `{{{styles}}}`: Expands to `<link>` tags for all attached CSS files. Remember to use triple braces to avoid HTML escaping.
 
-### Markdown Support
+### Markdown Support for Page Templates
 
-When using templates with a `.md` extension, the content is automatically processed from Markdown into Confluence-compatible XHTML:
+When using **page templates** with a `.md` extension, the content is automatically processed from Markdown into Confluence-compatible XHTML:
 
 - **GitHub Flavored Markdown** syntax is supported (tables, code blocks, task lists, etc.)
 - Markdown formatting is converted to appropriate Confluence XHTML
 - Handlebars expressions (like `{{pageTitle}}`) are preserved during markdown processing
 - You can mix markdown with Confluence macro helpers (e.g., `{{#confluence-panel}}` within your markdown)
+
+> **Warning:** Markdown processing is **only supported for page templates** (specified with `templatePath`). Macro templates (specified with `macroTemplatePath`) **must be HTML**. This is an important limitation to remember when setting up your project.
 
 ## Supported Macro Helpers
 
@@ -589,18 +591,19 @@ You can set these in a `.env` file in your project root.
 
 ### Example with Markdown Template
 
-You can use Markdown for your templates instead of HTML:
+You can use Markdown for your page templates instead of HTML:
 
 ```json
 {
   "spaceKey": "YOURSPACE",
   "pageTitle": "Markdown Documentation Page",
-  "templatePath": "./confluence-template.md",
+  "templatePath": "./confluence-template.md",  // Markdown for page template
+  "macroTemplatePath": "./macro-template.html",  // HTML only for macro template
   "distDir": "./dist"
 }
 ```
 
-With a Markdown template like:
+With a Markdown page template like:
 
 ```markdown
 # {{pageTitle}}
