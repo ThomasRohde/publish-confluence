@@ -1,0 +1,11 @@
+{
+  "spaceKey": "~thro",
+  "pageTitle": "Hello World Markdown",
+  "parentPageTitle": "10. Samples",
+  "distDir": "./dist",
+  "templatePath": "./confluence-template.md",
+  "includedFiles": [
+  ],
+  "excludedFiles": [
+  ]
+}

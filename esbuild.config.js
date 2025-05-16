@@ -24,6 +24,13 @@ const external = [
   'form-data',
   'globby',
   'handlebars',
+  'rehype-raw',
+  'remark',
+  'remark-gfm',
+  'remark-parse',
+  'remark-rehype', 
+  'unified',
+  'unist-util-visit',
   'xmldom',
   'zod',
   
