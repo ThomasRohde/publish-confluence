@@ -5,6 +5,7 @@ import path from 'path';
 import { ConfluenceClient } from './client';
 import { loadConfiguration } from './config';
 import { createLogger, shutdownLogger } from './logger';
+import { processMarkdownFile } from './markdown-processor';
 import { ConfluenceApiCredentials, PublishConfig, PublishOptions } from './types';
 import { generateUuid } from './utils';
 
@@ -40,6 +41,7 @@ function escapeForConfluence(content: string): string {
 
 /**
  * Load template content from file or use default template if file not found
+ * If the template file has a .md extension, it will be preprocessed with the markdown processor
  * 
  * @param templatePath - Path to the template file
  * @param defaultTemplate - Default template content to use if file is not found
@@ -51,6 +53,23 @@ async function loadTemplate(templatePath: string, defaultTemplate: string): Prom
     const resolvedPath = path.resolve(process.cwd(), templatePath);
     const content = await fs.readFile(resolvedPath, 'utf8');
     log.verbose(`Loaded template from ${templatePath}`);
+    
+    // Check if the template is a markdown file and process it
+    if (templatePath.toLowerCase().endsWith('.md')) {
+      log.verbose(`Processing markdown template: ${templatePath}`);
+      try {
+        const processedContent = await processMarkdownFile(resolvedPath);
+        if (typeof processedContent === 'string') {
+          log.verbose(`Markdown processing successful for ${templatePath}`);
+          return processedContent;
+        } else {
+          log.warn(`Markdown processor didn't return content for ${templatePath}, using raw content`);
+        }
+      } catch (mdError) {
+        log.warn(`Error processing markdown template ${templatePath}, using raw content: ${(mdError as Error).message}`);
+      }
+    }
+    
     return content;
   } catch (error) {
     log.verbose(`Template file ${templatePath} not found, using default template`);
