@@ -306,7 +306,7 @@ export class ConfluenceClient {
       if (directResults.results && directResults.results.length > 0) {
         // Page found with direct API method
         if (this.debug) {
-          console.log(`Page found via direct API: "${title}" (ID: ${directResults.results[0].id})`);
+          this.logger.debug(`Page found via direct API: "${title}" (ID: ${directResults.results[0].id})`);
         }
         return directResults.results[0];
       }
@@ -326,7 +326,7 @@ export class ConfluenceClient {
       if (cqlResults.results && cqlResults.results.length > 0) {
         // Page found with CQL search
         if (this.debug) {
-          console.log(`Page found via CQL search: "${title}" (ID: ${cqlResults.results[0].id})`);
+          this.logger.debug(`Page found via CQL search: "${title}" (ID: ${cqlResults.results[0].id})`);
         }
         return cqlResults.results[0];
       }
@@ -334,11 +334,11 @@ export class ConfluenceClient {
       // If no results with either approach, return null
       this.logger.debug(`Page not found with either approach: "${title}" in space "${spaceKey}"`);
       if (this.debug) {
-        console.log(`Page not found: "${title}" in space "${spaceKey}"`);
+        this.logger.debug(`Page not found: "${title}" in space "${spaceKey}"`);
       }
       return null;
     } catch (error) {
-       console.error(`Error finding page "${title}" in space "${spaceKey}":`, error);
+       this.logger.error(`Error finding page "${title}" in space "${spaceKey}":`, error);
        throw error; // Re-throw other errors
     }
   }
@@ -359,7 +359,7 @@ export class ConfluenceClient {
       }
       return space.homepage.id;
     } catch (error) {
-      console.error(`Error getting homepage for space "${spaceKey}":`, error);
+      this.logger.error(`Error getting homepage for space "${spaceKey}":`, error);
       throw error; // Re-throw
     }
   }
@@ -397,7 +397,7 @@ export class ConfluenceClient {
       
       if (!existingPage && attempts < maxFindAttempts - 1) {
         if (this.debug) {
-          console.log(`Page "${title}" not found on attempt ${attempts + 1}. Waiting before retry...`);
+          this.logger.debug(`Page "${title}" not found on attempt ${attempts + 1}. Waiting before retry...`);
         }
         // Short wait between retries (500ms)
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -433,7 +433,7 @@ export class ConfluenceClient {
             // Parent page not found, but we still have retries left
             if (parentAttempts < retryCount) {
               if (this.debug) {
-                console.log(`Parent page "${parentPageTitle}" not found on attempt ${parentAttempts + 1}. Waiting ${retryDelay}ms before retry...`);
+                this.logger.debug(`Parent page "${parentPageTitle}" not found on attempt ${parentAttempts + 1}. Waiting ${retryDelay}ms before retry...`);
               }
               
               // Wait before retrying - use exponential backoff for better results
@@ -450,7 +450,7 @@ export class ConfluenceClient {
           // Parent page found, store its ID and break out of the retry loop
           parentPageId = parentPage.id;
           if (this.debug && parentAttempts > 0) {
-            console.log(`Parent page "${parentPageTitle}" found after ${parentAttempts + 1} attempts.`);
+            this.logger.debug(`Parent page "${parentPageTitle}" found after ${parentAttempts + 1} attempts.`);
           }
           break;
         } catch (error) {
@@ -462,7 +462,7 @@ export class ConfluenceClient {
           parentAttempts++;
           
           if (this.debug) {
-            console.log(`Error finding parent page "${parentPageTitle}" (attempt ${parentAttempts}): ${error.message}`);
+            this.logger.debug(`Error finding parent page "${parentPageTitle}" (attempt ${parentAttempts}): ${error.message}`);
           }
         }
       }
@@ -497,7 +497,7 @@ export class ConfluenceClient {
       const currentVersion = latestPage.version?.number || version;
       
       if (this.debug) {
-        console.log(`Updating page ${pageId}, provided version: ${version}, current version from server: ${currentVersion}`);
+        this.logger.debug(`Updating page ${pageId}, provided version: ${version}, current version from server: ${currentVersion}`);
       }
       
       const response = await this.request<ConfluencePage>({
@@ -521,7 +521,7 @@ export class ConfluenceClient {
       });
       return response;
     } catch (error) {
-      console.error(`Error updating page with ID ${pageId}:`, error);
+      this.logger.error(`Error updating page with ID ${pageId}:`, error);
       throw error;
     }
   }
@@ -570,7 +570,7 @@ export class ConfluenceClient {
           error.apiErrorData.message.includes('A page with this title already exists')) {
         
         if (this.debug) {
-          console.log(`Page "${title}" already exists but wasn't found earlier. Retrying with findPageByTitle.`);
+          this.logger.debug(`Page "${title}" already exists but wasn't found earlier. Retrying with findPageByTitle.`);
         }
         
         // Retry finding the page with exponential backoff
@@ -583,7 +583,7 @@ export class ConfluenceClient {
           // Wait with exponential backoff: 1s, 2s, 4s, etc.
           const backoffTime = initialBackoff * Math.pow(2, attempts);
           if (this.debug) {
-            console.log(`Waiting ${backoffTime}ms before retry attempt ${attempts + 1}...`);
+            this.logger.debug(`Waiting ${backoffTime}ms before retry attempt ${attempts + 1}...`);
           }
           await new Promise(resolve => setTimeout(resolve, backoffTime));
           
@@ -593,7 +593,7 @@ export class ConfluenceClient {
           
           if (existingPage) {
             if (this.debug) {
-              console.log(`Page found on attempt ${attempts}. Updating instead of creating.`);
+              this.logger.debug(`Page found on attempt ${attempts}. Updating instead of creating.`);
             }
             // Page now found, update it instead
             return this.updatePage(
@@ -603,16 +603,16 @@ export class ConfluenceClient {
               existingPage.version?.number ?? 1
             );
           } else if (this.debug && attempts < maxAttempts) {
-            console.log(`Page still not found after attempt ${attempts}. Retrying...`);
+            this.logger.debug(`Page still not found after attempt ${attempts}. Retrying...`);
           }
         }
         
         if (!existingPage) {
-          console.error(`Unable to find existing page "${title}" after ${maxAttempts} attempts despite Confluence reporting it exists.`);
+          this.logger.error(`Unable to find existing page "${title}" after ${maxAttempts} attempts despite Confluence reporting it exists.`);
         }
       }
-      
-      console.error(`Error creating page "${title}" in space ${spaceKey}:`, error);
+
+      this.logger.error(`Error creating page "${title}" in space ${spaceKey}:`, error);
       throw error;
     }
   }
@@ -632,7 +632,7 @@ export class ConfluenceClient {
       
       return response.results;
     } catch (error) {
-      console.error(`Error listing attachments for page ${pageId}:`, error);
+      this.logger.error(`Error listing attachments for page ${pageId}:`, error);
       throw error;
     }
   }
@@ -684,14 +684,14 @@ export class ConfluenceClient {
       // For updates, we need to delete the old attachment first, then create a new one
       if (existingAttachment) {
         if (this.debug) {
-          console.log(`Attachment ${fileName} already exists (ID: ${existingAttachment.id}). Deleting it before creating a new version.`);
+          this.logger.debug(`Attachment ${fileName} already exists (ID: ${existingAttachment.id}). Deleting it before creating a new version.`);
         }
         
         // Delete the existing attachment
         await this.deleteContent(existingAttachment.id);
-        
+
         if (this.debug) {
-          console.log(`Existing attachment deleted. Creating new version.`);
+          this.logger.debug(`Existing attachment deleted. Creating new version.`);
         }
       }
       
@@ -762,7 +762,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error executing search query "${cqlQuery}":`, error);
+      this.logger.error(`Error executing search query "${cqlQuery}":`, error);
       throw error;
     }
   }
@@ -809,7 +809,7 @@ export class ConfluenceClient {
         url: '/server-information',
       });
     } catch (error) {
-      console.error('Error fetching server information:', error);
+      this.logger.error('Error fetching server information:', error);
       throw error;
     }
   }
@@ -860,7 +860,7 @@ export class ConfluenceClient {
         params: requestParams,
       });
     } catch (error) {
-      console.error('Error fetching spaces:', error);
+      this.logger.error('Error fetching spaces:', error);
       throw error;
     }
   }
@@ -885,7 +885,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error fetching space with key "${spaceKey}":`, error);
+      this.logger.error(`Error fetching space with key "${spaceKey}":`, error);
       throw error;
     }
   }
@@ -921,7 +921,7 @@ export class ConfluenceClient {
         data: payload,
       });
     } catch (error) {
-      console.error(`Error creating space with key "${key}":`, error);
+      this.logger.error(`Error creating space with key "${key}":`, error);
       throw error;
     }
   }
@@ -956,7 +956,7 @@ export class ConfluenceClient {
         data: payload,
       });
     } catch (error) {
-      console.error(`Error updating space with key "${spaceKey}":`, error);
+      this.logger.error(`Error updating space with key "${spaceKey}":`, error);
       throw error;
     }
   }
@@ -974,7 +974,7 @@ export class ConfluenceClient {
         url: `/space/${spaceKey}/archive`,
       });
     } catch (error) {
-      console.error(`Error archiving space with key "${spaceKey}":`, error);
+      this.logger.error(`Error archiving space with key "${spaceKey}":`, error);
       throw error;
     }
   }
@@ -992,7 +992,7 @@ export class ConfluenceClient {
         url: `/space/${spaceKey}/restore`,
       });
     } catch (error) {
-      console.error(`Error restoring space with key "${spaceKey}":`, error);
+      this.logger.error(`Error restoring space with key "${spaceKey}":`, error);
       throw error;
     }
   }
@@ -1010,7 +1010,7 @@ export class ConfluenceClient {
         url: `/space/${spaceKey}`,
       });
     } catch (error) {
-      console.error(`Error deleting space with key "${spaceKey}":`, error);
+      this.logger.error(`Error deleting space with key "${spaceKey}":`, error);
       throw error;
     }
   }
@@ -1031,7 +1031,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error('Error fetching current user information:', error);
+      this.logger.error('Error fetching current user information:', error);
       throw error;
     }
   }
@@ -1059,7 +1059,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error fetching user "${usernameOrKey}":`, error);
+      this.logger.error(`Error fetching user "${usernameOrKey}":`, error);
       throw error;
     }
   }
@@ -1088,7 +1088,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error('Error fetching users:', error);
+      this.logger.error('Error fetching users:', error);
       throw error;
     }
   }
@@ -1113,7 +1113,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error fetching groups for user "${usernameOrKey}":`, error);
+      this.logger.error(`Error fetching groups for user "${usernameOrKey}":`, error);
       throw error;
     }
   }
@@ -1138,7 +1138,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error fetching content with ID "${contentId}":`, error);
+      this.logger.error(`Error fetching content with ID "${contentId}":`, error);
       throw error;
     }
   }
@@ -1156,7 +1156,7 @@ export class ConfluenceClient {
         url: `/content/${contentId}`,
       });
     } catch (error) {
-      console.error(`Error deleting content with ID "${contentId}":`, error);
+      this.logger.error(`Error deleting content with ID "${contentId}":`, error);
       throw error;
     }
   }
@@ -1186,7 +1186,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error fetching ${type} children of content "${contentId}":`, error);
+      this.logger.error(`Error fetching ${type} children of content "${contentId}":`, error);
       throw error;
     }
   }
@@ -1213,7 +1213,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error fetching version ${versionNumber} of content "${contentId}":`, error);
+      this.logger.error(`Error fetching version ${versionNumber} of content "${contentId}":`, error);
       throw error;
     }
   }
@@ -1231,7 +1231,7 @@ export class ConfluenceClient {
         url: `/content/${contentId}/watchers`,
       });
     } catch (error) {
-      console.error(`Error fetching watchers of content "${contentId}":`, error);
+      this.logger.error(`Error fetching watchers of content "${contentId}":`, error);
       throw error;
     }
   }
@@ -1258,7 +1258,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error checking watch status for content "${contentId}":`, error);
+      this.logger.error(`Error checking watch status for content "${contentId}":`, error);
       throw error;
     }
   }
@@ -1285,7 +1285,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error adding watcher to content "${contentId}":`, error);
+      this.logger.error(`Error adding watcher to content "${contentId}":`, error);
       throw error;
     }
   }
@@ -1311,7 +1311,7 @@ export class ConfluenceClient {
         }
       });
     } catch (error) {
-      console.error(`Error removing watcher from content "${contentId}":`, error);
+      this.logger.error(`Error removing watcher from content "${contentId}":`, error);
       throw error;
     }
   }
