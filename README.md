@@ -154,6 +154,8 @@ The tool uses two primary templates:
 1. **Page Template**: The overall Confluence page content, which includes the macro placeholder
 2. **Macro Template**: The HTML structure for the Confluence HTML macro
 
+Templates can be created using either HTML (`.html`, `.hbs`) or Markdown (`.md`) formats. Markdown templates are automatically processed into Confluence-compatible XHTML when published.
+
 ### Page Template Variables
 
 - `{{pageTitle}}`: The title of the page
@@ -164,6 +166,15 @@ The tool uses two primary templates:
 
 - `{{{scripts}}}`: Expands to `<script>` tags for all attached JavaScript files. Remember to use triple braces to avoid HTML escaping.
 - `{{{styles}}}`: Expands to `<link>` tags for all attached CSS files. Remember to use triple braces to avoid HTML escaping.
+
+### Markdown Support
+
+When using templates with a `.md` extension, the content is automatically processed from Markdown into Confluence-compatible XHTML:
+
+- **GitHub Flavored Markdown** syntax is supported (tables, code blocks, task lists, etc.)
+- Markdown formatting is converted to appropriate Confluence XHTML
+- Handlebars expressions (like `{{pageTitle}}`) are preserved during markdown processing
+- You can mix markdown with Confluence macro helpers (e.g., `{{#confluence-panel}}` within your markdown)
 
 ## Supported Macro Helpers
 
@@ -575,6 +586,38 @@ You can set these in a `.env` file in your project root.
 2. Configure publish-confluence with your Confluence details
 3. Run `publish-confluence` after building your application
 4. View your application on the published Confluence page
+
+### Example with Markdown Template
+
+You can use Markdown for your templates instead of HTML:
+
+```json
+{
+  "spaceKey": "YOURSPACE",
+  "pageTitle": "Markdown Documentation Page",
+  "templatePath": "./confluence-template.md",
+  "distDir": "./dist"
+}
+```
+
+With a Markdown template like:
+
+```markdown
+# {{pageTitle}}
+
+This page is written in **Markdown** and automatically converted to Confluence-compatible XHTML.
+
+## Features
+- Easy to read and write
+- Supports **bold**, *italic*, and `code` formatting
+- Tables, lists, and code blocks
+
+{{{macro}}}
+
+---
+
+*Last updated: {{currentDate}}*
+```
 
 ## Project Structure and Tech Stack Recommendations
 

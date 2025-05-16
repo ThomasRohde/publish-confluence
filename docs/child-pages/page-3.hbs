@@ -3,12 +3,16 @@
     <li><strong>Page Template:</strong> Defines the overall structure and content of the Confluence page.</li>
     <li><strong>Macro Template:</strong> Defines the content specifically within the HTML macro that embeds your application.</li>
 </ul>
-<p>Both templates use Handlebars syntax for variables and helpers.</p>
+<p>Both templates use Handlebars syntax for variables and helpers and can be written in either HTML or Markdown format.</p>
+
+{{#confluence-panel title="New Feature!" type="tip"}}
+  <p><strong>Markdown Templates:</strong> You can now write templates in Markdown format! Simply use the <code>.md</code> extension for your templates, and they will be automatically converted to Confluence-compatible XHTML during publishing while preserving all Handlebars expressions.</p>
+{{/confluence-panel}}
 
 <hr />
 
-<h2>3.1. Page Templates (<code>confluence-template.html</code>)</h2>
-<p>This template controls the entire Confluence page layout. It typically includes standard XHTML elements, Confluence macro helpers, and placeholders for the page title and the main application macro.</p>
+<h2>3.1. Page Templates (<code>confluence-template.html</code> or <code>confluence-template.md</code>)</h2>
+<p>This template controls the entire Confluence page layout. It typically includes standard XHTML elements or Markdown formatting, Confluence macro helpers, and placeholders for the page title and the main application macro.</p>
 
 <h3>Purpose and Structure</h3>
 <p>Use the page template to:</p>
@@ -73,7 +77,7 @@
 
 <hr />
 
-<h2>3.2. Macro Templates (<code>macro-template.html</code>)</h2>
+<h2>3.2. Macro Templates (<code>macro-template.html</code> or <code>macro-template.md</code>)</h2>
 <p>This template defines the HTML content that goes <em>inside</em> the Confluence HTML macro. It's primarily used to set up the root element for your JavaScript application and include the necessary script and style tags.</p>
 
 {{#confluence-warning title="Important Note on Attachments"}}
@@ -198,3 +202,75 @@ function greet() {
 
 <p>Last updated: \{{currentDate}}</p>
 {{/confluence-code}}
+
+<hr />
+
+<h2>3.4. Using Markdown Templates</h2>
+<p>The <code>publish-confluence</code> tool now supports creating templates in Markdown format, which are automatically converted to Confluence-compatible XHTML during publishing.</p>
+
+<h3>How It Works</h3>
+<p>When a template file has a <code>.md</code> extension, the tool will:</p>
+<ol>
+    <li>Load the Markdown content from the file</li>
+    <li>Process it using a markdown processor that understands GitHub Flavored Markdown</li>
+    <li>Convert the Markdown to Confluence-compatible XHTML</li>
+    <li>Preserve all Handlebars expressions (like <code>\{{pageTitle}}</code> or <code>\{{{macro}}}</code>) during the conversion</li>
+    <li>Use the resulting XHTML as the template content</li>
+</ol>
+
+<p>This allows you to write templates using the more familiar and readable Markdown syntax, while still getting all the benefits of Confluence's rich content features.</p>
+
+<h3>Supported Markdown Features</h3>
+<p>The Markdown processor supports:</p>
+<ul>
+    <li><strong>Basic formatting:</strong> Headings, bold, italic, lists, links, images, etc.</li>
+    <li><strong>GitHub Flavored Markdown:</strong> Tables, fenced code blocks, task lists, strikethrough</li>
+    <li><strong>Inline HTML:</strong> You can mix HTML with Markdown when needed</li>
+    <li><strong>Code blocks:</strong> With syntax highlighting</li>
+    <li><strong>Confluence macros:</strong> Handlebars helpers inside Markdown content</li>
+</ul>
+
+<h3>Example Markdown Template</h3>
+{{#confluence-code language="markdown" title="Example confluence-template.md" linenumbers=true}}
+# \{{pageTitle}}
+
+> This is a blockquote that introduces the application.
+
+## Application Features
+
+* Feature one
+* Feature two
+* Feature three
+
+## Interactive Application
+
+Below you'll find the interactive application:
+
+\{{{macro}}}
+
+---
+
+*Last updated: \{{currentDate}}*
+{{/confluence-code}}
+
+<h3>Best Practices for Markdown Templates</h3>
+<ul>
+    <li><strong>Use proper Markdown syntax</strong> for structure rather than HTML where possible</li>
+    <li><strong>Remember that Handlebars expressions</strong> like <code>\{{pageTitle}}</code> still work inside Markdown</li>
+    <li><strong>You can mix Confluence macro helpers</strong> with Markdown syntax</li>
+    <li><strong>Triple-brace expressions</strong> like <code>\{{{macro}}}</code> are still needed to prevent HTML escaping</li>
+    <li><strong>For complex layouts</strong>, you might still want to use HTML templates with Confluence macros</li>
+    <li><strong>Test your templates</strong> in dry-run mode to ensure they convert correctly</li>
+</ul>
+
+{{#confluence-panel title="Template File Extensions" type="note"}}
+<p>When configuring <code>publish-confluence.json</code>, make sure to specify the correct file extension for your templates:</p>
+{{#confluence-code language="json" linenumbers=false}}
+{
+  "templatePath": "./confluence-template.md",
+  "macroTemplatePath": "./macro-template.md"
+}
+{{/confluence-code}}
+{{/confluence-panel}}
+
+<hr />

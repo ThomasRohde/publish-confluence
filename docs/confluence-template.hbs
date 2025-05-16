@@ -22,12 +22,12 @@
         <li><strong>CI/CD Integration:</strong> Automate publishing through GitHub Actions, GitLab CI, Jenkins, or Azure DevOps.</li>
       </ul>
     {{/layout-cell}}
-    {{#layout-cell}}
-      <h3>Core Concepts</h3>
-      <p><strong>Templates:</strong> Control the structure of your Confluence page (`confluence-template.html`) and the embedded HTML macro (`macro-template.html`) using Handlebars.</p>
+    {{#layout-cell}}      <h3>Core Concepts</h3>
+      <p><strong>Templates:</strong> Control the structure of your Confluence page (`confluence-template.html`) and the embedded HTML macro (`macro-template.html`) using Handlebars. Templates support both HTML and Markdown (`.md`) formats.</p>
       <p><strong>Asset Management:</strong> The tool automatically finds your build output (JS, CSS, images), uploads them as attachments, and injects the correct links into your macro template via `{{{scripts}}}` and `{{{styles}}}`.</p>
       <p><strong>Macro Helpers:</strong> Use built-in Handlebars helpers (like <code>\{{#confluence-panel}}</code> or <code>\{{confluence-toc}}</code>) within your page template to generate rich Confluence content alongside your embedded application.</p>
       <p><strong>Hierarchical Content:</strong> Create and maintain complex documentation structures with nested child pages, all managed through a single configuration file.</p>
+      <p><strong>Markdown Support:</strong> Write templates in Markdown (`.md`) and they'll be automatically converted to Confluence XHTML while preserving Handlebars expressions.</p>
 
       <h3>Classic Use Cases</h3>
       <ul>
