@@ -29,10 +29,9 @@ export function getProjectTemplate(projectType: number, logger: Logger): Project
       return new ConfluenceEmbeddableScaffold(logger);
     default:
       // Default to basic JavaScript project
-      return new BasicJsProject(logger);
-  }
+      return new BasicJsProject(logger);  }
 }
 
-export { Logger, ProjectTemplate } from './project-template-interface';
-export { ProjectTypeChoice } from './project-type-choices';
+export type { Logger, ProjectTemplate } from './project-template-interface';
+export type { ProjectTypeChoice } from './project-type-choices';
 

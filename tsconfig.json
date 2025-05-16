@@ -14,10 +14,9 @@
       "declaration": true, // Generate .d.ts files
       "sourceMap": true, // Generate source maps
       "baseUrl": ".",
-      "paths": {
-        "@/*": ["src/*"]
-      }
+      "allowSyntheticDefaultImports": true,
+      "isolatedModules": true
     },
     "include": ["src/**/*"], // Only compile files in src
-    "exclude": ["node_modules", "dist", "vite.config.ts"] // Exclude build output and config
+    "exclude": ["node_modules", "dist", "esbuild.config.js", "build.js"] // Exclude build output and config
   }
