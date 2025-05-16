@@ -301,9 +301,7 @@ export class ConfluenceClient {
           expand: 'version',
           status: 'current'
         }
-      });
-
-      if (directResults.results && directResults.results.length > 0) {
+      });      if (directResults.results && directResults.results.length > 0) {
         // Page found with direct API method
         if (this.debug) {
           this.logger.debug(`Page found via direct API: "${title}" (ID: ${directResults.results[0].id})`);
@@ -311,6 +309,7 @@ export class ConfluenceClient {
         return directResults.results[0];
       }
       
+      /*
       // If direct API approach didn't find the page, try CQL search as fallback
       this.logger.debug(`Direct API approach found no results, trying CQL search as fallback`);
       const searchParams = {
@@ -330,9 +329,10 @@ export class ConfluenceClient {
         }
         return cqlResults.results[0];
       }
+      */
       
-      // If no results with either approach, return null
-      this.logger.debug(`Page not found with either approach: "${title}" in space "${spaceKey}"`);
+      // If no results with direct approach, return null
+      this.logger.debug(`Page not found: "${title}" in space "${spaceKey}"`);
       if (this.debug) {
         this.logger.debug(`Page not found: "${title}" in space "${spaceKey}"`);
       }
