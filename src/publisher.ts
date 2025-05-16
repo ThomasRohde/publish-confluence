@@ -190,12 +190,16 @@ export async function processMacroTemplates(
     log.verbose('No macro template path provided, skipping macro generation');
     return ''; // Return empty string if no macro template path
   }
-
-  // Load the macro template
-  const macroTemplate = await loadTemplate(
-    config.macroTemplatePath, 
-    DEFAULT_MACRO_TEMPLATE
-  );
+  // Load the macro template, but don't process as markdown even if it has .md extension
+  let macroTemplate: string;
+  try {
+    const resolvedPath = path.resolve(process.cwd(), config.macroTemplatePath);
+    macroTemplate = await fs.readFile(resolvedPath, 'utf8');
+    log.verbose(`Loaded macro template from ${config.macroTemplatePath}`);
+  } catch (error) {
+    log.verbose(`Macro template file ${config.macroTemplatePath} not found, using default template`);
+    macroTemplate = DEFAULT_MACRO_TEMPLATE;
+  }
   
   // Update context with script and style tags if we have a page ID
   if (baseUrl && pageId && attachments && attachments.length > 0) {
