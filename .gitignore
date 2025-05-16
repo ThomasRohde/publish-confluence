@@ -59,8 +59,9 @@ test-results/
 *.pem
 docs/dry-run/
 docs/dry/
+docs/output/
 samples/target-architecture-template/
 log.txt
 dry/
 samples/macro-showcase/package-lock.json
-docs-output/
+
