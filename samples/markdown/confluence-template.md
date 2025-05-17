@@ -1,6 +1,9 @@
 {{#confluence-info title="Markdown processing in publishing-confluence" comment=false}}
   ### This is a heading inside a info box
-  > Note this!
+  - This is a list item inside the info box
+  - This is another list item
+
+  > This is a blockquote inside the info box
 {{/confluence-info}}
 
 # Sample Markdown File

@@ -16,7 +16,8 @@
     },
     "files": [
         "dist"
-    ],    "scripts": {
+    ],
+    "scripts": {
         "dev": "node build.js --watch && npm run copy-templates",
         "build": "node build.js",
         "bundle-template-scripts": "node bundle-template-scripts.js",
@@ -37,7 +38,8 @@
         "node"
     ],
     "author": "Thomas Klok Rohde <thomas@rohde.name>",
-    "license": "MIT",    "dependencies": {
+    "license": "MIT",
+    "dependencies": {
         "axios": "^1.7.7",
         "chalk": "^5.3.0",
         "commander": "^13.1.0",
@@ -45,6 +47,7 @@
         "form-data": "^4.0.0",
         "globby": "^14.1.0",
         "handlebars": "^4.7.8",
+        "hast-util-to-html": "^9.0.5",
         "rehype-raw": "^7.0.0",
         "remark": "^15.0.1",
         "remark-gfm": "^4.0.1",
