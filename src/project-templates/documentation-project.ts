@@ -139,8 +139,7 @@ export class DocumentationProject implements ProjectTemplate {
       throw error;
     }
   }
-
-  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string): Promise<void> {
+  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string, childPages?: any[]): Promise<void> {
     // Documentation project doesn't need additional config files
     return;
   }

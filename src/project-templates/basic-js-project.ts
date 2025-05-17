@@ -140,8 +140,7 @@ h1 {
       throw error;
     }
   }
-
-  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string): Promise<void> {
+  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string, childPages?: any[]): Promise<void> {
     try {
       // Create webpack.config.js
       await fs.writeFile(

@@ -4,8 +4,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import * as readline from 'readline';
 import { getProjectTemplate, Logger } from './project-templates';
+import { MarkdownDocumentationProject } from './project-templates/markdown-documentation-project';
 import { PROJECT_TYPE_CHOICES } from './project-templates/project-type-choices';
 import { PROMPT_TEXT } from './prompt';
+import { MARKDOWN_PROMPT_TEXT } from './prompt-markdown';
 
 /**
  * Create a readline interface for interactive prompts
@@ -73,10 +75,9 @@ export async function createProject(log: Logger): Promise<void> {
     if (!projectName) {
       projectName = await question(rl, 'Enter project name', path.basename(process.cwd()));
     }
-    
-    // Special handling for Documentation Project
+      // Special handling for Documentation Projects
     let pageCount = 1;
-    if (projectType === 5) { // Documentation Project
+    if (projectType === 5 || projectType === 7) { // Documentation Projects
       const pageCountInput = await question(rl, 'Enter the number of pages', '1');
       pageCount = parseInt(pageCountInput) || 1;
       if (pageCount < 1) {
@@ -89,14 +90,14 @@ export async function createProject(log: Logger): Promise<void> {
     
     // Ask for parent page title (always needed regardless of project type)
     const parentPageTitle = await question(rl, 'Enter the parent page title (optional)', '');
-      const distDir = await question(rl, 'Enter the distribution directory', './dist');    
-    // Advanced configuration
+      const distDir = await question(rl, 'Enter the distribution directory', './dist');      // Advanced configuration
     log.info(chalk.blue('\nAdvanced configuration (press Enter to use defaults):'));
-    const templatePath = await question(rl, 'Path to the page template', './confluence-template.html');
-    
-    // Only ask for macro template path if not a documentation project
+    // Default template path - use .md for Markdown project, .html for others
+    const defaultTemplatePath = projectType === 7 ? './confluence-template.md' : './confluence-template.html';
+    const templatePath = await question(rl, 'Path to the page template', defaultTemplatePath);
+      // Only ask for macro template path if not a documentation project (types 5 and 7)
     let macroTemplatePath = null;
-    if (projectType !== 5) {
+    if (projectType !== 5 && projectType !== 7) {
       macroTemplatePath = await question(rl, 'Path to the macro template', './macro-template.html');
     }
       const createDotEnv = (await question(rl, 'Create .env file for authentication? (y/n)', 'y')).toLowerCase() === 'y';
@@ -113,15 +114,16 @@ export async function createProject(log: Logger): Promise<void> {
       includedFiles: template.getIncludedFiles(),
       excludedFiles: ['**/*.map'],
     };
-    
-    // For Documentation Project with multiple pages, set up child pages
-    if (projectType === 5 && pageCount > 1) {
+      // For Documentation Projects with multiple pages, set up child pages
+    if ((projectType === 5 || projectType === 7) && pageCount > 1) {
       // Create child page configurations
       const childPages = [];
       for (let i = 1; i < pageCount; i++) {
+        // Use .md extension for Markdown Documentation Project, otherwise use .html
+        const fileExtension = projectType === 7 ? '.md' : '.html';
         childPages.push({
           pageTitle: `Page ${i}`,
-          templatePath: `./child-pages/page-${i}.html`,
+          templatePath: `./child-pages/page-${i}${fileExtension}`,
           macroTemplatePath: null
         });
       }
@@ -136,16 +138,24 @@ export async function createProject(log: Logger): Promise<void> {
     log.success(`Created publish-confluence.json`);
       // Always create template files
     await fs.writeFile(path.resolve(process.cwd(), templatePath), template.getPageTemplate(), 'utf8');
-    
-    // For Documentation Project with multiple pages, create child page structure
-    if (projectType === 5 && pageCount > 1) {
+      // For Documentation Projects with multiple pages, create child page structure
+    if ((projectType === 5 || projectType === 7) && pageCount > 1) {
       // Create child pages directory
       const childPagesDir = path.join(process.cwd(), 'child-pages');
       await fs.mkdir(childPagesDir, { recursive: true });
       
-      // Create template files for each child page
-      for (let i = 1; i < pageCount; i++) {
-        const childTemplate = `<h1>Page ${i}</h1>
+      // For Markdown Documentation Project (type 7), use the template's method to create child pages
+      if (projectType === 7) {
+        const markdownTemplate = template as MarkdownDocumentationProject;
+        for (let i = 1; i < pageCount; i++) {
+          await markdownTemplate.createChildPageTemplate(childPagesDir, i);
+        }
+      } 
+      // For regular Documentation Project (type 5), create HTML templates
+      else {
+        // Create template files for each child page
+        for (let i = 1; i < pageCount; i++) {
+          const childTemplate = `<h1>Page ${i}</h1>
 
 <p>Add your content for child page ${i} here.</p>
 
@@ -156,18 +166,19 @@ export async function createProject(log: Logger): Promise<void> {
 <hr/>
 <p><em>Last updated: {{currentDate}}</em></p>`;
 
-        await fs.writeFile(
-          path.join(childPagesDir, `page-${i}.html`),
-          childTemplate,
-          'utf8'
-        );
+          await fs.writeFile(
+            path.join(childPagesDir, `page-${i}.html`),
+            childTemplate,
+            'utf8'
+          );
+        }
       }
       
       log.success(`Created ${pageCount - 1} child page templates in 'child-pages' directory`);
     }
     
-    // Create macro template if needed (not for Documentation Project)
-    if (projectType !== 5 && template.getMacroTemplate()) {
+    // Create macro template if needed (not for Documentation Projects)
+    if (projectType !== 5 && projectType !== 7 && template.getMacroTemplate()) {
       await fs.writeFile(path.resolve(process.cwd(), macroTemplatePath as string), template.getMacroTemplate(), 'utf8');
       log.success(`Created template files: ${templatePath}, ${macroTemplatePath}`);
     } else {
@@ -183,15 +194,18 @@ CONFLUENCE_TOKEN=your-api-token`;
 
       await fs.writeFile(path.resolve(process.cwd(), '.env'), envContent, 'utf8');
       log.success(`Created .env file with placeholder credentials`);
-    }
-      // Create prompt file for LLM template generation if requested
+    }    // Create prompt file for LLM template generation if requested
     if (createPromptFile) {
       const promptFilePath = path.resolve(process.cwd(), 'template-prompt.md');
       await fs.writeFile(promptFilePath, PROMPT_TEXT, 'utf8');
       log.success(`Created template-prompt.md for generating templates with AI`);
-    }
-      // Update package.json or create one if it doesn't exist (skip for documentation projects)
-    if (projectType !== 5) { // 5 is Documentation Project
+
+      // Also create a Markdown-specific prompt file
+      const markdownPromptFilePath = path.resolve(process.cwd(), 'markdown-template-prompt.md');
+      await fs.writeFile(markdownPromptFilePath, MARKDOWN_PROMPT_TEXT, 'utf8');
+      log.success(`Created markdown-template-prompt.md for generating Markdown templates with AI`);
+    }// Update package.json or create one if it doesn't exist (skip for documentation projects)
+    if (projectType !== 5 && projectType !== 7) { // Skip for Documentation Projects
       if (!Object.keys(packageJson).length) {
         // Create a new package.json using the template
         const packageJsonTemplate = template.getPackageJsonTemplate(projectName);
@@ -221,8 +235,7 @@ CONFLUENCE_TOKEN=your-api-token`;
           
           log.success(`Updated package.json with publish script`);
         }
-      }
-    } else {
+      }    } else {
       log.verbose('Skipping package.json creation for Documentation Project');
     }
     
@@ -231,7 +244,8 @@ CONFLUENCE_TOKEN=your-api-token`;
     await template.createSourceFiles(srcDir, projectName);
     
     // Create additional configuration files
-    await template.createConfigFiles(process.cwd(), projectName, spaceKey, parentPageTitle);
+    // Pass child pages to createConfigFiles if they exist
+    await template.createConfigFiles(process.cwd(), projectName, spaceKey, parentPageTitle, config.childPages || []);
     
     log.success(`\nProject created successfully!`);
     log.info(`\nNext steps:

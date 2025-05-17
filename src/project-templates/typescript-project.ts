@@ -147,8 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
       throw error;
     }
   }
-
-  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string): Promise<void> {
+  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string, childPages?: any[]): Promise<void> {
     try {
       // Create tsconfig.json
       await fs.writeFile(

@@ -2,90 +2,94 @@
 
 <h3>This is a heading inside a info box</h3>
 <ul>
-<li>This is a list item inside the info box</li>
-<li>This is another list item</li>
+  <li>This is a list item inside the info box</li>
+  <li>This is another list item</li>
 </ul>
 <blockquote>
-<p>This is a blockquote inside the info box</p>
+  <p>This is a blockquote inside the info box</p>
 </blockquote>
 {{/confluence-info}}
 <h1>Sample Markdown File</h1>
-<p>This is a sample Markdown file to test the integration with publish-confluence. It demonstrates various GitHub Flavored Markdown features that are supported by the publish-confluence tool.</p>
+<p>This is a sample Markdown file to test the integration with publish-confluence. It demonstrates various GitHub
+  Flavored Markdown features that are supported by the publish-confluence tool.</p>
 <h2>Text Formatting</h2>
 <ul>
-<li><strong>Bold text</strong> and <em>italic text</em></li>
-<li><em><strong>Bold and italic text</strong></em></li>
-<li><del>Strikethrough text</del></li>
-<li><sub>Subscript</sub> and <sup>Superscript</sup></li>
-<li><code>Inline code</code> with backticks</li>
-<li>
-<blockquote>
-<p>Blockquote text</p>
-</blockquote>
-</li>
-<li>Horizontal rule below:</li>
+  <li><strong>Bold text</strong> and <em>italic text</em></li>
+  <li><em><strong>Bold and italic text</strong></em></li>
+  <li><del>Strikethrough text</del></li>
+  <li><sub>Subscript</sub> and <sup>Superscript</sup></li>
+  <li><code>Inline code</code> with backticks</li>
+  <li>
+    <blockquote>
+      <p>Blockquote text</p>
+    </blockquote>
+  </li>
+  <li>Horizontal rule below:</li>
 </ul>
-<hr></hr>
+<hr>
+</hr>
 <h2>Lists</h2>
 <h3>Unordered Lists</h3>
 <ul>
-<li>First level item
-<ul>
-<li>Second level item
-<ul>
-<li>Third level item
-<ul>
-<li>Fourth level item</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Another first level item
-<ul>
-<li>Mixed bullet styles</li>
-</ul>
-<ul>
-<li>Work as well</li>
-</ul>
-</li>
+  <li>First level item
+    <ul>
+      <li>Second level item
+        <ul>
+          <li>Third level item
+            <ul>
+              <li>Fourth level item</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Another first level item
+    <ul>
+      <li>Mixed bullet styles</li>
+    </ul>
+    <ul>
+      <li>Work as well</li>
+    </ul>
+  </li>
 </ul>
 <h3>Ordered Lists</h3>
 <ol>
-<li>First item</li>
-<li>Second item
-<ol>
-<li>Nested item 1</li>
-<li>Nested item 2</li>
-</ol>
-</li>
-<li>Third item</li>
+  <li>First item</li>
+  <li>Second item
+    <ol>
+      <li>Nested item 1</li>
+      <li>Nested item 2</li>
+    </ol>
+  </li>
+  <li>Third item</li>
 </ol>
 <h3>Task Lists</h3>
 <ul className="contains-task-list">
-<li className="task-list-item"><input type="checkbox" checked="true" disabled="true"></input> Completed task</li>
-<li className="task-list-item"><input type="checkbox" disabled="true"></input> Uncompleted task</li>
-<li className="task-list-item"><input type="checkbox" checked="true" disabled="true"></input> @mentions, #refs, <a href="https://github.com">links</a>, <strong>formatting</strong>, and <del>tags</del> supported</li>
-<li className="task-list-item"><input type="checkbox" disabled="true"></input> List syntax required (any unordered or ordered list supported)</li>
+  <li className="task-list-item"><input type="checkbox" checked="true" disabled="true"></input> Completed task</li>
+  <li className="task-list-item"><input type="checkbox" disabled="true"></input> Uncompleted task</li>
+  <li className="task-list-item"><input type="checkbox" checked="true" disabled="true"></input> @mentions, #refs, <a
+      href="https://github.com">links</a>, <strong>formatting</strong>, and <del>tags</del> supported</li>
+  <li className="task-list-item"><input type="checkbox" disabled="true"></input> List syntax required (any unordered or
+    ordered list supported)</li>
 </ul>
 <h2>Links and References</h2>
 <ul>
-<li><a href="https://github.com">Basic link to GitHub</a></li>
-<li><a href="https://github.com" title="GitHub's Homepage">Link with title</a></li>
-<li>[Reference-style link][reference text]</li>
-<li><a href="../README.md">Relative link to a repository file</a></li>
-<li>Auto-converted link: <a href="https://www.example.com">https://www.example.com</a></li>
-<li>Email link: <a href="mailto:example@example.com">example@example.com</a></li>
+  <li><a href="https://github.com">Basic link to GitHub</a></li>
+  <li><a href="https://github.com" title="GitHub's Homepage">Link with title</a></li>
+  <li>[Reference-style link][reference text]</li>
+  <li><a href="../README.md">Relative link to a repository file</a></li>
+  <li>Auto-converted link: <a href="https://www.example.com">https://www.example.com</a></li>
+  <li>Email link: <a href="mailto:example@example.com">example@example.com</a></li>
 </ul>
 <h2>Code Samples</h2>
 <p>Inline code: <code>const greeting = "Hello World";</code></p>
 {{#confluence-code language="javascript" linenumbers=true}}
 // JavaScript code block with syntax highlighting
 function hello(name) {
-  const greeting = `Hello, ${name}!`;
-  console.log(greeting);
-  return greeting;
+const greeting = `Hello, ${name}!`;
+console.log(greeting);
+return greeting;
 }
 
 // Call the function
@@ -94,22 +98,22 @@ hello("Confluence User");
 {{#confluence-code language="typescript" linenumbers=true}}
 // TypeScript code example
 interface User {
-  name: string;
-  age: number;
-  isAdmin: boolean;
+name: string;
+age: number;
+isAdmin: boolean;
 }
 
 class UserManager {
-  private readonly users: User[] = [];
-  
-  public addUser(user: User): void {
-    this.users.push(user);
-    console.log(`Added user: ${user.name}`);
-  }
-  
-  public getAdmins(): User[] {
-    return this.users.filter(user => user.isAdmin);
-  }
+private readonly users: User[] = [];
+
+public addUser(user: User): void {
+this.users.push(user);
+console.log(`Added user: ${user.name}`);
+}
+
+public getAdmins(): User[] {
+return this.users.filter(user => user.isAdmin);
+}
 }
 {{/confluence-code}}
 {{#confluence-code language="html" linenumbers=true}}
@@ -121,36 +125,98 @@ class UserManager {
 </div>
 {{/confluence-code}}
 <h2>Tables</h2>
-<table><thead><tr><th scope="col">Feature</th><th scope="col" style="text-align: center;">Basic Support</th><th scope="col" style="text-align: center;">Advanced Support</th><th scope="col">Notes</th></tr></thead><tbody><tr><td>Text formatting</td><td style="text-align: center;">✅</td><td style="text-align: center;">✅</td><td>Supports <strong>bold</strong>, <em>italic</em>, and <del>strikethrough</del></td></tr><tr><td>Code blocks</td><td style="text-align: center;">✅</td><td style="text-align: center;">✅</td><td>With syntax highlighting</td></tr><tr><td>Tables</td><td style="text-align: center;">✅</td><td style="text-align: center;">⚠️</td><td>Some advanced features may not work</td></tr><tr><td>Handlebars</td><td style="text-align: center;">✅</td><td style="text-align: center;">✅</td><td>Template expressions preserved</td></tr><tr><td>Images</td><td style="text-align: center;">✅</td><td style="text-align: center;">✅</td><td>Supports alt text and titles</td></tr></tbody></table>
+<table>
+  <thead>
+    <tr>
+      <th scope="col">Feature</th>
+      <th scope="col" style="text-align: center;">Basic Support</th>
+      <th scope="col" style="text-align: center;">Advanced Support</th>
+      <th scope="col">Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Text formatting</td>
+      <td style="text-align: center;">✅</td>
+      <td style="text-align: center;">✅</td>
+      <td>Supports <strong>bold</strong>, <em>italic</em>, and <del>strikethrough</del></td>
+    </tr>
+    <tr>
+      <td>Code blocks</td>
+      <td style="text-align: center;">✅</td>
+      <td style="text-align: center;">✅</td>
+      <td>With syntax highlighting</td>
+    </tr>
+    <tr>
+      <td>Tables</td>
+      <td style="text-align: center;">✅</td>
+      <td style="text-align: center;">⚠️</td>
+      <td>Some advanced features may not work</td>
+    </tr>
+    <tr>
+      <td>Handlebars</td>
+      <td style="text-align: center;">✅</td>
+      <td style="text-align: center;">✅</td>
+      <td>Template expressions preserved</td>
+    </tr>
+    <tr>
+      <td>Images</td>
+      <td style="text-align: center;">✅</td>
+      <td style="text-align: center;">✅</td>
+      <td>Supports alt text and titles</td>
+    </tr>
+  </tbody>
+</table>
 <h3>Table Alignment</h3>
-<table><thead><tr><th scope="col" style="text-align: left;">Left-aligned</th><th scope="col" style="text-align: center;">Center-aligned</th><th scope="col" style="text-align: right;">Right-aligned</th></tr></thead><tbody><tr><td style="text-align: left;">Left</td><td style="text-align: center;">Center</td><td style="text-align: right;">Right</td></tr><tr><td style="text-align: left;">Text</td><td style="text-align: center;">Text</td><td style="text-align: right;">Text</td></tr></tbody></table>
+<table>
+  <thead>
+    <tr>
+      <th scope="col" style="text-align: left;">Left-aligned</th>
+      <th scope="col" style="text-align: center;">Center-aligned</th>
+      <th scope="col" style="text-align: right;">Right-aligned</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left;">Left</td>
+      <td style="text-align: center;">Center</td>
+      <td style="text-align: right;">Right</td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">Text</td>
+      <td style="text-align: center;">Text</td>
+      <td style="text-align: right;">Text</td>
+    </tr>
+  </tbody>
+</table>
 <h2>Escaping Characters</h2>
 <p>You can escape Markdown formatting characters with a backslash: *not italic*, `not code`</p>
 <h2>Inline HTML</h2>
 {{#confluence-expand title="Click to expand details section"}}
 <p>This is hidden content that can be expanded.</p>
 <ul>
-<li>You can include lists</li>
-<li>And other markdown formatting</li>
-<li>Inside HTML blocks</li>
+  <li>You can include lists</li>
+  <li>And other markdown formatting</li>
+  <li>Inside HTML blocks</li>
 </ul>
 {{/confluence-expand}}
 <div align="center">
-<h3>Centered Content</h3>
-<p>This text and heading will be centered when rendered.</p>
+  <h3>Centered Content</h3>
+  <p>This text and heading will be centered when rendered.</p>
 </div>
 <h2>Quotes and Footnotes</h2>
 <blockquote>
-<p>This is a single line quote</p>
+  <p>This is a single line quote</p>
 </blockquote>
 <blockquote>
-<p>This is a multi-line blockquote.</p>
-<p>It can span multiple paragraphs.</p>
-<blockquote>
-<p>And can be nested.</p>
+  <p>This is a multi-line blockquote.</p>
+  <p>It can span multiple paragraphs.</p>
+  <blockquote>
+    <p>And can be nested.</p>
+  </blockquote>
 </blockquote>
-</blockquote>
-<p>Here's a simple footnote reference<sup>{{confluence-anchor name="footnote-ref-1"}}{{confluence-link type="anchor" text="1" anchor="footnote-1"}}</sup>.</p>
+<p>Here's a simple footnote reference<sup>{{confluence-anchor name="footnote-ref-1"}}{{confluence-link type="anchor"
+    text="1" anchor="footnote-1"}}</sup>.</p>
 <h2>Emojis</h2>
 <p>🔗😂🪵🔊🔨📐🪟</p>
 <h2>Handlebars Templates</h2>
@@ -159,9 +225,10 @@ class UserManager {
 <p>Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Del</kbd> to restart your computer.</p>
 <p><abbr title="HyperText Markup Language">HTML</abbr> is the standard markup language for web pages.</p>
 <p><mark>Highlighted text</mark> can be created using the mark tag.</p>
-<hr></hr>
+<hr>
+</hr>
 <p><em>Last updated: {{currentDate}}</em></p>
 <h2>Footnotes</h2>
 {{confluence-anchor name="footnote-1"}}
-<p>This is the footnote content. {{confluence-link type="anchor" text="↩" anchor="footnote-ref-1" tooltip="Back to reference"}}</p>
-
+<p>This is the footnote content. {{confluence-link type="anchor" text="↩" anchor="footnote-ref-1" tooltip="Back to
+  reference"}}</p>

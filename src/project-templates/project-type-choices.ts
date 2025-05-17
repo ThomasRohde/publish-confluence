@@ -36,10 +36,14 @@ export const PROJECT_TYPE_CHOICES: ProjectTypeChoice[] = [
     id: 5,
     name: 'Documentation Project',
     description: 'Pure documentation pages (no JavaScript)'
-  },
-  {
+  },  {
     id: 6,
     name: 'Confluence Embeddable Application Scaffold',
     description: 'TypeScript application that can be embedded in Confluence as an HTML macro'
+  },
+  {
+    id: 7,
+    name: 'Markdown Documentation Project',
+    description: 'Pure documentation pages using Markdown format'
   }
 ];

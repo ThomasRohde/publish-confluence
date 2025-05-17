@@ -176,8 +176,7 @@ button:hover {
       throw error;
     }
   }
-
-  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string): Promise<void> {
+  async createConfigFiles(projectDir: string, projectName: string, spaceKey?: string, parentPageTitle?: string, childPages?: any[]): Promise<void> {
     try {
       // Create vite.config.js
       await fs.writeFile(

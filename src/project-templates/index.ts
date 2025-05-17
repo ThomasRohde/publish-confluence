@@ -3,13 +3,14 @@ import { BasicJsProject } from './basic-js-project';
 import { ConfluenceEmbeddableScaffold } from './confluence-embeddable-scaffold';
 import { DataVisualizationProject } from './data-visualization-project';
 import { DocumentationProject } from './documentation-project';
+import { MarkdownDocumentationProject } from './markdown-documentation-project';
 import { Logger, ProjectTemplate } from './project-template-interface';
 import { ReactProject } from './react-project';
 import { TypeScriptProject } from './typescript-project';
 
 /**
  * Get a project template instance by project type
- * @param projectType The numeric project type (1-6)
+ * @param projectType The numeric project type (1-7)
  * @param logger The logger instance
  * @returns A project template instance for the specified type
  */
@@ -27,6 +28,8 @@ export function getProjectTemplate(projectType: number, logger: Logger): Project
       return new DocumentationProject(logger);
     case 6:
       return new ConfluenceEmbeddableScaffold(logger);
+    case 7:
+      return new MarkdownDocumentationProject(logger);
     default:
       // Default to basic JavaScript project
       return new BasicJsProject(logger);  }
