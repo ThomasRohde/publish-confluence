@@ -48,7 +48,7 @@ function escapeForConfluence(content: string): string {
  * @returns The loaded template content or default template
  * @throws Error if there's an issue reading the file for reasons other than the file not existing
  */
-async function loadTemplate(templatePath: string, defaultTemplate: string): Promise<string> {
+async function loadTemplate(templatePath: string, defaultTemplate: string, options?: PublishOptions): Promise<string> {
   try {
     const resolvedPath = path.resolve(process.cwd(), templatePath);
     const content = await fs.readFile(resolvedPath, 'utf8');
@@ -57,14 +57,27 @@ async function loadTemplate(templatePath: string, defaultTemplate: string): Prom
     // Check if the template is a markdown file and process it
     if (templatePath.toLowerCase().endsWith('.md')) {
       log.verbose(`Processing markdown template: ${templatePath}`);
-      try {
-        const processedContent = await processMarkdownFile(resolvedPath);
-        if (typeof processedContent === 'string') {
-          log.verbose(`Markdown processing successful for ${templatePath}`);
-          return processedContent;
+      try {        // Process markdown file
+        let processedContent: string;
+        
+        // If both dry-run and markdown options are enabled, save the processed content as .hbs file
+        if (options?.dryRun && options?.markdown) {
+          // Generate the output file name by replacing .md extension with .hbs
+          const hbsOutputPath = templatePath.replace(/\.md$/i, '.hbs');
+          log.info(`Markdown option enabled: Saving processed markdown as ${hbsOutputPath}`);
+          
+          // Process markdown file and write the output, capturing the processed content in one step
+          const resolvedHbsPath = path.resolve(process.cwd(), hbsOutputPath);
+          processedContent = await processMarkdownFile(resolvedPath, resolvedHbsPath);
+          log.success(`Saved processed markdown to ${hbsOutputPath}`);
         } else {
-          log.warn(`Markdown processor didn't return content for ${templatePath}, using raw content`);
+          // Process markdown file for regular use without saving to .hbs
+          processedContent = await processMarkdownFile(resolvedPath);
         }
+        
+        // Now processedContent is always a string since we fixed the return type
+        log.verbose(`Markdown processing successful for ${templatePath}`);
+        return processedContent;
       } catch (mdError) {
         log.warn(`Error processing markdown template ${templatePath}, using raw content: ${(mdError as Error).message}`);
       }
@@ -421,15 +434,14 @@ async function publishPageRecursive(
     styles?: string;
     comment?: boolean;
   }
-  
-  // Initial context setup for templates with proper typing
+    // Initial context setup for templates with proper typing
   const context: TemplateContext = { 
     pageTitle: cfg.pageTitle, 
     currentDate: new Date().toISOString().split('T')[0]
   };
   
-  // Load page template
-  const pageTpl = await loadTemplate(cfg.templatePath, DEFAULT_PAGE_TEMPLATE);
+  // Load page template, passing options for markdown processing
+  const pageTpl = await loadTemplate(cfg.templatePath, DEFAULT_PAGE_TEMPLATE, options);
   const compile = Handlebars.compile(pageTpl);
   
   // First, search for existing page to determine if this is create or update

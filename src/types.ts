@@ -68,6 +68,8 @@ export interface PublishOptions {
   dryRun?: string;
   /** Enable HTML preview generation in dry-run mode (defaults to true) */
   preview?: boolean;
+  /** Save processed markdown files as .hbs files in dry-run mode */
+  markdown?: boolean;
 }
 
 /**

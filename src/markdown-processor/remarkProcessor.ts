@@ -75,12 +75,12 @@ function customSerializer(tree: any) {
  * Processes a Markdown file and optionally saves the result
  * @param inputPath Path to input Markdown file
  * @param outputPath Optional path to save output. If not provided, output is returned
- * @returns Processed content as string if outputPath is not provided
+ * @returns Processed content as string
  */
 export async function processMarkdownFile(
   inputPath: string, 
   outputPath?: string
-): Promise<string | void> {
+): Promise<string> {
   // Read the input file
   const resolvedInputPath = path.resolve(process.cwd(), inputPath)
   const input = await fs.readFile(resolvedInputPath, 'utf8')
@@ -88,12 +88,12 @@ export async function processMarkdownFile(
   // Process the content
   const cleanedOutput = await processMarkdown(input)
   
-  // Write to output file or return the result
+  // Write to output file if requested
   if (outputPath) {
     const resolvedOutputPath = path.resolve(process.cwd(), outputPath)
     await fs.writeFile(resolvedOutputPath, cleanedOutput, 'utf8')
-    return
   }
   
+  // Always return the processed content
   return cleanedOutput
 }

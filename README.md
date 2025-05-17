@@ -493,9 +493,9 @@ Usage: publish-confluence [options] [command]
 Options:
   -q, --quiet              Suppress all output except errors
   -v, --verbose            Enable verbose output
-  -d, --debug              Enable debug output
-  --dry-run [dir]          Generate storage files locally instead of publishing to Confluence
+  -d, --debug              Enable debug output  --dry-run [dir]          Generate storage files locally instead of publishing to Confluence
   --no-preview             Disable HTML preview generation in dry-run mode
+  --markdown               Save processed markdown files as .hbs files in dry-run mode
   -c, --comment            Display content with comment flags in info macros
   --log-file [path]        Enable logging to file with optional custom path
   --allow-self-signed      Allow self-signed SSL certificates (default: true)
@@ -621,6 +621,22 @@ This page is written in **Markdown** and automatically converted to Confluence-c
 
 *Last updated: {{currentDate}}*
 ```
+
+#### Markdown Processing and Preview
+
+When working with Markdown templates, you can use the `--markdown` option in conjunction with `--dry-run` to see how your Markdown content will be transformed into Confluence-compatible format:
+
+```bash
+# Generate both storage format and processed Markdown templates
+publish-confluence --dry-run --markdown
+```
+
+This will:
+1. Process all Markdown (`.md`) templates through the Markdown processor
+2. Save the processed content as Handlebars (`.hbs`) files with the same base name
+3. Allow you to review exactly how your Markdown will be transformed before publishing
+
+This option is particularly useful when developing complex documentation with advanced Markdown features, as it helps you verify that everything will be properly converted to Confluence's storage format.
 
 ## Project Structure and Tech Stack Recommendations
 

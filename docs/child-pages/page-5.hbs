@@ -38,21 +38,29 @@ publish-confluence [options] [command]
       <td><code>--dry-run</code> [dir]</td>
       <td></td>
       <td>Generate storage files locally instead of publishing to Confluence. Optionally specify a custom output directory (defaults to <code>dry/</code>).</td>
-    </tr>
-    <tr>
+    </tr>    <tr>
       <td><code>--no-preview</code></td>
       <td></td>
       <td>Disable HTML preview generation in dry-run mode. Use this if you only need the storage format files and not the browsable preview.</td>
     </tr>
     <tr>
+      <td><code>--markdown</code></td>
+      <td></td>
+      <td>When used with <code>--dry-run</code>, saves the processed Markdown templates as <code>.hbs</code> files for review. This allows you to see how your Markdown will be converted to Confluence storage format.</td>
+    </tr>
+    <tr>
       <td><code>--comment</code></td>
       <td><code>-c</code></td>
       <td>Display content marked with <code>comment=true</code> in admonition macros (info, note, warning, tip). Useful for showing developer-only documentation.</td>
-    </tr>
-    <tr>
+    </tr><tr>
       <td><code>--log-file</code> [path]</td>
       <td></td>
       <td>Enable logging to a file for persistent error tracking and debugging. If a path is provided, logs will be written to that file; otherwise, logs will be written to <code>publish-confluence.log</code> in the current directory.</td>
+    </tr>
+    <tr>
+      <td><code>--markdown</code></td>
+      <td></td>
+      <td>When used with <code>--dry-run</code>, saves the processed Markdown templates as <code>.hbs</code> files for review. This allows you to see how your Markdown will be converted to Confluence storage format.</td>
     </tr>
     <tr>
       <td><code>--help</code></td>

@@ -167,12 +167,13 @@ program.hook('preAction', () => {
 });
 
 // Define explicit publish command
-program
+program  
   .command('publish', { isDefault: true })
   .description('Publish JavaScript builds and HTML content to Confluence (default)')
   .option('-c, --comment', 'Display content with comment flags in info macros', false)
   .option('--dry-run [dir]', 'Generate storage files locally instead of publishing to Confluence')
   .option('--no-preview', 'Disable HTML preview generation in dry-run mode')
+  .option('--markdown', 'Save processed markdown files as .hbs files in dry-run mode', false)
   .action((cmdOptions) => {
     const options = { ...program.opts(), ...cmdOptions };
     runPublishCommand(options);
