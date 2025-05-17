@@ -3,5 +3,11 @@
     {
       "text": "Generate commit messages using the Conventional Commits format with emojis."
     }
+  ],
+  "github.copilot.chat.codeGeneration.instructions": 
+  [
+    {
+      "text": "When generating PowerShell scripts, use PowerShell 7.5 syntax. Always use semicolons (;) as command separators, not ampersands. When changing directories with cd/Set-Location, always enclose paths in double quotes. Example: cd \"C:\\path\\to\\directory\"; Get-ChildItem"
+    }
   ]
 }
