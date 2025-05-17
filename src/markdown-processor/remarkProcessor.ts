@@ -4,8 +4,9 @@ import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
+import remarkHbs from 'remark-hbs'
 import { unified } from 'unified'
-import { confluenceXhtml, preserveBlockMacros, preserveHandlebars, remarkTableFormat } from './plugins'
+import { confluenceXhtml, preserveBlockMacros, remarkTableFormat } from './plugins'
 
 /**
  * Processes Markdown content and converts it to Confluence XHTML
@@ -17,12 +18,12 @@ export async function processMarkdown(input: string): Promise<string> {
   const processor = unified()
     .use(remarkParse)
     .use(remarkGfm)
+    .use(remarkHbs)              // Add before any transformers to preserve Handlebars syntax
     .use(remarkTableFormat as any)
     .use(remarkRehype, {
-      allowDangerousHtml: true 
+      allowDangerousHtml: true   // Required to let raw nodes pass through
     })
     .use(rehypeRaw)
-    .use(preserveHandlebars as any)
     .use(confluenceXhtml as any)
     .use(preserveBlockMacros as any);  
 
