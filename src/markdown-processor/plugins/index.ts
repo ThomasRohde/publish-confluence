@@ -6,6 +6,7 @@
 export { default as confluenceXhtml } from './confluenceXhtml';
 export { default as preserveHandlebars } from './preserveHandlebars';
 export { default as remarkTableFormat } from './remarkTableFormat';
+export { default as preserveBlockMacros } from './preserveBlockMacros';
 
 // Utility exports 
 export {

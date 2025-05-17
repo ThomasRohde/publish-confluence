@@ -59,6 +59,7 @@ async function loadTemplate(templatePath: string, defaultTemplate: string): Prom
       log.verbose(`Processing markdown template: ${templatePath}`);
       try {
         const processedContent = await processMarkdownFile(resolvedPath);
+        console.log(`Processed markdown template: ${processedContent}`);
         if (typeof processedContent === 'string') {
           log.verbose(`Markdown processing successful for ${templatePath}`);
           return processedContent;

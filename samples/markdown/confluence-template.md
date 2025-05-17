@@ -1,5 +1,6 @@
-{{#confluence-info title="Markdown processing in publishing-confluence" comment=true}}
+{{#confluence-info title="Markdown processing in publishing-confluence" comment=false}}
   ### This is a heading inside a info box
+  > Note this!
 {{/confluence-info}}
 
 # Sample Markdown File

@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import { unified } from 'unified'
-import { confluenceXhtml, preserveHandlebars, remarkTableFormat } from './plugins'
+import { confluenceXhtml, preserveBlockMacros, preserveHandlebars, remarkTableFormat } from './plugins'
 
 /**
  * Processes Markdown content and converts it to Confluence XHTML
@@ -24,6 +24,7 @@ export async function processMarkdown(input: string): Promise<string> {
     .use(rehypeRaw)
     .use(preserveHandlebars as any)
     .use(confluenceXhtml as any)
+    .use(preserveBlockMacros as any);  
 
   // Parse the input to a syntax tree
   const tree = processor.parse(input);
