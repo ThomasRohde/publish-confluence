@@ -1,3 +1,7 @@
+<!-- Quantum Computing in Banking Use Case -->
+
+# {{pageTitle}}
+
 *Last updated: {{currentDate}}*
 
 {{confluence-toc minLevel=2 maxLevel=3}}
@@ -10,16 +14,16 @@ Quantum computing represents a paradigm shift in computational capacity with sig
 **Quantum Computing** leverages quantum-mechanical phenomena such as superposition and entanglement to perform calculations exponentially faster than classical computers for specific problem types.
 {{/confluence-info}}
 
+
+
 ## Strategic Value for Banking
 
 {{#confluence-panel title="Key Business Drivers" borderStyle="solid" borderColor="#cccccc" borderWidth="1" bgColor="#f5f5f5" titleBGColor="#e0e0e0" titleColor="#000000" comment=false}}
-
 - **Risk Management Enhancement**: Quantum algorithms can significantly improve the accuracy and speed of risk calculations
 - **Security Transformation**: Post-quantum cryptography will redefine banking security protocols
 - **Portfolio Optimization**: Quantum approaches may deliver superior investment strategies
 - **Customer Experience**: Faster data processing enables more personalized services
 - **Operational Efficiency**: Complex optimization problems can be solved more effectively
-
 {{/confluence-panel}}
 
 ## Primary Banking Use Cases
