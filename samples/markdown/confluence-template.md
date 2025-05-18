@@ -80,10 +80,13 @@ from qiskit.visualization import plot_histogram
 import numpy as np
 
 def quantum_monte_carlo(iterations, dimension, function):
+
     # Set up quantum circuit
+
     qc = QuantumCircuit(dimension*2, dimension)
     
     # Apply Hadamard gates to create superposition
+
     for i in range(dimension):
         qc.h(i)
     
@@ -91,9 +94,11 @@ def quantum_monte_carlo(iterations, dimension, function):
     # [...implementation details...]
     
     # Measure results
+
     qc.measure(range(dimension), range(dimension))
     
     # Execute and collect results
+
     simulator = Aer.get_backend('qasm_simulator')
     job = execute(qc, simulator, shots=iterations)
     result = job.result()
@@ -103,6 +108,7 @@ def quantum_monte_carlo(iterations, dimension, function):
     # [...processing logic...]
     
     return estimated_value, uncertainty
+
 {{/confluence-code}}
 
 {{/confluence-tab}}

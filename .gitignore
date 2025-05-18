@@ -65,3 +65,4 @@ log.txt
 dry/
 samples/macro-showcase/package-lock.json
 samples/markdown/output/
+samples/markdown/confluence-template.hbs
