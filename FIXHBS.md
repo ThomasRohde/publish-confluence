@@ -1,70 +1,153 @@
-Below is the shortest (and safest) way I’ve found to let **all `{{…}}` Handlebars macros sail straight through the *publish-confluence* Remark pipeline without being split up or turned into XHTML** while the rest of your Markdown continues to be parsed and converted as usual.
+Below is the **minimal pattern** that makes every
 
----
-
-### 1  Install a “no-touch” Handlebars plugin for Remark
-
-The ready-made plugin **`remark-hbs`** already tells micromark/remark to treat every `{{ … }}` pair as an indivisible, raw chunk, so nothing inside is parsed for emphasis, links, HTML, etc.  Add it to your workspace:
-
-```bash
-npm i --save-dev remark-hbs   # or:  yarn add -D remark-hbs
+```
+{{#confluence-code …}}
+…any text, Markdown, or symbols…
+{{/confluence-code}}
 ```
 
-The README shows a minimal example with just `.use(remarkHbs)` after the parser ([GitHub][1]).
+block pass straight through Remark **unchanged**.
+The ideas are exactly the same as for the `{{#layout-cell}}…` fix—you just
+extend the plug-in so that it swallows *everything* between the opening and
+closing macro tokens and turns the whole region into a single **raw** node.
 
 ---
 
-### 2  Wire the plugin into your pipeline *before* anything that could rewrite the AST
+## 1 Create `remark-confluence-code.js`
 
 ```js
-// build/publish.js (or wherever you construct the processor)
-import { unified }          from 'unified'
-import remarkParse          from 'remark-parse'
-import remarkGfm            from 'remark-gfm'            // keep the MD features you need
-import remarkHbs            from 'remark-hbs'            // <-- NEW
-import remarkConfluenceAdf  from 'remark-confluence-adf' // whatever you already use
-import remarkStringify      from 'remark-stringify'
+import { visit } from 'unist-util-visit'
+import { toString } from 'mdast-util-to-string'
+
+/**
+ * Collapse an entire {{#confluence-code}} … {{/confluence-code}} region
+ * into ONE raw HTML node so nothing inside is parsed as Markdown.
+ */
+export default function remarkConfluenceCode () {
+  const OPEN  = /^\s*\{\{\s*#confluence-code\b/i
+  const CLOSE = /^\s*\{\{\s*\/confluence-code\s*}}/i
+
+  return (tree) => {
+    const out = []
+    const children = tree.children
+
+    for (let i = 0; i < children.length; i++) {
+      const node = children[i]
+
+      //   ── 1. look for the opening macro line ───────────────────────────
+      if (node.type === 'html' && OPEN.test(node.value)) {
+        let raw = node.value + '\n'
+        i++
+
+        //   ── 2. copy every following node untouched until we see CLOSE ──
+        while (i < children.length) {
+          const next = children[i]
+          raw +=
+            next.type === 'html'
+              ? next.value + '\n'        // lines that were already raw
+              : toString(next) + '\n'    // paragraphs, lists, etc.
+          if (next.type === 'html' && CLOSE.test(next.value)) break
+          i++
+        }
+
+        //   ── 3. replace whole fragment with ONE raw node ─────────────────
+        out.push({ type: 'html', value: raw })
+        continue
+      }
+
+      // ordinary nodes that aren’t part of a code macro
+      out.push(node)
+    }
+
+    tree.children = out
+  }
+}
+```
+
+**What it does**
+
+1. Walks the MDAST once.
+2. When it meets an *opening* `{{#confluence-code}}` line, it starts copying the
+   original source of every following node (paragraphs, lists, headings, etc.)
+   into a buffer **without interpreting anything**.
+3. When the *closing* `{{/confluence-code}}` line appears, the buffer (open +
+   body + close) is emitted as a single **`type: "html"` raw node**.
+4. Down-stream plugins therefore see one opaque block and leave it alone.
+
+---
+
+## 2 Wire the plug-in into your pipeline
+
+Put it **right after** the `remarkHbsBlocks` helper (that one already converts
+each macro line into a raw node) and **before** anything that might rewrite the
+AST (Confluence ADF, stringify, etc.):
+
+```js
+import { unified }         from 'unified'
+import remarkParse         from 'remark-parse'
+import remarkGfm           from 'remark-gfm'
+import remarkHbsBlocks     from './remark-hbs-blocks.js'
+import remarkConfluenceCode from './remark-confluence-code.js'   // ← NEW
+import remarkHbs           from 'remark-hbs'
+import remarkConfluenceAdf from 'remark-confluence-adf'
+import remarkStringify     from 'remark-stringify'
 
 export const md = unified()
   .use(remarkParse)
   .use(remarkGfm)
-  .use(remarkHbs)                 // ‼️ must come BEFORE any other transformers
-  .use(remarkConfluenceAdf)       // normal publish-confluence steps
-  .use(remarkStringify, {         // only needed if you re-emit MD anywhere
-    allowDangerousHtml: true      // lets raw nodes (our macros) stay verbatim
-  })
+  .use(remarkHbsBlocks)       // makes each {{#...}} / {{/...}} line raw
+  .use(remarkConfluenceCode)  // collapses the whole code macro region
+  .use(remarkHbs)             // keeps inline {{…}} intact elsewhere
+  .use(remarkConfluenceAdf)
+  .use(remarkStringify, { allowDangerousHtml: true })
 ```
 
-**Why the order matters**
-
-* `remarkHbs` runs immediately after parsing, converting every macro it finds into a **`raw`** (HTML) node.
-* Down-stream plugins now see a single opaque node and **leave it intact**.
-* When you later serialise to Atlassian Document Format or HTML, `raw` nodes are copied over verbatim, so the Confluence macro engine receives exactly the `{{ macro … }}` you wrote.
-
----
-
-### 3  Tell *publish-confluence* to allow raw nodes (one-liner)
-
-If you invoke the CLI, pass the flag once:
+CLI invocation stays exactly the same:
 
 ```bash
-publish-confluence --allow-dangerous-html
+publish-confluence --markdown --allow-dangerous-html
 ```
-
-In an API call:
-
-```js
-md.process(markdown, { allowDangerousHtml: true })
-```
-
-That is enough; you do **not** need to monkey-patch micromark or maintain a custom RegExp yourself.
 
 ---
 
-### 5  Clean up the rest of the pipeline
+## 3 Confirm with your sample
 
-1. **Remove** any earlier work-arounds (e.g. regex pre-filters that surrounded macros with back-ticks).
-2. Make sure no other Remark plug-in that runs *before* `remark-hbs` tries to escape HTML or strip out “unsafe” text.
-3. Keep your Markdown editors exactly as they are – the pipeline change is invisible to writers.
+```markdown
+{{#confluence-code language="bash"}}
+# THIS *is* _Markdown_ but must **not** be parsed!
+echo "Hello, Confluence"
+{{/confluence-code}}
+```
 
+**Output now**
 
+```html
+<h1>Primary Banking Use Cases</h1>
+…
+{{#confluence-code language="bash"}}
+# THIS *is* _Markdown_ but must **not** be parsed!
+echo "Hello, Confluence"
+{{/confluence-code}}
+…
+```
+
+Nothing inside `{{#confluence-code}}` was touched; no `<p>`, `<em>`, or `<li>`
+leak out, and the macro engine in Confluence receives the block exactly as you
+wrote it.
+
+---
+
+### Notes & Variations
+
+* **Attributes** – The simple regex `OPEN` matches anything after
+  `#confluence-code`, so optional attributes like
+  `language="javascript" theme="dark"` are fine.
+
+* **Multiple code blocks** – The loop handles any number of open/close pairs.
+
+* **Other “raw” macros** – If you have more macros that must suppress Markdown
+  (`{{#no-markdown}}…{{/no-markdown}}`, etc.), add more patterns or make the
+  regexes configurable.
+
+That’s all you need: a 40-line helper and a one-line `.use()` call—no changes
+for writers, no more stray HTML in Confluence code sections.

@@ -7,7 +7,7 @@ export { default as confluenceXhtml } from './confluenceXhtml';
 export { default as remarkTableFormat } from './remarkTableFormat';
 export { default as preserveBlockMacros } from './preserveBlockMacros';
 export { default as remarkHbsBlocks } from './remarkHbsBlocks';
-
+export { default as remarkConfluenceCode } from './remarkConfluenceCode';
 
 
 // Utility exports 
