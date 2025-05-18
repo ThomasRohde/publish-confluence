@@ -7,7 +7,7 @@ import remarkRehype from 'remark-rehype'
 
 import remarkHbs from 'remark-hbs'
 import { unified } from 'unified'
-import { confluenceXhtml, preserveBlockMacros, remarkTableFormat, remarkConfluenceCode, remarkHbsBlocks} from './plugins'
+import { confluenceXhtml, preserveBlockMacros, remarkHbsBlocks, remarkTableFormat } from './plugins'
 
 /**
  * Processes Markdown content and converts it to Confluence XHTML
@@ -20,7 +20,6 @@ export async function processMarkdown(input: string): Promise<string> {
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkHbsBlocks)   
-    .use(remarkConfluenceCode)
     .use(remarkHbs)              // Add before any transformers to preserve Handlebars syntax
     .use(remarkTableFormat as any)
     .use(remarkRehype, {

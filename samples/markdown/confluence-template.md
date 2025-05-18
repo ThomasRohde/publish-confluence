@@ -77,7 +77,7 @@ Quantum computing enables significantly more sophisticated risk modeling capabil
 
 {{confluence-status type="green" text="High Impact Potential"}}
 
-{{#confluence-code language="python" title="Quantum Monte Carlo Simulation Example" linenumbers=true}}
+```python
 from qiskit import QuantumCircuit, Aer, execute
 from qiskit.visualization import plot_histogram
 import numpy as np
@@ -106,7 +106,7 @@ def quantum_monte_carlo(iterations, dimension, function):
     # [...processing logic...]
     
     return estimated_value, uncertainty
-{{/confluence-code}}
+```
 
 {{/confluence-tab}}
 
