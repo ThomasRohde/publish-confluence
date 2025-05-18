@@ -5,7 +5,6 @@ import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 
-import remarkHbs from 'remark-hbs'
 import { unified } from 'unified'
 import { confluenceXhtml, preserveBlockMacros, remarkTableFormat, remarkConfluenceCode, remarkHbsBlocks} from './plugins'
 
@@ -29,11 +28,12 @@ export async function processMarkdown(input: string): Promise<string> {
     .use(confluenceXhtml as any)
     .use(preserveBlockMacros as any);  
 
-  // Parse the input to a syntax tree
-  const tree = processor.parse(input);
+  // Parse the input to a syntax tree with positional info
+  const file = { value: input };
+  const tree = processor.parse(file);
   
   // Run all plugins (transformations)
-  const transformed = await processor.run(tree);
+  const transformed = await processor.run(tree, file);
   
   // Serialize the transformed tree
   const output = customSerializer(transformed);
