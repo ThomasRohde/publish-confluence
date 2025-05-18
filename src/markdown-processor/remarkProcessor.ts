@@ -21,7 +21,6 @@ export async function processMarkdown(input: string): Promise<string> {
     .use(remarkGfm)
     .use(remarkHbsBlocks)   
     .use(remarkConfluenceCode)
-    .use(remarkHbs)              // Add before any transformers to preserve Handlebars syntax
     .use(remarkTableFormat as any)
     .use(remarkRehype, {
       allowDangerousHtml: true   // Required to let raw nodes pass through

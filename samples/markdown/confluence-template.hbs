@@ -1,234 +1,220 @@
-{{#confluence-info title="Markdown processing in publishing-confluence" comment=false}}
-
-<h3>This is a heading inside a info box</h3>
+<h2>Executive Summary</h2>
+<p>Quantum computing represents a paradigm shift in computational capacity with significant implications for the banking sector. This document outlines key use cases, challenges, and strategic considerations for financial institutions exploring quantum technologies.</p>
+<p>{{#confluence-info title="Definition" comment=false}}
+<strong>Quantum Computing</strong> leverages quantum-mechanical phenomena such as superposition and entanglement to perform calculations exponentially faster than classical computers for specific problem types.
+{{/confluence-info}}</p>
+<h2>Strategic Value for Banking</h2>
+{{#confluence-panel title="Key Business Drivers" borderStyle="solid" borderColor="#cccccc" borderWidth="1" bgColor="#f5f5f5" titleBGColor="#e0e0e0" titleColor="#000000" comment=false}}
 <ul>
-  <li>This is a list item inside the info box</li>
-  <li>This is another list item</li>
+<li><strong>Risk Management Enhancement</strong>: Quantum algorithms can significantly improve the accuracy and speed of risk calculations</li>
+<li><strong>Security Transformation</strong>: Post-quantum cryptography will redefine banking security protocols</li>
+<li><strong>Portfolio Optimization</strong>: Quantum approaches may deliver superior investment strategies</li>
+<li><strong>Customer Experience</strong>: Faster data processing enables more personalized services</li>
+<li><strong>Operational Efficiency</strong>: Complex optimization problems can be solved more effectively</li>
 </ul>
-<blockquote>
-  <p>This is a blockquote inside the info box</p>
-</blockquote>
-{{/confluence-info}}
-<h1>Sample Markdown File</h1>
-<p>This is a sample Markdown file to test the integration with publish-confluence. It demonstrates various GitHub
-  Flavored Markdown features that are supported by the publish-confluence tool.</p>
-<h2>Text Formatting</h2>
+{{/confluence-panel}}
+<h2>Primary Banking Use Cases</h2>
+{{#confluence-layout}}
+{{#layout-section type="three_equal"}}
+{{#layout-cell}}
+<h3>Risk Assessment</h3>
 <ul>
-  <li><strong>Bold text</strong> and <em>italic text</em></li>
-  <li><em><strong>Bold and italic text</strong></em></li>
-  <li><del>Strikethrough text</del></li>
-  <li><sub>Subscript</sub> and <sup>Superscript</sup></li>
-  <li><code>Inline code</code> with backticks</li>
-  <li>
-    <blockquote>
-      <p>Blockquote text</p>
-    </blockquote>
-  </li>
-  <li>Horizontal rule below:</li>
+<li>Monte Carlo simulations</li>
+<li>Credit scoring innovations</li>
+<li>Market volatility forecasting</li>
+<li>Stress testing acceleration</li>
 </ul>
-<hr>
-</hr>
-<h2>Lists</h2>
-<h3>Unordered Lists</h3>
+{{/layout-cell}}
+{{#layout-cell}}
+<h3>Trading & Investment</h3>
 <ul>
-  <li>First level item
-    <ul>
-      <li>Second level item
-        <ul>
-          <li>Third level item
-            <ul>
-              <li>Fourth level item</li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li>Another first level item
-    <ul>
-      <li>Mixed bullet styles</li>
-    </ul>
-    <ul>
-      <li>Work as well</li>
-    </ul>
-  </li>
+<li>Portfolio optimization</li>
+<li>Arbitrage detection</li>
+<li>High-frequency algorithms</li>
+<li>Market prediction models</li>
 </ul>
-<h3>Ordered Lists</h3>
+{{/layout-cell}}
+{{#layout-cell}}
+<h3>Security & Fraud</h3>
+<ul>
+<li>Post-quantum cryptography</li>
+<li>Fraud pattern detection</li>
+<li>Quantum-secure communications</li>
+<li>Authentication enhancement</li>
+</ul>
+{{/layout-cell}}
+{{/layout-section}}
+{{/confluence-layout}}
+<h2>Detailed Application Areas</h2>
+{{#confluence-tabs disposition="horizontal" outline=true}}
+{{#confluence-tab name="Risk Modeling" icon="icon-sp-flag"}}
+<h3>Risk Modeling Applications</h3>
+<p>Quantum computing enables significantly more sophisticated risk modeling capabilities through:</p>
+<ul>
+<li><strong>Enhanced Monte Carlo Simulations</strong>: Quantum algorithms can sample from complex probability distributions exponentially faster than classical methods</li>
+<li><strong>Credit Risk Assessment</strong>: More accurate evaluation of default probabilities by processing larger datasets with quantum machine learning</li>
+<li><strong>Market Risk Calculation</strong>: Real-time VaR (Value at Risk) computations incorporating more variables and scenarios</li>
+<li><strong>Dynamic Stress Testing</strong>: Complex scenario analysis that would be computationally prohibitive with classical systems</li>
+</ul>
+<p>{{confluence-status type="green" text="High Impact Potential"}}</p>
+{{#confluence-code language="python" title="Quantum Monte Carlo Simulation Example" linenumbers=true}}
+from qiskit import QuantumCircuit, Aer, execute
+from qiskit.visualization import plot_histogram
+import numpy as np
+def quantum_monte_carlo(iterations, dimension, function):
+# Set up quantum circuit
+qc = QuantumCircuit(dimension*2, dimension)
+# Apply Hadamard gates to create superposition
+for i in range(dimension):
+    qc.h(i)
+# Apply function evaluation (problem specific)
+# [...implementation details...]
+# Measure results
+qc.measure(range(dimension), range(dimension))
+# Execute and collect results
+simulator = Aer.get_backend('qasm_simulator')
+job = execute(qc, simulator, shots=iterations)
+result = job.result()
+counts = result.get_counts(qc)
+# Process results to estimate integral
+# [...processing logic...]
+return estimated_value, uncertainty
+{{/confluence-code}}
+{{/confluence-tab}}
+{{#confluence-tab name="Portfolio Optimization" icon="icon-sp-star"}}
+<h3>Portfolio Optimization</h3>
+<p>Quantum algorithms can potentially solve complex portfolio optimization problems more efficiently:</p>
+<ul>
+<li><strong>Quadratic Unconstrained Binary Optimization (QUBO)</strong> models can be mapped to quantum systems</li>
+<li><strong>Markowitz Portfolio Theory</strong> implementation with quantum advantage for large asset pools</li>
+<li><strong>Multi-period Rebalancing</strong> strategies optimized through quantum annealing or gate-based approaches</li>
+<li><strong>Constraints Satisfaction</strong> for complex regulatory and client requirements</li>
+</ul>
+<p>{{confluence-status type="blue" text="Active Research"}}</p>
+<p>Traditional portfolio optimization requires solving quadratic programming problems that grow exponentially in complexity with the number of assets. Quantum approaches using either:</p>
 <ol>
-  <li>First item</li>
-  <li>Second item
-    <ol>
-      <li>Nested item 1</li>
-      <li>Nested item 2</li>
-    </ol>
-  </li>
-  <li>Third item</li>
+<li><strong>Quantum Annealing</strong> (e.g., D-Wave systems)</li>
+<li><strong>Quantum Approximate Optimization Algorithm (QAOA)</strong></li>
+<li><strong>Variational Quantum Eigensolver (VQE)</strong></li>
 </ol>
-<h3>Task Lists</h3>
-<ul className="contains-task-list">
-  <li className="task-list-item"><input type="checkbox" checked="true" disabled="true"></input> Completed task</li>
-  <li className="task-list-item"><input type="checkbox" disabled="true"></input> Uncompleted task</li>
-  <li className="task-list-item"><input type="checkbox" checked="true" disabled="true"></input> @mentions, #refs, <a
-      href="https://github.com">links</a>, <strong>formatting</strong>, and <del>tags</del> supported</li>
-  <li className="task-list-item"><input type="checkbox" disabled="true"></input> List syntax required (any unordered or
-    ordered list supported)</li>
-</ul>
-<h2>Links and References</h2>
+<p>Can theoretically provide significant speedups for portfolios with hundreds or thousands of assets.</p>
+{{/confluence-tab}}
+{{#confluence-tab name="Fraud Detection" icon="icon-sp-lock"}}
+<h3>Fraud Detection & Security</h3>
+<p>Quantum computing offers both challenges and opportunities for banking security:</p>
 <ul>
-  <li><a href="https://github.com">Basic link to GitHub</a></li>
-  <li><a href="https://github.com" title="GitHub's Homepage">Link with title</a></li>
-  <li>[Reference-style link][reference text]</li>
-  <li><a href="../README.md">Relative link to a repository file</a></li>
-  <li>Auto-converted link: <a href="https://www.example.com">https://www.example.com</a></li>
-  <li>Email link: <a href="mailto:example@example.com">example@example.com</a></li>
+<li><strong>Quantum Machine Learning</strong> for anomaly detection with higher accuracy</li>
+<li><strong>Pattern Recognition</strong> in transaction data revealing previously undetectable fraud</li>
+<li><strong>Post-Quantum Cryptography</strong> preparation for quantum threat to current encryption</li>
+<li><strong>Secure Multi-party Computation</strong> enhanced by quantum protocols</li>
 </ul>
-<h2>Code Samples</h2>
-<p>Inline code: <code>const greeting = "Hello World";</code></p>
-{{#confluence-code language="javascript" linenumbers=true}}
-// JavaScript code block with syntax highlighting
-function hello(name) {
-const greeting = `Hello, ${name}!`;
-console.log(greeting);
-return greeting;
-}
-
-// Call the function
-hello("Confluence User");
-{{/confluence-code}}
-{{#confluence-code language="typescript" linenumbers=true}}
-// TypeScript code example
-interface User {
-name: string;
-age: number;
-isAdmin: boolean;
-}
-
-class UserManager {
-private readonly users: User[] = [];
-
-public addUser(user: User): void {
-this.users.push(user);
-console.log(`Added user: ${user.name}`);
-}
-
-public getAdmins(): User[] {
-return this.users.filter(user => user.isAdmin);
-}
-}
-{{/confluence-code}}
-{{#confluence-code language="html" linenumbers=true}}
-<!-- HTML code example -->
-<div class="container">
-  <h1 class="title">Hello Confluence</h1>
-  <p>This is an HTML example that will be rendered in Confluence.</p>
-  <button onclick="alert('Clicked!')">Click me</button>
-</div>
-{{/confluence-code}}
-<h2>Tables</h2>
-<table>
-  <thead>
-    <tr>
-      <th scope="col">Feature</th>
-      <th scope="col" style="text-align: center;">Basic Support</th>
-      <th scope="col" style="text-align: center;">Advanced Support</th>
-      <th scope="col">Notes</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Text formatting</td>
-      <td style="text-align: center;">✅</td>
-      <td style="text-align: center;">✅</td>
-      <td>Supports <strong>bold</strong>, <em>italic</em>, and <del>strikethrough</del></td>
-    </tr>
-    <tr>
-      <td>Code blocks</td>
-      <td style="text-align: center;">✅</td>
-      <td style="text-align: center;">✅</td>
-      <td>With syntax highlighting</td>
-    </tr>
-    <tr>
-      <td>Tables</td>
-      <td style="text-align: center;">✅</td>
-      <td style="text-align: center;">⚠️</td>
-      <td>Some advanced features may not work</td>
-    </tr>
-    <tr>
-      <td>Handlebars</td>
-      <td style="text-align: center;">✅</td>
-      <td style="text-align: center;">✅</td>
-      <td>Template expressions preserved</td>
-    </tr>
-    <tr>
-      <td>Images</td>
-      <td style="text-align: center;">✅</td>
-      <td style="text-align: center;">✅</td>
-      <td>Supports alt text and titles</td>
-    </tr>
-  </tbody>
-</table>
-<h3>Table Alignment</h3>
-<table>
-  <thead>
-    <tr>
-      <th scope="col" style="text-align: left;">Left-aligned</th>
-      <th scope="col" style="text-align: center;">Center-aligned</th>
-      <th scope="col" style="text-align: right;">Right-aligned</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: left;">Left</td>
-      <td style="text-align: center;">Center</td>
-      <td style="text-align: right;">Right</td>
-    </tr>
-    <tr>
-      <td style="text-align: left;">Text</td>
-      <td style="text-align: center;">Text</td>
-      <td style="text-align: right;">Text</td>
-    </tr>
-  </tbody>
-</table>
-<h2>Escaping Characters</h2>
-<p>You can escape Markdown formatting characters with a backslash: *not italic*, `not code`</p>
-<h2>Inline HTML</h2>
-{{#confluence-expand title="Click to expand details section"}}
-<p>This is hidden content that can be expanded.</p>
+<p>{{confluence-status type="yellow" text="Urgent Preparation Needed"}}</p>
+{{#confluence-warning title="Cryptographic Vulnerability" comment=false}}
+<p>Shor's algorithm running on a sufficiently powerful quantum computer could break RSA and ECC encryption, which secures most banking transactions today. Financial institutions should prepare migration paths to post-quantum cryptographic standards.</p>
+{{/confluence-warning}}
+<p>NIST has selected several post-quantum cryptographic algorithms that banks should begin evaluating:</p>
 <ul>
-  <li>You can include lists</li>
-  <li>And other markdown formatting</li>
-  <li>Inside HTML blocks</li>
+<li>CRYSTALS-Kyber (key establishment)</li>
+<li>CRYSTALS-Dilithium (digital signatures)</li>
+<li>FALCON (digital signatures)</li>
+<li>SPHINCS+ (digital signatures)</li>
 </ul>
+{{/confluence-tab}}
+{{/confluence-tabs}}
+<h2>Implementation Timeline & Roadmap</h2>
+{{#confluence-expand title="Click to view implementation roadmap"}}
+<table><thead><tr><th scope="col">Phase</th><th scope="col">Timeframe</th><th scope="col">Focus Areas</th><th scope="col">Key Activities</th></tr></thead><tbody><tr><td><strong>Awareness & Education</strong></td><td>2025-2026</td><td>Knowledge building</td><td><ul><li>Executive education</li><li>Talent acquisition</li><li>Use case identification</li></ul></td></tr><tr><td><strong>Experimentation</strong></td><td>2026-2028</td><td>Proof of concepts</td><td><ul><li>Quantum algorithm testing</li><li>Vendor partnerships</li><li>Small-scale applications</li></ul></td></tr><tr><td><strong>Post-Quantum Security</strong></td><td>2027-2029</td><td>Cryptographic migration</td><td><ul><li>Cryptographic inventory</li><li>PQC implementation</li><li>Security testing</li></ul></td></tr><tr><td><strong>Hybrid Deployment</strong></td><td>2028-2030</td><td>Production integration</td><td><ul><li>Hybrid quantum-classical systems</li><li>API development</li><li>Process integration</li></ul></td></tr><tr><td><strong>Scaled Adoption</strong></td><td>2030+</td><td>Business transformation</td><td><ul><li>Full production deployment</li><li>Legacy system replacement</li><li>New quantum-native services</li></ul></td></tr></tbody></table>
 {{/confluence-expand}}
-<div align="center">
-  <h3>Centered Content</h3>
-  <p>This text and heading will be centered when rendered.</p>
-</div>
-<h2>Quotes and Footnotes</h2>
-<blockquote>
-  <p>This is a single line quote</p>
-</blockquote>
-<blockquote>
-  <p>This is a multi-line blockquote.</p>
-  <p>It can span multiple paragraphs.</p>
-  <blockquote>
-    <p>And can be nested.</p>
-  </blockquote>
-</blockquote>
-<p>Here's a simple footnote reference<sup>{{confluence-anchor name="footnote-ref-1"}}{{confluence-link type="anchor"
-    text="1" anchor="footnote-1"}}</sup>.</p>
-<h2>Emojis</h2>
-<p>🔗😂🪵🔊🔨📐🪟</p>
-<h2>Handlebars Templates</h2>
-<p>This should preserve Handlebars expressions: {{pageTitle}} and {{currentDate}}</p>
-<h2>Keyboard and Other Special Formatting</h2>
-<p>Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Del</kbd> to restart your computer.</p>
-<p><abbr title="HyperText Markup Language">HTML</abbr> is the standard markup language for web pages.</p>
-<p><mark>Highlighted text</mark> can be created using the mark tag.</p>
-<hr>
-</hr>
+<h2>Current Banking Industry Initiatives</h2>
+<p>Several leading financial institutions have already begun exploring quantum computing applications:</p>
+{{#confluence-layout}}
+{{#layout-section type="two_equal"}}
+{{#layout-cell}}
+<h3>Early Adopters</h3>
+<ul>
+<li><strong>JPMorgan Chase</strong>: Quantum algorithms for portfolio optimization and risk analysis</li>
+<li><strong>Goldman Sachs</strong>: Investment in quantum computing startups and internal research</li>
+<li><strong>BBVA</strong>: Research collaboration with quantum software companies</li>
+<li><strong>Barclays</strong>: Quantum computing exploration with university partnerships</li>
+<li><strong>Standard Chartered</strong>: Quantum-safe cryptography implementation planning</li>
+</ul>
+{{/layout-cell}}
+{{#layout-cell}}
+<h3>Consortium Activities</h3>
+<ul>
+<li><strong>QED-C Financial Services Technical Advisory Committee</strong></li>
+<li><strong>European Quantum Industry Consortium (QuIC)</strong></li>
+<li><strong>Quantum Economic Development Consortium</strong></li>
+<li><strong>IEEE Quantum Finance Working Group</strong></li>
+<li><strong>Financial Services Quantum Computing Working Group</strong></li>
+</ul>
+{{/layout-cell}}
+{{/layout-section}}
+{{/confluence-layout}}
+<h2>Implementation Considerations</h2>
+{{#confluence-note title="Technical Requirements" comment=false}}
+<ul>
+<li><strong>Access Models</strong>: Cloud-based quantum computing services vs. on-premises quantum simulators</li>
+<li><strong>Integration</strong>: APIs and frameworks for connecting quantum services with existing systems</li>
+<li><strong>Talent</strong>: Specialized quantum algorithm developers and quantum-aware data scientists</li>
+<li><strong>Computing Resources</strong>: Hybrid quantum-classical infrastructure planning</li>
+</ul>
+{{/confluence-note}}
+{{#confluence-tip title="Getting Started" comment=false}}
+<ol>
+<li>Establish a quantum computing center of excellence</li>
+<li>Partner with quantum technology vendors for educational workshops</li>
+<li>Identify high-value use cases specific to your business priorities</li>
+<li>Start small with proof-of-concept projects using quantum simulators</li>
+<li>Develop a quantum-safe security transition strategy</li>
+</ol>
+{{/confluence-tip}}
+<h2>Challenges & Limitations</h2>
+{{#confluence-panel title="Current Quantum Computing Challenges" borderStyle="solid" borderColor="#ffcccc" borderWidth="1" bgColor="#fff5f5" titleBGColor="#ffcccc" titleColor="#990000" comment=false}}
+<ul>
+<li><strong>Hardware Immaturity</strong>: Current quantum processors have limited qubit counts and high error rates</li>
+<li><strong>Decoherence</strong>: Quantum states are fragile and difficult to maintain</li>
+<li><strong>Error Correction</strong>: Quantum error correction requires significant overhead</li>
+<li><strong>Algorithm Development</strong>: Limited set of proven quantum algorithms with definitive advantages</li>
+<li><strong>Talent Scarcity</strong>: Shortage of professionals with quantum computing expertise</li>
+<li><strong>Integration Complexity</strong>: Connecting quantum and classical systems presents technical challenges</li>
+</ul>
+{{/confluence-panel}}
+<h2>ROI Considerations</h2>
+<p>Investment in quantum computing capabilities should be evaluated against:</p>
+<ol>
+<li><strong>Competitive Advantage</strong>: Early adoption may provide significant differentiation</li>
+<li><strong>Risk Mitigation</strong>: Preparation for quantum threats to cryptographic systems</li>
+<li><strong>Efficiency Gains</strong>: Potential cost savings from optimized operations</li>
+<li><strong>New Product Development</strong>: Novel financial products enabled by quantum computing</li>
+<li><strong>Learning Curve</strong>: Building institutional knowledge ahead of widespread adoption</li>
+</ol>
+{{#confluence-warning title="Investment Caution" comment=true}}
+<p>Quantum computing remains an emerging technology with uncertain timelines to practical advantage. Organizations should balance speculative investment with pragmatic near-term applications.</p>
+{{/confluence-warning}}
+<h2>Glossary of Quantum Computing Terms</h2>
+{{#confluence-expand title="Expand for Quantum Computing Terminology"}}
+<table><thead><tr><th scope="col">Term</th><th scope="col">Definition</th></tr></thead><tbody><tr><td><strong>Qubit</strong></td><td>The fundamental unit of quantum information, analogous to a classical bit but capable of superposition</td></tr><tr><td><strong>Superposition</strong></td><td>A quantum principle where qubits can exist in multiple states simultaneously</td></tr><tr><td><strong>Entanglement</strong></td><td>A quantum phenomenon where qubits become correlated such that the state of one instantly affects another</td></tr><tr><td><strong>Quantum Gate</strong></td><td>Operations that manipulate quantum states, analogous to classical logic gates</td></tr><tr><td><strong>Quantum Circuit</strong></td><td>A sequence of quantum gates and measurements that perform quantum computation</td></tr><tr><td><strong>Quantum Advantage</strong></td><td>The milestone when quantum computers can solve problems beyond classical capability</td></tr><tr><td><strong>Quantum Supremacy</strong></td><td>Demonstration that a quantum computer can solve a problem that no classical computer can solve in reasonable time</td></tr><tr><td><strong>Quantum Annealing</strong></td><td>A quantum computing approach optimized for solving optimization problems</td></tr><tr><td><strong>Gate-based Quantum Computing</strong></td><td>The universal quantum computing approach using quantum logic gates</td></tr><tr><td><strong>NISQ</strong></td><td>Noisy Intermediate-Scale Quantum - the current era of quantum computers with limited qubits and high error rates</td></tr><tr><td><strong>Post-Quantum Cryptography</strong></td><td>Cryptographic algorithms believed to be secure against quantum computer attacks</td></tr><tr><td><strong>Quantum Key Distribution</strong></td><td>A secure communication method using quantum mechanics to establish encryption keys</td></tr></tbody></table>
+{{/confluence-expand}}
+<h2>References & Resources</h2>
+{{#confluence-info title="Key References" comment=false}}
+<ol>
+<li>World Economic Forum: "The Impact of Quantum Computing on Financial Services"</li>
+<li>McKinsey & Company: "Quantum Computing Use Cases for Financial Services"</li>
+<li>IBM: "Quantum Computing Applications in Banking"</li>
+<li>NIST: "Post-Quantum Cryptography Standardization"</li>
+<li>D-Wave Systems: "Quantum Computing Applications in Finance"</li>
+</ol>
+{{/confluence-info}}
+{{#confluence-note title="Additional Resources" comment=true}}
+<ul>
+<li><strong>Internal Contacts</strong>: [Quantum Computing Center of Excellence]</li>
+<li><strong>Vendor Relationships</strong>: [List of current quantum computing partners]</li>
+<li><strong>Training Resources</strong>: [Links to internal educational materials]</li>
+<li><strong>Development Environment</strong>: [Access information for quantum computing simulators]</li>
+</ul>
+{{/confluence-note}}
+<hr></hr>
+<p><em>For more information, contact the Emerging Technology team.</em></p>
+<p>{{confluence-anchor name="quantum-banking-footer"}}</p>
 <p><em>Last updated: {{currentDate}}</em></p>
-<h2>Footnotes</h2>
-{{confluence-anchor name="footnote-1"}}
-<p>This is the footnote content. {{confluence-link type="anchor" text="↩" anchor="footnote-ref-1" tooltip="Back to
-  reference"}}</p>
