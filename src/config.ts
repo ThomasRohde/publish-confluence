@@ -305,13 +305,13 @@ export function updatePageInConfig(
   if (page.parentTitle) {
     pageConfig.parentPageTitle = page.parentTitle;
   }
-  
-  // If this is the root config and has no pageTitle set, use the page title
+    // If this is the root config and has no pageTitle set, use the page title
   if (!config.pageTitle && !page.parentId) {
     const updatedConfig = {
       ...config,
       spaceKey: page.spaceKey,
       pageTitle: page.title,
+      templatePath: page.path ? page.path : './confluence-template.html',
     };
     return updatedConfig;
   }
