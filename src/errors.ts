@@ -281,10 +281,10 @@ export class BadRequestError extends ConfluenceApiError {
           
           this.message = enhancedMessage;
         }
-      }
-    } catch (parseError) {
+      }    } catch (parseError) {
       // Fallback if there's an error processing the XHTML errors
-      console.error('Error processing XHTML validation errors:', parseError);
+      // Use a warning instead of error and without showing the full parseError
+      // This prevents raw error objects from going to console
     }
   }
 

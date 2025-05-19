@@ -202,17 +202,31 @@ export class ConfluenceClient {
                     
                     const location = lineColMatch ? 
                       `at line ${lineColMatch[1]}, column ${lineColMatch[2]}` : '';
+                        // Log a simplified error message without the full error object data
+                    // This prevents raw JSON data from appearing in the console
+                    const locationStr = lineColMatch ? 
+                      `at line ${lineColMatch[1]}, column ${lineColMatch[2]}` : '';
                       
-                    this.logger.error(`Malformed XHTML content detected ${location}`, {
+                    this.logger.error(`Malformed XHTML content detected ${locationStr}`);
+                    this.logger.error(`Issue: ${specificError}`);
+                    
+                    // Only log solutions at info level to keep error output clean
+                    this.logger.info('Suggestions:');
+                    solutions.forEach((solution, index) => {
+                      this.logger.info(`  ${index + 1}. ${solution}`);
+                    });
+                    
+                    // Additional common suggestions
+                    this.logger.info('  ' + (solutions.length + 1) + '. Ensure special characters are properly escaped');
+                    this.logger.info('  ' + (solutions.length + 2) + '. Validate your HTML/XHTML using a checker tool');
+                    this.logger.info('  ' + (solutions.length + 3) + '. Make sure HTML entities use the correct format (e.g., &amp; for &)');
+                    
+                    // Only log the detailed context when in debug mode
+                    this.logger.debug('Detailed error context:', {
                       ...errorContext,
                       errorMessage: errorData.message,
                       specificError: specificError,
-                      location: lineColMatch ? { line: parseInt(lineColMatch[1]), col: parseInt(lineColMatch[2]) } : undefined,
-                      possibleSolutions: solutions.concat([
-                        'Ensure special characters are properly escaped',
-                        'Validate your HTML/XHTML using a checker tool',
-                        'Make sure HTML entities use the correct format (e.g., &amp; for &)'
-                      ])
+                      location: lineColMatch ? { line: parseInt(lineColMatch[1]), col: parseInt(lineColMatch[2]) } : undefined
                     });
                     
                     errorMessage = specificError;

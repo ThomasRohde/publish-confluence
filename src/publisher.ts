@@ -5,7 +5,7 @@ import path from 'path';
 import { ConfluenceClient } from './client';
 import { loadConfiguration } from './config';
 import { BadRequestError } from './errors';
-import { createLogger, shutdownLogger } from './logger';
+import { createLogger, getVerbosityLevel, shutdownLogger, VERBOSITY } from './logger';
 import { processMarkdownFile } from './markdown-processor';
 import { ConfluenceApiCredentials, ConfluenceXhtmlValidationError, PublishConfig, PublishOptions } from './types';
 import { generateUuid } from './utils';
@@ -880,7 +880,8 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
       : 'All pages published successfully.');
     
     // Shutdown the logger to ensure proper cleanup and process exit
-    shutdownLogger();  } catch (error: any) {
+    shutdownLogger();  
+  } catch (error: any) {
     // Check if this is a "page already exists" error that we can handle gracefully
     if (isPageAlreadyExistsError(error)) {
       // This is a special case where the page already exists but wasn't initially found
@@ -895,26 +896,41 @@ export async function publishToConfluence(options: PublishOptions): Promise<void
       return;
     }
     
-    // For all other errors, provide detailed error information
+    // For all other errors, provide actionable error information without raw JSON dumps
     const errorType = error.constructor ? error.constructor.name : 'Unknown Error';
-    const errorContext = {
-      errorType,
-      troubleshootingSteps: determineTroubleshootingSteps(error),
-      stack: error.stack || 'No stack trace available',
-      options,
-      timestamp: new Date().toISOString(),
-      // Add error-specific information
-      statusCode: error.statusCode || error.status || null,
-      apiPath: error.path || null,
-      requestInfo: error.request ? {
-        method: error.request.method || null,
-        url: error.request.url || null
-      } : null,
-      // Add troubleshooting guidance based on error type
-      troubleshooting: determineTroubleshootingSteps(error)
-    };
+    const troubleSteps = determineTroubleshootingSteps(error);
     
-    log.error(`Failed to publish to Confluence: ${error.message}`, errorContext);
+    // Extract just the essential error information to display to the user
+    log.error(`Failed to publish to Confluence: ${error.message}`);
+    
+    // Only log status code if available (for API errors)
+    if (error.statusCode || error.status) {
+      log.error(`Status code: ${error.statusCode || error.status}`);
+    }
+    
+    // Only add troubleshooting steps if we have any
+    if (troubleSteps && troubleSteps.length > 0) {
+      log.info('\nTroubleshooting steps:');
+      troubleSteps.forEach((step, index) => {
+        log.info(`${index + 1}. ${step}`);
+      });
+    }
+    
+    // Log full details only in debug mode
+    if (getVerbosityLevel() >= VERBOSITY.DEBUG) {
+      const detailedContext = {
+        errorType,
+        stack: error.stack || 'No stack trace available',
+        timestamp: new Date().toISOString(),
+        statusCode: error.statusCode || error.status || null,
+        apiPath: error.path || null,
+        requestInfo: error.request ? {
+          method: error.request.method || null,
+          url: error.request.url || null
+        } : null
+      };
+      log.debug('Detailed error information:', detailedContext);
+    }
     shutdownLogger(); // Ensure logger is shutdown before exit
     process.exit(1);
   }
