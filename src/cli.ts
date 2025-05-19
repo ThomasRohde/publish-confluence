@@ -217,35 +217,26 @@ program
       shutdownLogger(); // Ensure proper cleanup before exit
       process.exit(1);
     }
-      // If we have both space-key and page-title, use fetchPages, otherwise use fetchPageContent
-    if ((options.spaceKey && options.pageTitle) || (!options.spaceKey && !options.pageTitle)) {
-      // Use fetchPages imported at the top of the file
-      fetchPages({
-        spaceKey: options.spaceKey,
-        pageTitle: options.pageTitle,
-        outputFormat: options.format,
-        outputFile: options.output,
-        outputDir: options.outputDir,
-        children: options.children,
-        configFile: options.config,
-        quiet: options.quiet,
-        verbose: options.verbose,
-        debug: options.debug,
-        allowSelfSigned: options.allowSelfSigned
-      }).catch(err => {
-        log.error(`Failed to execute fetch command: ${(err as Error).message}`);
-        log.debug((err as Error).stack || 'No stack trace available');
-        shutdownLogger(); // Ensure proper cleanup before exit
-        process.exit(1);
-      });
-    } else {
-      // If only one of space-key or page-title is provided, show an error
-      if (options.spaceKey || options.pageTitle) {
-        log.error('Both --space-key and --page-title must be provided together.');
-        shutdownLogger();
-        process.exit(1);
-      }
-    }
+    
+    // Use fetchPages imported at the top of the file
+    fetchPages({
+      spaceKey: options.spaceKey,
+      pageTitle: options.pageTitle,
+      outputFormat: options.format,
+      outputFile: options.output,
+      outputDir: options.outputDir,
+      children: options.children,
+      configFile: options.config,
+      quiet: options.quiet,
+      verbose: options.verbose,
+      debug: options.debug,
+      allowSelfSigned: options.allowSelfSigned
+    }).catch(err => {
+      log.error(`Failed to execute fetch command: ${(err as Error).message}`);
+      log.debug((err as Error).stack || 'No stack trace available');
+      shutdownLogger(); // Ensure proper cleanup before exit
+      process.exit(1);
+    });
   });
 
 // Generate prompt command

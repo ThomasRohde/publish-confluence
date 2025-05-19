@@ -5,7 +5,7 @@ import { dirname, resolve, join } from 'path';
 import { ConfluenceClient } from './client';
 import { readFetchConfigFile, saveFetchConfigFile, updatePageInConfig } from './config';
 import { createLogger, setVerbosityLevel, VERBOSITY } from './logger';
-import { ConfluenceApiCredentials, PageConfig, PublishConfluenceConfig } from './types';
+import { ConfluenceApiCredentials, PageConfig, PublishConfig } from './types';
 
 // Load environment variables from .env file
 config();
@@ -44,6 +44,9 @@ async function fetchPageAndChildren(
     fetchChildren: boolean;
     outputFormat: 'storage' | 'json';
     outputDir: string;
+    parentId?: string;
+    parentTitle?: string;
+    parentPath?: string;
     quiet?: boolean;
     verbose?: boolean;
     debug?: boolean;
@@ -73,9 +76,22 @@ async function fetchPageAndChildren(
   
   // Create sanitized filename
   const sanitizedTitle = pageTitle.replace(/[^\w\s-]/g, '_').replace(/\s+/g, '_');
+    // Create path for saving the page
+  let pagePath;
+  let relativeTemplatePath;
   
-  // Create path for saving the page
-  const pagePath = join(options.outputDir, spaceKey, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));
+  if (options.parentPath) {
+    // For child pages, create a path under the parent's directory
+    const parentDir = dirname(options.parentPath);
+    pagePath = join(parentDir, sanitizedTitle, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));
+    // Create relative path for templatePath
+    relativeTemplatePath = `./${sanitizedTitle}/${sanitizedTitle}.html`;
+  } else {
+    // For root pages
+    pagePath = join(options.outputDir, spaceKey, sanitizedTitle, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));
+    // Create relative path for templatePath
+    relativeTemplatePath = `${options.outputDir}/${spaceKey}/${sanitizedTitle}/${sanitizedTitle}.html`;
+  }
   
   // Create directory if it doesn't exist
   const dir = dirname(resolve(pagePath));
@@ -90,13 +106,14 @@ async function fetchPageAndChildren(
   await fs.writeFile(pagePath, contentToSave);
   
   log.success(`Saved page "${pageTitle}" to ${pagePath}`);
-  
-  // Add page to fetched pages
+    // Add page to fetched pages
   fetchedPages.push({
     id: page.id,
     title: pageTitle,
     spaceKey: spaceKey,
-    path: pagePath
+    path: relativeTemplatePath,  // Use the relative path for templatePath
+    parentId: options.parentId,
+    parentTitle: options.parentTitle
   });
   
   // Fetch children if requested
@@ -111,14 +128,13 @@ async function fetchPageAndChildren(
         client,
         spaceKey,
         child.title,
-        options
+        {
+          ...options,
+          parentId: page.id,
+          parentTitle: pageTitle,
+          parentPath: pagePath
+        }
       );
-      
-      // Update parent info for child pages
-      childPages.forEach(childPage => {
-        childPage.parentId = page.id;
-        childPage.parentTitle = pageTitle;
-      });
       
       fetchedPages.push(...childPages);
     }
@@ -178,12 +194,7 @@ export async function fetchPages(options: {
     });
     
     // Read existing config or initialize new one
-    let config: PublishConfluenceConfig = await readFetchConfigFile(configFile);
-    
-    // Set baseUrl in config if not already set
-    if (!config.baseUrl) {
-      config.baseUrl = baseUrl;
-    }
+    let config: PublishConfig = await readFetchConfigFile(configFile);
     
     // Determine which pages to fetch
     let pagesToFetch: { spaceKey: string; pageTitle: string }[] = [];
@@ -192,13 +203,20 @@ export async function fetchPages(options: {
       // Fetch single page specified by command line arguments
       pagesToFetch = [{ spaceKey, pageTitle }];
       log.info(`Fetching page "${pageTitle}" from space "${spaceKey}"...`);
-    } else if (config.pages.length > 0) {
-      // Fetch pages from config
-      pagesToFetch = config.pages.map(page => ({
-        spaceKey: page.spaceKey,
-        pageTitle: page.title
+    } else if (config.childPages && config.childPages.length > 0) {
+      // Fetch pages from config's childPages
+      pagesToFetch = config.childPages.map(childConfig => ({
+        spaceKey: childConfig.spaceKey || config.spaceKey,
+        pageTitle: childConfig.pageTitle
       }));
       log.info(`Fetching ${pagesToFetch.length} page(s) from config file...`);
+    } else if (config.pageTitle) {
+      // Fetch the main page from config
+      pagesToFetch = [{ 
+        spaceKey: config.spaceKey,
+        pageTitle: config.pageTitle
+      }];
+      log.info(`Fetching page "${config.pageTitle}" from space "${config.spaceKey}"...`);
     } else {
       throw new Error(
         'No pages to fetch. Please provide --space-key and --page-title options ' +

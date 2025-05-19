@@ -230,21 +230,30 @@ export async function loadConfiguration(skipEnvCheck: boolean = false): Promise<
  * @param configPath Path to the config file
  * @returns The parsed configuration or a default configuration if the file doesn't exist
  */
-export async function readFetchConfigFile(configPath: string): Promise<import('./types').PublishConfluenceConfig> {
+export async function readFetchConfigFile(configPath: string): Promise<import('./types').PublishConfig> {
   try {
     const configData = await fs.readFile(configPath, 'utf8');
-    const config = JSON.parse(configData) as import('./types').PublishConfluenceConfig;
+    const config = JSON.parse(configData) as import('./types').PublishConfig;
     
-    // Ensure the pages array exists
-    if (!config.pages) {
-      config.pages = [];
+    // Ensure we have the basic properties initialized
+    if (!config.childPages) {
+      config.childPages = [];
     }
     
     return config;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       // File doesn't exist, return empty config
-      return { pages: [] };
+      return { 
+        spaceKey: '',
+        pageTitle: '',
+        templatePath: './confluence-template.html',
+        macroTemplatePath: null,
+        includedFiles: [],
+        excludedFiles: [],
+        distDir: './dist',
+        childPages: []
+      };
     }
     throw error;
   }
@@ -257,7 +266,7 @@ export async function readFetchConfigFile(configPath: string): Promise<import('.
  */
 export async function saveFetchConfigFile(
   configPath: string, 
-  config: import('./types').PublishConfluenceConfig
+  config: import('./types').PublishConfig
 ): Promise<void> {
   // Create directory if it doesn't exist
   const dir = path.dirname(configPath);
@@ -279,28 +288,97 @@ export async function saveFetchConfigFile(
  * @returns Updated configuration object
  */
 export function updatePageInConfig(
-  config: import('./types').PublishConfluenceConfig, 
+  config: import('./types').PublishConfig, 
   page: import('./types').PageConfig
-): import('./types').PublishConfluenceConfig {
-  const updatedConfig = { ...config };
-  const existingPageIndex = updatedConfig.pages.findIndex(
-    p => p.id === page.id || (p.title === page.title && p.spaceKey === page.spaceKey)
-  );
+): import('./types').PublishConfig {  // Create a new PublishConfig entry from the page data
+  const pageConfig: import('./types').PublishConfig = {
+    spaceKey: page.spaceKey,
+    pageTitle: page.title,
+    templatePath: page.path || './confluence-template.html', // Use the actual path where the content was saved
+    macroTemplatePath: null,
+    includedFiles: [],
+    excludedFiles: [],
+    distDir: './dist',
+  };
+
+  // If parent info is available, add it
+  if (page.parentTitle) {
+    pageConfig.parentPageTitle = page.parentTitle;
+  }
   
-  if (existingPageIndex >= 0) {
+  // If this is the root config and has no pageTitle set, use the page title
+  if (!config.pageTitle && !page.parentId) {
+    const updatedConfig = {
+      ...config,
+      spaceKey: page.spaceKey,
+      pageTitle: page.title,
+    };
+    return updatedConfig;
+  }
+  
+  // If this is a child page, find its parent and add it to the childPages array
+  if (page.parentId && page.parentTitle) {
+    // We need to recursively find the parent and add this as a child
+    const findAndAddChildPage = (parentConfig: import('./types').PublishConfig): boolean => {
+      if (parentConfig.pageTitle === page.parentTitle) {
+        // Initialize childPages if it doesn't exist
+        if (!parentConfig.childPages) {
+          parentConfig.childPages = [];
+        }
+        
+        // Check if this child already exists
+        const existingIndex = parentConfig.childPages.findIndex(child => child.pageTitle === page.title);
+        
+        if (existingIndex >= 0) {
+          // Update existing child
+          parentConfig.childPages[existingIndex] = {
+            ...parentConfig.childPages[existingIndex],
+            ...pageConfig,
+          };
+        } else {
+          // Add new child
+          parentConfig.childPages.push(pageConfig);
+        }
+        return true;
+      }
+      
+      // Search in child pages if they exist
+      if (parentConfig.childPages) {
+        for (const childConfig of parentConfig.childPages) {
+          if (findAndAddChildPage(childConfig)) {
+            return true;
+          }
+        }
+      }
+      
+      return false;
+    };
+    
+    // If we found and updated the parent's children, return the updated config
+    if (findAndAddChildPage(config)) {
+      return { ...config };
+    }
+  }
+  
+  // If we didn't find a parent or this is a root page and we already have a root page,
+  // add it as a child of the root config
+  if (!config.childPages) {
+    config.childPages = [];
+  }
+  
+  // Check if this page already exists at the root level
+  const existingIndex = config.childPages.findIndex(child => child.pageTitle === page.title);
+  
+  if (existingIndex >= 0) {
     // Update existing page
-    updatedConfig.pages[existingPageIndex] = {
-      ...updatedConfig.pages[existingPageIndex],
-      ...page,
-      lastFetched: new Date().toISOString()
+    config.childPages[existingIndex] = {
+      ...config.childPages[existingIndex],
+      ...pageConfig,
     };
   } else {
     // Add new page
-    updatedConfig.pages.push({
-      ...page,
-      lastFetched: new Date().toISOString()
-    });
+    config.childPages.push(pageConfig);
   }
   
-  return updatedConfig;
+  return { ...config };
 }
