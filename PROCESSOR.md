@@ -216,36 +216,37 @@ The following existing dependencies in esbuild.config.js will be utilized:
 
 ## Implementation Phases
 
+> **Note:** Update these task lists whenever progress is made to track completion status.
+
 ### Phase 1: Core Framework
-1. Create directory structure
-2. Implement types and interfaces
-3. Create base processor class
-4. Implement processor factory
-5. Update CLI command options
+- [x] Create directory structure
+- [x] Implement types and interfaces
+- [x] Create base processor class
+- [x] Implement processor factory
+- [ ] Update CLI command options
 
 ### Phase 2: Default Processors
-1. Implement Handlebars processor (default)
-2. Implement Markdown processor example
-3. Test basic functionality
+- [x] Implement Handlebars processor (default)
+- [x] Implement Markdown processor example
 
 ### Phase 3: Integration
-1. Integrate with fetch command
-2. Update file handling to support different extensions
-3. Add processor options handling
-4. Update documentation
+- [ ] Integrate with fetch command
+- [ ] Update file handling to support different extensions
+- [ ] Add processor options handling
+- [ ] Update documentation
 
 ### Phase 4: Testing and Refinement
-1. Add unit tests for processors
-2. Test with real Confluence content
-3. Refine macro conversion
-4. Optimize performance
+- [ ] Add unit tests for processors
+- [ ] Test with real Confluence content
+- [ ] Refine macro conversion
+- [ ] Optimize performance
 
 ## Future Enhancements
 
-1. Support for processor-specific configuration files
-2. Pipeline processors (chain multiple processors)
-3. Custom output templates for specific processors
-4. Plugin system for third-party processors
+- [ ] Support for processor-specific configuration files
+- [ ] Pipeline processors (chain multiple processors)
+- [ ] Custom output templates for specific processors
+- [ ] Plugin system for third-party processors
 
 ## Commands for Testing
 

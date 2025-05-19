@@ -1,5 +1,10 @@
 // src/post-processor/processor-factory.ts
+import { createLogger } from '../logger';
+import { HandlebarsProcessor } from './handlebars-processor';
+import { MarkdownProcessor } from './markdown-processor';
 import { PostProcessor } from './types';
+
+const log = createLogger();
 
 /**
  * Factory for creating post-processors
@@ -12,7 +17,7 @@ export class ProcessorFactory {
    * 
    * @private
    */
-  private static processors: Map<string, new () => PostProcessor> = new Map();
+  private static readonly processors: Map<string, new () => PostProcessor> = new Map();
 
   /**
    * Register a post-processor
@@ -49,8 +54,11 @@ export class ProcessorFactory {
    * Get a list of all available post-processors
    * 
    * @returns Array of processor names
-   */
-  static getAvailableProcessors(): string[] {
+   */  static getAvailableProcessors(): string[] {
     return Array.from(ProcessorFactory.processors.keys());
   }
 }
+
+// Register default processors
+ProcessorFactory.register('handlebars', HandlebarsProcessor);
+ProcessorFactory.register('markdown', MarkdownProcessor);
