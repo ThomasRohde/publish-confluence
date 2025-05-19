@@ -6,7 +6,7 @@ import Handlebars from 'handlebars';
 import path from 'path';
 import * as readline from 'readline';
 import { fileURLToPath } from 'url';
-import { fetchPageContent } from './fetch';
+import { fetchPageContent, fetchPages } from './fetch';
 import { configureFileLogging, createLogger, setVerbosityLevel, shutdownLogger, VERBOSITY } from './logger';
 import { registerMacroHelpers } from './macro-helpers';
 import { createProject } from './project-creator';
@@ -198,11 +198,14 @@ program
 // Fetch command
 program
   .command('fetch')
-  .description('Fetch content from a Confluence page')
-  .requiredOption('-s, --space-key <key>', 'Confluence space key (required)')
-  .requiredOption('-p, --page-title <title>', 'Title of the page to fetch (required)')
+  .description('Fetch content from Confluence pages')
+  .option('-s, --space-key <key>', 'Confluence space key')
+  .option('-p, --page-title <title>', 'Title of the page to fetch')
   .option('-f, --format <format>', 'Output format: "storage" (default) or "json"', 'storage')
   .option('-o, --output <file>', 'Save output to a file instead of stdout')
+  .option('-c, --children', 'Recursively fetch all child pages', false)
+  .option('--output-dir <dir>', 'Directory to save fetched pages (default: ./content)', './content')
+  .option('--config <file>', 'Path to config file (default: ./publish-confluence.json)', './publish-confluence.json')
   .action((cmdOptions) => {
     // Merge command options with global options
     const options = { ...program.opts(), ...cmdOptions };
@@ -214,23 +217,35 @@ program
       shutdownLogger(); // Ensure proper cleanup before exit
       process.exit(1);
     }
-    
-    // Use the fetchPageContent function imported at the top of the file
-    fetchPageContent({
-      spaceKey: options.spaceKey,
-      pageTitle: options.pageTitle,
-      outputFormat: options.format,
-      outputFile: options.output,
-      quiet: options.quiet,
-      verbose: options.verbose,
-      debug: options.debug,
-      allowSelfSigned: options.allowSelfSigned
-    }).catch(err => {
-      log.error(`Failed to execute fetch command: ${(err as Error).message}`);
-      log.debug((err as Error).stack || 'No stack trace available');
-      shutdownLogger(); // Ensure proper cleanup before exit
-      process.exit(1);
-    });
+      // If we have both space-key and page-title, use fetchPages, otherwise use fetchPageContent
+    if ((options.spaceKey && options.pageTitle) || (!options.spaceKey && !options.pageTitle)) {
+      // Use fetchPages imported at the top of the file
+      fetchPages({
+        spaceKey: options.spaceKey,
+        pageTitle: options.pageTitle,
+        outputFormat: options.format,
+        outputFile: options.output,
+        outputDir: options.outputDir,
+        children: options.children,
+        configFile: options.config,
+        quiet: options.quiet,
+        verbose: options.verbose,
+        debug: options.debug,
+        allowSelfSigned: options.allowSelfSigned
+      }).catch(err => {
+        log.error(`Failed to execute fetch command: ${(err as Error).message}`);
+        log.debug((err as Error).stack || 'No stack trace available');
+        shutdownLogger(); // Ensure proper cleanup before exit
+        process.exit(1);
+      });
+    } else {
+      // If only one of space-key or page-title is provided, show an error
+      if (options.spaceKey || options.pageTitle) {
+        log.error('Both --space-key and --page-title must be provided together.');
+        shutdownLogger();
+        process.exit(1);
+      }
+    }
   });
 
 // Generate prompt command
@@ -241,10 +256,9 @@ program
   .action((cmdOptions) => {
     // Merge command options with global options
     const options = { ...program.opts(), ...cmdOptions };
-    configureCommandOptions(options);
-    
-    generatePromptCommand().catch(err => {
-      log.error(err);
+    configureCommandOptions(options);      generatePromptCommand().catch((err: Error) => {
+      log.error(err.message);
+      log.debug(err.stack || 'No stack trace available');
       shutdownLogger(); // Ensure proper cleanup before exit  
       process.exit(1);
     });

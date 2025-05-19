@@ -224,3 +224,83 @@ export async function loadConfiguration(skipEnvCheck: boolean = false): Promise<
   // Validate the configuration using Zod
   return validateConfig(config);
 }
+
+/**
+ * Read the publish-confluence.json config file specifically for fetch command
+ * @param configPath Path to the config file
+ * @returns The parsed configuration or a default configuration if the file doesn't exist
+ */
+export async function readFetchConfigFile(configPath: string): Promise<import('./types').PublishConfluenceConfig> {
+  try {
+    const configData = await fs.readFile(configPath, 'utf8');
+    const config = JSON.parse(configData) as import('./types').PublishConfluenceConfig;
+    
+    // Ensure the pages array exists
+    if (!config.pages) {
+      config.pages = [];
+    }
+    
+    return config;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      // File doesn't exist, return empty config
+      return { pages: [] };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Save the publish-confluence.json config file for fetch command
+ * @param configPath Path to save the config file
+ * @param config Configuration object to save
+ */
+export async function saveFetchConfigFile(
+  configPath: string, 
+  config: import('./types').PublishConfluenceConfig
+): Promise<void> {
+  // Create directory if it doesn't exist
+  const dir = path.dirname(configPath);
+  await fs.mkdir(dir, { recursive: true });
+  
+  // Write the config with pretty formatting
+  await fs.writeFile(
+    configPath, 
+    JSON.stringify(config, null, 2)
+  );
+  
+  log.success(`Updated config file at ${configPath}`);
+}
+
+/**
+ * Add or update a page in the config
+ * @param config Current configuration object
+ * @param page Page data to add or update
+ * @returns Updated configuration object
+ */
+export function updatePageInConfig(
+  config: import('./types').PublishConfluenceConfig, 
+  page: import('./types').PageConfig
+): import('./types').PublishConfluenceConfig {
+  const updatedConfig = { ...config };
+  const existingPageIndex = updatedConfig.pages.findIndex(
+    p => p.id === page.id || (p.title === page.title && p.spaceKey === page.spaceKey)
+  );
+  
+  if (existingPageIndex >= 0) {
+    // Update existing page
+    updatedConfig.pages[existingPageIndex] = {
+      ...updatedConfig.pages[existingPageIndex],
+      ...page,
+      lastFetched: new Date().toISOString()
+    };
+  } else {
+    // Add new page
+    updatedConfig.pages.push({
+      ...page,
+      lastFetched: new Date().toISOString()
+    });
+  }
+  
+  return updatedConfig;
+}

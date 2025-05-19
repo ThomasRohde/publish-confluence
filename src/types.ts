@@ -9,6 +9,36 @@ export interface ConfluenceApiCredentials {
 }
 
 /**
+ * Configuration for fetching pages from Confluence
+ */
+export interface PageConfig {
+  /** The unique ID of the page in Confluence */
+  id?: string;
+  /** The title of the page */
+  title: string;
+  /** The space key containing the page */
+  spaceKey: string;
+  /** The ID of the parent page (if applicable) */
+  parentId?: string;
+  /** The title of the parent page (if applicable) */
+  parentTitle?: string;
+  /** The local path where the page content is stored */
+  path?: string;
+  /** ISO timestamp when the page was last fetched */
+  lastFetched?: string;
+}
+
+/**
+ * Configuration file structure for publish-confluence
+ */
+export interface PublishConfluenceConfig {
+  /** Base URL for the Confluence instance */
+  baseUrl?: string;
+  /** Array of pages to publish/fetch */
+  pages: PageConfig[];
+}
+
+/**
  * Configuration for the Confluence client
  */
 export interface ConfluenceClientConfig {

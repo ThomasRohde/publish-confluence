@@ -1592,6 +1592,23 @@ export class ConfluenceClient {
   }
 
   /**
+   * Get child pages of a specific page
+   * 
+   * @param pageId The ID of the parent page
+   * @param expand Optional fields to expand in the response
+   * @returns Array of child pages
+   */
+  async getChildPages(pageId: string, expand: string[] = []): Promise<ConfluencePage[]> {
+    try {
+      const result = await this.getChildContent(pageId, 'page', expand);
+      return result.results || [];
+    } catch (error) {
+      this.logger.error(`Error fetching child pages of page "${pageId}":`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Get a specific version of content
    * 
    * @param contentId The ID of the content
