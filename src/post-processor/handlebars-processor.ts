@@ -39,36 +39,48 @@ export class HandlebarsProcessor extends BasePostProcessor {
 
     // Get macro body content
     const bodyContent = this.extractMacroBody(macroElement);    // Handle different macro types with specific formatting
-    switch (macroName.toLowerCase()) {
-      case 'code':
+    switch (macroName.toLowerCase()) {      case 'code':
         const language = parameters.language || 'text';
-        return `{{#confluence-code language="${language}" title="${parameters.title || ''}" linenumbers=${parameters.linenumbers || 'false'}}}${bodyContent}{{/confluence-code}}`;
+        // Format and indent code blocks properly
+        const formattedCodeContent = bodyContent.replace(/\n/g, '\n  ');
+        return `\n\n{{#confluence-code language="${language}" title="${parameters.title || ''}" linenumbers=${parameters.linenumbers || 'false'}}}\n  ${formattedCodeContent}\n{{/confluence-code}}\n\n`;
 
       case 'info':
-        return `{{#confluence-info title="${parameters.title || ''}"}}${bodyContent}{{/confluence-info}}`;
+        // Format info blocks with proper indentation
+        const formattedInfoContent = bodyContent.replace(/\n/g, '\n  ');
+        return `\n\n{{#confluence-info title="${parameters.title || ''}"}}\n  ${formattedInfoContent}\n{{/confluence-info}}\n\n`;
         
       case 'note':
-        return `{{#confluence-note title="${parameters.title || ''}"}}${bodyContent}{{/confluence-note}}`;
+        // Format note blocks with proper indentation
+        const formattedNoteContent = bodyContent.replace(/\n/g, '\n  ');
+        return `\n\n{{#confluence-note title="${parameters.title || ''}"}}\n  ${formattedNoteContent}\n{{/confluence-note}}\n\n`;
         
       case 'warning':
-        return `{{#confluence-warning title="${parameters.title || ''}"}}${bodyContent}{{/confluence-warning}}`;
+        // Format warning blocks with proper indentation
+        const formattedWarningContent = bodyContent.replace(/\n/g, '\n  ');
+        return `\n\n{{#confluence-warning title="${parameters.title || ''}"}}\n  ${formattedWarningContent}\n{{/confluence-warning}}\n\n`;
         
       case 'tip':
-        return `{{#confluence-tip title="${parameters.title || ''}"}}${bodyContent}{{/confluence-tip}}`;
+        // Format tip blocks with proper indentation
+        const formattedTipContent = bodyContent.replace(/\n/g, '\n  ');
+        return `\n\n{{#confluence-tip title="${parameters.title || ''}"}}\n  ${formattedTipContent}\n{{/confluence-tip}}\n\n`;
 
       case 'panel':
-        return `{{#confluence-panel title="${parameters.title || ''}"}}${bodyContent}{{/confluence-panel}}`;
-        
-      case 'expand':
-        return `{{#confluence-expand title="${parameters.title || ''}"}}${bodyContent}{{/confluence-expand}}`;
+        // Format panel blocks with proper indentation
+        const formattedPanelContent = bodyContent.replace(/\n/g, '\n  ');
+        return `\n\n{{#confluence-panel title="${parameters.title || ''}"}}\n  ${formattedPanelContent}\n{{/confluence-panel}}\n\n`;
+          case 'expand':
+        const formattedExpandContent = bodyContent.replace(/\n/g, '\n  ');
+        return `\n\n{{#confluence-expand title="${parameters.title || ''}"}}\n  ${formattedExpandContent}\n{{/confluence-expand}}\n\n`;
         
       case 'toc':
         const minLevel = parameters.minLevel || '2';
         const maxLevel = parameters.maxLevel || '5';
-        return `{{confluence-toc minLevel=${minLevel} maxLevel=${maxLevel}}}`;
+        return `\n\n{{confluence-toc minLevel=${minLevel} maxLevel=${maxLevel}}}\n\n`;
         
       case 'html':
-        return `{{#confluence-html}}${bodyContent}{{/confluence-html}}`;
+        const formattedHtmlContent = bodyContent.replace(/\n/g, '\n  ');
+        return `\n\n{{#confluence-html}}\n  ${formattedHtmlContent}\n{{/confluence-html}}\n\n`;
         
       case 'children':
         const sortBy = parameters.sort || '';
@@ -76,20 +88,20 @@ export class HandlebarsProcessor extends BasePostProcessor {
         const includeLabels = parameters.labels || '';
         const excludeLabels = parameters.excludeLabels || '';
         const mode = parameters.mode || '';
-        return `{{confluence-children sortBy="${sortBy}" reverse=${reverse} includeLabels="${includeLabels}" excludeLabels="${excludeLabels}" mode="${mode}"}}`;
+        return `\n\n{{confluence-children sortBy="${sortBy}" reverse=${reverse} includeLabels="${includeLabels}" excludeLabels="${excludeLabels}" mode="${mode}}}\n\n`;
         
       case 'status':
         const type = parameters.colour || parameters.color || 'neutral';
         const text = parameters.title || '';
-        return `{{confluence-status type="${type}" text="${text}"}}`;
+        return `\n\n{{confluence-status type="${type}" text="${text}}}\n\n`;
 
       case 'anchor':
         const name = parameters.name || '';
-        return `{{confluence-anchor name="${name}"}}`;
+        return `\n\n{{confluence-anchor name="${name}}}\n\n`;
         
       // For all other macros, use a partial
       default:
-        return `{{> ${macroName}}}`;
+        return `\n\n{{> ${macroName}}}\n\n`;
     }
   }
 
@@ -118,9 +130,7 @@ export class HandlebarsProcessor extends BasePostProcessor {
     if (element.nodeName === 'ac:structured-macro') {
       const macroName = element.getAttribute('ac:name') || '';
       return this.processMacro(macroName, element);
-    }
-
-    // Handle Confluence layout elements
+    }    // Handle Confluence layout elements
     if (element.nodeName === 'ac:layout') {
       // Process children of the layout element
       let layoutContent = '';
@@ -128,7 +138,7 @@ export class HandlebarsProcessor extends BasePostProcessor {
         layoutContent += this.processNode(element.childNodes[i]);
       }
       
-      return `{{#confluence-layout}}${layoutContent}{{/confluence-layout}}`;
+      return `\n\n{{#confluence-layout}}\n  ${layoutContent}\n{{/confluence-layout}}\n\n`;
     }
 
     if (element.nodeName === 'ac:layout-section') {
@@ -141,7 +151,10 @@ export class HandlebarsProcessor extends BasePostProcessor {
         sectionContent += this.processNode(element.childNodes[i]);
       }
       
-      return `{{#layout-section type="${sectionType}"}}${sectionContent}{{/layout-section}}`;
+      // Indent the content and add newlines
+      const indentedContent = sectionContent.split('\n').map(line => line ? '    ' + line : line).join('\n');
+      
+      return `\n  {{#layout-section type="${sectionType}"}}\n${indentedContent}\n  {{/layout-section}}\n`;
     }
 
     if (element.nodeName === 'ac:layout-cell') {
@@ -151,7 +164,10 @@ export class HandlebarsProcessor extends BasePostProcessor {
         cellContent += this.processNode(element.childNodes[i]);
       }
       
-      return `{{#layout-cell}}${cellContent}{{/layout-cell}}`;
+      // Indent the content and add newlines
+      const indentedContent = cellContent.split('\n').map(line => line ? '      ' + line : line).join('\n');
+      
+      return `\n    {{#layout-cell}}\n${indentedContent}\n    {{/layout-cell}}\n`;
     }
 
     // Handle Confluence-specific tags
@@ -162,9 +178,7 @@ export class HandlebarsProcessor extends BasePostProcessor {
         return `{{confluence-image src="${filename}"}}`;
       }
       return '';
-    }
-
-    // Handle regular HTML elements
+    }    // Handle regular HTML elements
     const tagName = element.nodeName.toLowerCase();
     
     // These elements can be preserved as-is in Handlebars
@@ -176,6 +190,18 @@ export class HandlebarsProcessor extends BasePostProcessor {
       let innerContent = '';
       for (let i = 0; i < element.childNodes.length; i++) {
         innerContent += this.processNode(element.childNodes[i]);
+      }
+      
+      // Add special formatting for heading elements
+      if (tagName.startsWith('h') && tagName.length === 2) {
+        // Add extra newlines around headings
+        return `\n\n<${tagName}>${innerContent}</${tagName}>\n`;
+      }
+      
+      // Add special formatting for lists and tables
+      if (['ul', 'ol', 'table'].includes(tagName)) {
+        const formattedContent = innerContent.replace(/\n/g, '\n  ');
+        return `\n<${tagName}>\n  ${formattedContent}\n</${tagName}>\n`;
       }
       
       // For simple elements with no attributes, just wrap the inner content
@@ -197,18 +223,28 @@ export class HandlebarsProcessor extends BasePostProcessor {
    * @param content - The content in Confluence storage format
    * @param options - Processor-specific options
    * @returns A promise resolving to the processed content and metadata
-   */
-  async process(content: string, options: PostProcessorOptions): Promise<ProcessorResult> {
+   */  async process(content: string, options: PostProcessorOptions): Promise<ProcessorResult> {
     try {
       log.verbose(`Converting Confluence storage format to Handlebars template...`);
       
       // Convert macros and process content
-      const processedContent = this.convertConfluenceMacros(content);
+      let processedContent = this.convertConfluenceMacros(content);
       
       // Apply prefix to macro names if specified
-      const finalContent = options.macroPrefix 
+      let finalContent = options.macroPrefix 
         ? processedContent.replace(/\{\{\s*>\s*(\w+)\s*\}\}/g, `{{> ${options.macroPrefix}$1}}`)
         : processedContent;
+        
+      // Clean up extra whitespace and normalize formatting
+      finalContent = finalContent
+        // Fix multiple newlines (more than 3) to be exactly 2
+        .replace(/\n{4,}/g, '\n\n\n')
+        // Fix spacing around Handlebars expressions
+        .replace(/(\{\{[^}]+\}\})\n\n+(\{\{[^}]+\}\})/g, '$1\n\n$2')
+        // Clean up any trailing whitespace on lines
+        .replace(/[ \t]+$/gm, '')
+        // Ensure proper whitespace at beginning/end of document
+        .trim() + '\n';
 
       return {
         content: finalContent,

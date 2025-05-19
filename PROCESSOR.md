@@ -238,7 +238,7 @@ The following existing dependencies in esbuild.config.js will be utilized:
 ### Phase 4: Testing and Refinement
 - [x] Test with real Confluence content. Do not create test cases yet but collaborate with the team to gather real-world examples.
 - [x] Refine macro conversion
-- [ ] Optimize performance
+- [x] Optimize performance and improve output formatting
 
 ## Future Enhancements
 
