@@ -635,7 +635,6 @@ content/
 - `--space-key, -s <key>`: The key of the Confluence space
 - `--page-title, -p <title>`: The title of the Confluence page to fetch
 - `--children, -c`: Recursively fetch all child pages
-- `--format, -f <format>`: Output format (`storage` for XHTML or `json` for full page data)
 - `--output, -o <file>`: Save output to a specific file
 - `--output-dir <dir>`: Directory to save fetched pages (default: `./content`)
 

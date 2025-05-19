@@ -42,7 +42,6 @@ async function fetchPageAndChildren(
   pageTitle: string,
   options: {
     fetchChildren: boolean;
-    outputFormat: 'storage' | 'json';
     outputDir: string;
     parentId?: string;
     parentTitle?: string;
@@ -73,8 +72,7 @@ async function fetchPageAndChildren(
   
   // Get the page content
   const pageContent = fullPage.body.storage.value || '';
-  
-  // Create sanitized filename
+    // Create sanitized filename
   const sanitizedTitle = pageTitle.replace(/[^\w\s-]/g, '_').replace(/\s+/g, '_');
   // Create path for saving the page
   let pagePath;
@@ -90,7 +88,7 @@ async function fetchPageAndChildren(
   if (options.parentPath) {
     // For child pages, create a path under the parent's directory
     const parentDir = dirname(options.parentPath);
-    pagePath = join(parentDir, sanitizedTitle, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));
+    pagePath = join(parentDir, sanitizedTitle, sanitizedTitle + '.html');
     
     // Extract the part of the path after the space key for relative template path
     const pathAfterSpaceKey = dirname(options.parentPath).split(spaceKey)[1] || '';
@@ -108,22 +106,19 @@ async function fetchPageAndChildren(
     relativeTemplatePath = normalizePath(templatePathParts.join('/'));
   } else {
     // For root pages
-    pagePath = join(options.outputDir, spaceKey, sanitizedTitle, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));
+    pagePath = join(options.outputDir, spaceKey, sanitizedTitle, sanitizedTitle + '.html');
     
     // Build path from individual parts to avoid duplicate slashes
     relativeTemplatePath = normalizePath([
       '.', options.outputDir, spaceKey, sanitizedTitle, `${sanitizedTitle}.html`
     ].join('/'));
   }
-  
-  // Create directory if it doesn't exist
+    // Create directory if it doesn't exist
   const dir = dirname(resolve(pagePath));
   await fs.mkdir(dir, { recursive: true });
   
-  // Determine content to save based on requested format
-  const contentToSave = options.outputFormat === 'json' 
-    ? JSON.stringify(fullPage, null, 2)
-    : pageContent;
+  // Save the page content in storage format
+  const contentToSave = pageContent;
   
   // Write to file
   await fs.writeFile(pagePath, contentToSave);
@@ -172,7 +167,6 @@ async function fetchPageAndChildren(
 export async function fetchPages(options: {
   spaceKey?: string;
   pageTitle?: string;
-  outputFormat?: 'storage' | 'json';
   outputFile?: string;
   outputDir?: string;
   children?: boolean;
@@ -193,12 +187,10 @@ export async function fetchPages(options: {
     } else {
       setVerbosityLevel(VERBOSITY.NORMAL);
     }
-    
-    // Normalize options
+      // Normalize options
     const {
       spaceKey, 
       pageTitle,
-      outputFormat = 'storage',
       outputDir = './content',
       children = false,
       configFile = './publish-confluence.json',
@@ -246,14 +238,12 @@ export async function fetchPages(options: {
         'or ensure a valid publish-confluence.json file exists with page definitions.'
       );
     }
-    
-    // If outputFile is provided, it overrides the directory-based approach
+      // If outputFile is provided, it overrides the directory-based approach
     if (options.outputFile && pagesToFetch.length === 1) {
       // Use the original fetchPageContent logic for backward compatibility
       await fetchPageContent({
         spaceKey: pagesToFetch[0].spaceKey,
         pageTitle: pagesToFetch[0].pageTitle,
-        outputFormat: outputFormat,
         outputFile: options.outputFile,
         quiet: options.quiet,
         verbose: options.verbose,
@@ -270,7 +260,6 @@ export async function fetchPages(options: {
       
       const fetchedPages = await fetchPageAndChildren(client, spaceKey, pageTitle, {
         fetchChildren: children,
-        outputFormat,
         outputDir,
         quiet: options.quiet,
         verbose: options.verbose,
@@ -303,7 +292,6 @@ export async function fetchPages(options: {
 export async function fetchPageContent(options: {
   spaceKey: string;
   pageTitle: string;
-  outputFormat?: 'storage' | 'json';
   outputFile?: string;
   quiet?: boolean;
   verbose?: boolean;
@@ -322,7 +310,7 @@ export async function fetchPageContent(options: {
       setVerbosityLevel(VERBOSITY.NORMAL);
     }
 
-    const { spaceKey, pageTitle, outputFormat = 'storage', outputFile, allowSelfSigned = true } = options;
+    const { spaceKey, pageTitle, outputFile, allowSelfSigned = true } = options;
 
     // Get authentication credentials
     const { auth, baseUrl } = getAuthCredentials();
@@ -367,13 +355,9 @@ export async function fetchPageContent(options: {
     if (pageContent === '') {
       log.verbose(`Page "${pageTitle}" exists but has empty content.`);
     }
-    
-    // Determine content to save based on requested format
-    const contentToSave = outputFormat === 'json' 
-      ? JSON.stringify(fullPage, null, 2)
-      : pageContent;
-    
-    // Handle output - either save to file or output to stdout
+      // Always use storage format
+    const contentToSave = pageContent;
+      // Handle output - either save to file or output to stdout
     if (outputFile) {
       // Create directory if it doesn't exist
       const dir = dirname(resolve(outputFile));
@@ -382,15 +366,14 @@ export async function fetchPageContent(options: {
       // Write to file
       await fs.writeFile(outputFile, contentToSave);
       
-      // Determine file extension for logging
-      const fileType = outputFormat === 'json' ? 'JSON' : 'HTML';
-      log.success(`Successfully saved ${fileType} content to ${outputFile}`);
+      log.success(`Successfully saved HTML content to ${outputFile}`);
     } else {
       // Output to stdout as before
       process.stdout.write(contentToSave + '\n');
-      log.debug(`Outputting ${outputFormat} content to stdout`);
+      log.debug(`Outputting HTML content to stdout`);
       log.success(`Successfully fetched page content.`);
-    }  } catch (error) {
+    }
+  }catch (error) {
     log.error(`Failed to fetch page content: ${(error as Error).message}`);
     log.debug((error as Error).stack || 'No stack trace available');
     throw error; // Rethrow error instead of exiting process

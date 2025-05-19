@@ -186,13 +186,7 @@ publish-confluence fetch [options]
       <td><code>-c</code></td>
       <td>Recursively fetch all child pages under the specified page.</td>
       <td>No</td>
-    </tr>
-    <tr>
-      <td><code>--format</code> &lt;format&gt;</td>
-      <td><code>-f</code> &lt;format&gt;</td>
-      <td>The output format. Options are <code>storage</code> (default, returns XHTML body) or <code>json</code> (returns the full page JSON object).</td>
-      <td>No</td>
-    </tr>
+    </tr>    <!-- Format option removed as it's redundant, storage format is now the only option -->
     <tr>
       <td><code>--output</code> &lt;file&gt;</td>
       <td><code>-o</code> &lt;file&gt;</td>
@@ -217,17 +211,14 @@ publish-confluence fetch [options]
 
 <h4>Fetch Examples</h4>
 {{#confluence-code language="bash" title="Fetch Examples"}}
-# Fetch the storage format (XHTML) of a page in space "MYSPACE"
+# Fetch a page in space "MYSPACE"
 publish-confluence fetch -s MYSPACE -p "My Important Page"
 
 # Fetch a page and all its children recursively
 publish-confluence fetch -s MYSPACE -p "My Important Page" -c
 
-# Fetch the storage format from a personal space
+# Fetch content from a personal space
 publish-confluence fetch -s ~jsmith -p "My Personal Notes"
-
-# Fetch the full page data as JSON
-publish-confluence fetch -s DOCS -p "API Reference" -f json
 
 # Save the page content to a file
 publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" -o ./output/dashboard.html

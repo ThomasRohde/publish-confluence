@@ -201,7 +201,6 @@ program
   .description('Fetch content from Confluence pages')
   .option('-s, --space-key <key>', 'Confluence space key')
   .option('-p, --page-title <title>', 'Title of the page to fetch')
-  .option('-f, --format <format>', 'Output format: "storage" (default) or "json"', 'storage')
   .option('-o, --output <file>', 'Save output to a file instead of stdout')
   .option('-c, --children', 'Recursively fetch all child pages', false)
   .option('--output-dir <dir>', 'Directory to save fetched pages (default: ./content)', './content')
@@ -210,19 +209,10 @@ program
     // Merge command options with global options
     const options = { ...program.opts(), ...cmdOptions };
     configureCommandOptions(options);
-    
-    // Validate the format option
-    if (options.format && !['storage', 'json'].includes(options.format)) {
-      log.error(`Invalid format: ${options.format}. Must be "storage" or "json".`);
-      shutdownLogger(); // Ensure proper cleanup before exit
-      process.exit(1);
-    }
-    
-    // Use fetchPages imported at the top of the file
+      // Use fetchPages imported at the top of the file
     fetchPages({
       spaceKey: options.spaceKey,
       pageTitle: options.pageTitle,
-      outputFormat: options.format,
       outputFile: options.output,
       outputDir: options.outputDir,
       children: options.children,
