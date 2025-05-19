@@ -282,22 +282,18 @@ export class HandlebarsProcessor extends BasePostProcessor {
         ? processedContent.replace(/\{\{\s*>\s*(\w+)\s*\}\}/g, `{{> ${options.macroPrefix}$1}}`)
         : processedContent;
       
-      // We're no longer doing the second escaping here as it's already handled in the element processors
-      // Removed: finalContent = this.escapeHandlebarsInCodeBlocks(finalContent);
-
       // Remove the special root element tag
       finalContent = finalContent.replace(/<confluence-root>|<\/confluence-root>/g, '');
 
       // Remove extra div wrappers that might be present from Confluence storage format
-      finalContent = finalContent.replace(/^<div>\s*/, '').replace(/\s*<\/div>$/, '');
-      // Clean up extra whitespace and normalize formatting
+      finalContent = finalContent.replace(/^<div>\s*/, '').replace(/\s*<\/div>$/, '');      // Clean up extra whitespace and normalize formatting
       finalContent = finalContent
-        // Fix multiple newlines (more than 3) to be exactly 2
-        .replace(/\n{4,}/g, '\n\n\n')
-        // Fix spacing around Handlebars expressions
-        .replace(/(\{\{[^}]+\}\})\n\n+(\{\{[^}]+\}\})/g, '$1\n\n$2')
-        // Ensure proper spacing between layout cells
-        .replace(/\}\}\n\s*\{\{#layout-cell/g, '}}\n\n\n    {{#layout-cell')
+        // Limit consecutive newlines to a maximum of 1
+        .replace(/\n{2,}/g, '\n')
+        // Fix spacing around Handlebars expressions to ensure only one newline
+        .replace(/(\{\{[^}]+\}\})\n+(\{\{[^}]+\}\})/g, '$1\n$2')
+        // Ensure proper spacing between layout cells (only one newline)
+        .replace(/\}\}\n\s*\{\{#layout-cell/g, '}}\n    {{#layout-cell')
         // Clean up any trailing whitespace on lines
         .replace(/[ \t]+$/gm, '')
         // Ensure proper whitespace at beginning/end of document
