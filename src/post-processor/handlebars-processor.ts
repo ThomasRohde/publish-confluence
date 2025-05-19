@@ -43,7 +43,11 @@ export class HandlebarsProcessor extends BasePostProcessor {
       case 'code':
         const language = parameters.language || 'text';
         // Format and indent code blocks properly
-        const formattedCodeContent = bodyContent.replace(/\n/g, '\n  ');
+        let formattedCodeContent = bodyContent.replace(/\n/g, '\n  ');        // Checking for the 'handlebars' or 'hbs' language which might indicate intentional unescaped handlebar templates
+        const isHandlebarsCode = ['handlebars', 'hbs'].includes(language.toLowerCase());        // Escape Handlebars syntax in code blocks, unless it's explicitly a Handlebars template
+        if (!isHandlebarsCode) {
+          formattedCodeContent = formattedCodeContent.replace(/\{\{/g, '\\{{');
+        }
         return `\n\n{{#confluence-code language="${language}" title="${parameters.title || ''}" linenumbers=${parameters.linenumbers || 'false'}}}\n  ${formattedCodeContent}\n{{/confluence-code}}\n\n`;
 
       case 'info':
@@ -184,9 +188,7 @@ export class HandlebarsProcessor extends BasePostProcessor {
       }
       return '';
     }    // Handle regular HTML elements
-    const tagName = element.nodeName.toLowerCase();
-
-    // These elements can be preserved as-is in Handlebars
+    const tagName = element.nodeName.toLowerCase();    // These elements can be preserved as-is in Handlebars
     const preserveTags = ['p', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
       'ul', 'ol', 'li', 'table', 'tr', 'td', 'th', 'a', 'strong', 'em', 'code', 'pre'];
 
@@ -196,10 +198,19 @@ export class HandlebarsProcessor extends BasePostProcessor {
       for (let i = 0; i < element.childNodes.length; i++) {
         innerContent += this.processNode(element.childNodes[i]);
       }
+      // Escape Handlebars syntax in code and pre elements
+      if (['code', 'pre'].includes(tagName)) {
+        // Check for class attribute to see if this is explicitly marked as Handlebars code
+        const classAttr = element.getAttribute('class') || '';
+        const isHandlebarsCode = classAttr.includes('handlebars') || classAttr.includes('hbs');        // Only escape if not explicitly marked as Handlebars content
+        if (!isHandlebarsCode) {
+          innerContent = innerContent.replace(/\{\{/g, String.fromCharCode(92) + '{{');
+        }
+      }
 
       // Add special formatting for heading elements
       if (tagName.startsWith('h') && tagName.length === 2) {
-        // Add extra newlines around headings
+        // Add extra newlines around headings 
         return `\n\n<${tagName}>${innerContent}</${tagName}>\n`;
       }
 
@@ -223,6 +234,42 @@ export class HandlebarsProcessor extends BasePostProcessor {
   }
 
   /**
+   * Escapes Handlebars syntax ({{ }}) in code blocks to prevent it from being interpreted as actual Handlebars code
+   * 
+   * @param content - The content to process
+   * @returns Content with Handlebars syntax escaped in code blocks
+   */  private escapeHandlebarsInCodeBlocks(content: string): string {    // Function to escape Handlebars syntax
+    const escapeHandlebars = (match: string): string => {
+      return match.replace(/\{\{/g, '\\{{');
+    };
+
+    // Escape Handlebars syntax in code blocks (identified by confluence-code blocks)
+    let result = content.replace(
+      /(\{\{#confluence-code[^}]*\}\})([\s\S]*?)(\{\{\/confluence-code\}\})/g,
+      (match, opening, codeContent, closing) => {
+        return opening + escapeHandlebars(codeContent) + closing;
+      }
+    );
+
+    // Also escape Handlebars syntax in pre and code tags
+    result = result.replace(
+      /(<pre[^>]*>)([\s\S]*?)(<\/pre>)/gi,
+      (match, opening, content, closing) => {
+        return opening + escapeHandlebars(content) + closing;
+      }
+    );
+
+    result = result.replace(
+      /(<code[^>]*>)([\s\S]*?)(<\/code>)/gi,
+      (match, opening, content, closing) => {
+        return opening + escapeHandlebars(content) + closing;
+      }
+    );
+
+    return result;
+  }
+
+  /**
    * Process Confluence storage format content into a Handlebars template
    * 
    * @param content - The content in Confluence storage format
@@ -230,15 +277,14 @@ export class HandlebarsProcessor extends BasePostProcessor {
    * @returns A promise resolving to the processed content and metadata
    */  async process(content: string, options: PostProcessorOptions): Promise<ProcessorResult> {
     try {
-      log.verbose(`Converting Confluence storage format to Handlebars template...`);
-
-      // Convert macros and process content
-      let processedContent = this.convertConfluenceMacros(content);
-
-      // Apply prefix to macro names if specified
+      log.verbose(`Converting Confluence storage format to Handlebars template...`);      // Convert macros and process content
+      let processedContent = this.convertConfluenceMacros(content);      // Apply prefix to macro names if specified
       let finalContent = options.macroPrefix
         ? processedContent.replace(/\{\{\s*>\s*(\w+)\s*\}\}/g, `{{> ${options.macroPrefix}$1}}`)
         : processedContent;
+
+      // Always escape Handlebars syntax in code blocks and pre tags
+      finalContent = this.escapeHandlebarsInCodeBlocks(finalContent);
 
       // Remove the special root element tag
       finalContent = finalContent.replace(/<confluence-root>|<\/confluence-root>/g, '');
