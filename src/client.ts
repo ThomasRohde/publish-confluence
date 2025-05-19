@@ -118,21 +118,21 @@ export class ConfluenceClient {
         if (error.response) {
           const status = error.response.status;
           const resourcePath = error.config?.url || 'unknown';
-          
-          // Additional logging for authentication errors
+            // Additional logging for authentication errors
           if (status === 401) {
-            this.logger.error('Authentication failed', {
+            this.logger.error('Authentication failed: Invalid credentials or token');
+            
+            this.logger.info('Possible causes:');
+            this.logger.info('1. Invalid API token (expired or malformed)');
+            this.logger.info('2. URL domain issues (e.g., using cloud URL for server instance)');
+            this.logger.info('3. User lacks permissions for this operation');
+            this.logger.info('4. Token scopes may not include the required permissions');
+            
+            // Only log detailed context in debug mode
+            this.logger.debug('Authentication error context:', {
               url: `${this.restApiBase}${resourcePath}`,
               status,
-              statusText: error.response.statusText,
-              headers: error.response.headers,
-              data: error.response.data,
-              possibleCauses: [
-                'Invalid API token (expired or malformed)',
-                'URL domain issues (e.g., using cloud URL for server instance)',
-                'User lacks permissions for this operation',
-                'Token scopes may not include the required permissions'
-              ]
+              statusText: error.response.statusText
             });
           }
           
@@ -239,20 +239,36 @@ export class ConfluenceClient {
               // Authentication errors are already logged above
               return Promise.reject(new AuthenticationError('Authentication credentials are invalid', error));
             case 403:
-              this.logger.error('Permission denied', {
-                ...errorContext,
-                possibleSolutions: [
-                  'Ensure the user has appropriate permissions in Confluence',
-                  'Check space restrictions and page restrictions',
-                  'Verify token has sufficient scopes'
-                ]
+              this.logger.error('Permission denied: You do not have permission to perform this action');
+              this.logger.info('Possible solutions:');
+              this.logger.info('1. Ensure the user has appropriate permissions in Confluence');
+              this.logger.info('2. Check space restrictions and page restrictions');
+              this.logger.info('3. Verify token has sufficient scopes');
+              
+              // Only log detailed context in debug mode
+              this.logger.debug('Permission denied error context:', {
+                url: errorContext.url,
+                method: errorContext.method
               });
-              return Promise.reject(new PermissionDeniedError('You do not have permission to perform this action', error));
-            case 404:
-              this.logger.error('Resource not found', errorContext);
-              return Promise.reject(new ResourceNotFoundError('Resource', resourcePath, error));
-            default:
-              this.logger.error(`API request failed with status ${status}`, errorContext);
+              return Promise.reject(new PermissionDeniedError('You do not have permission to perform this action', error));            case 404:
+              this.logger.error(`Resource not found: ${resourcePath}`);
+              
+              // Only log detailed context in debug mode
+              this.logger.debug('Not found error context:', {
+                url: errorContext.url,
+                method: errorContext.method
+              });
+              
+              return Promise.reject(new ResourceNotFoundError('Resource', resourcePath, error));            default:
+              this.logger.error(`API request failed with status ${status}: ${error.response?.statusText || 'Unknown error'}`);
+              
+              // Only log detailed context in debug mode
+              this.logger.debug('API error context:', {
+                url: errorContext.url,
+                method: errorContext.method,
+                status: status
+              });
+              
               return Promise.reject(new ConfluenceApiError('API request failed', error));
           }
         }
@@ -533,10 +549,12 @@ export class ConfluenceClient {
         // Re-throw custom error already created by interceptor
          throw error;
       }
-      
-      // Wrap other unexpected errors with contextual information
+        // Wrap other unexpected errors with contextual information
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred during the request';
-      this.logger.error(`Unexpected error during API request: ${errorMessage}`, {
+      this.logger.error(`Unexpected error during API request: ${errorMessage}`);
+      
+      // Only log detailed context in debug mode
+      this.logger.debug('Request error details:', {
         method: config.method?.toUpperCase() || 'GET',
         url: config.url,
         errorType: error instanceof Error ? error.constructor.name : typeof error
@@ -609,8 +627,15 @@ export class ConfluenceClient {
       }
       return null;
     } catch (error) {
-       this.logger.error(`Error finding page "${title}" in space "${spaceKey}":`, error);
-       throw error; // Re-throw other errors
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error finding page "${title}" in space "${spaceKey}": ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('Find page error details:', { spaceKey, title, errorName: error.name });
+      } else {
+        this.logger.error(`Error finding page "${title}" in space "${spaceKey}": Unknown error`);
+      }
+      throw error; // Re-throw other errors
     }
   }
 
@@ -628,9 +653,15 @@ export class ConfluenceClient {
       if (!space.homepage || !space.homepage.id) {
         throw new Error(`Homepage not found or not configured for space "${spaceKey}".`);
       }
-      return space.homepage.id;
-    } catch (error) {
-      this.logger.error(`Error getting homepage for space "${spaceKey}":`, error);
+      return space.homepage.id;    } catch (error) {
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error getting homepage for space "${spaceKey}": ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('Get homepage error details:', { spaceKey, errorName: error.name });
+      } else {
+        this.logger.error(`Error getting homepage for space "${spaceKey}": Unknown error`);
+      }
       throw error; // Re-throw
     }
   }
@@ -815,9 +846,15 @@ export class ConfluenceClient {
           }
         }
       });
-      return response;
-    } catch (error) {
-      this.logger.error(`Error updating page with ID ${pageId}:`, error);
+      return response;    } catch (error) {
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error updating page with ID ${pageId}: ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('Update page error details:', { pageId, title, version, errorName: error.name });
+      } else {
+        this.logger.error(`Error updating page with ID ${pageId}: Unknown error`);
+      }
       throw error;
     }
   }
@@ -928,10 +965,17 @@ export class ConfluenceClient {
         
         if (!existingPage) {
           this.logger.error(`Unable to find existing page "${title}" after ${maxAttempts} attempts despite Confluence reporting it exists.`);
-        }
-      }
+        }      }
 
-      this.logger.error(`Error creating page "${title}" in space ${spaceKey}:`, error);
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error creating page "${title}" in space ${spaceKey}: ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('Create page error details:', { spaceKey, title, parentPageId, errorName: error.name });
+      } else {
+        this.logger.error(`Error creating page "${title}" in space ${spaceKey}: Unknown error`);
+      }
+      
       throw error;
     }
   }
@@ -949,9 +993,15 @@ export class ConfluenceClient {
         }
       });
       
-      return response.results;
-    } catch (error) {
-      this.logger.error(`Error listing attachments for page ${pageId}:`, error);
+      return response.results;    } catch (error) {
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error listing attachments for page ${pageId}: ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('List attachments error details:', { pageId, errorName: error.name });
+      } else {
+        this.logger.error(`Error listing attachments for page ${pageId}: Unknown error`);
+      }
       throw error;
     }
   }
@@ -1041,13 +1091,16 @@ export class ConfluenceClient {
       } catch {
         // Ignore errors when getting file size
       }
+        // Log just essential error information
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to upload attachment ${path.basename(filePath)} to page ${pageId}: ${errorMsg}`);
       
-      this.logger.error(`Failed to upload attachment ${path.basename(filePath)} to page ${pageId}`, {
-        error: (error as Error).message,
-        pageId,
-        filePath,
+      // Only log detailed context in debug mode
+      this.logger.debug('Attachment upload error context:', {
+        fileName: path.basename(filePath),
         fileSize,
-        timestamp: new Date().toISOString()
+        pageId,
+        errorType: error instanceof Error ? error.name : 'unknown'
       });
       
       throw error;
@@ -1079,9 +1132,15 @@ export class ConfluenceClient {
           ...(limit ? { limit } : {}),
           ...additionalParams
         }
-      });
-    } catch (error) {
-      this.logger.error(`Error executing search query "${cqlQuery}":`, error);
+      });    } catch (error) {
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error executing search query "${cqlQuery}": ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('Search error details:', { query: cqlQuery, errorName: error.name });
+      } else {
+        this.logger.error(`Error executing search query "${cqlQuery}": Unknown error`);
+      }
       throw error;
     }
   }
@@ -1126,9 +1185,15 @@ export class ConfluenceClient {
       return await this.request<ServerInfo>({
         method: 'GET',
         url: '/server-information',
-      });
-    } catch (error) {
-      this.logger.error('Error fetching server information:', error);
+      });    } catch (error) {
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error fetching server information: ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('Server info error details:', { errorName: error.name });
+      } else {
+        this.logger.error('Error fetching server information: Unknown error');
+      }
       throw error;
     }
   }
@@ -1177,9 +1242,19 @@ export class ConfluenceClient {
         method: 'GET',
         url: '/space',
         params: requestParams,
-      });
-    } catch (error) {
-      this.logger.error('Error fetching spaces:', error);
+      });    } catch (error) {
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error fetching spaces: ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('Get spaces error details:', { 
+          params: Object.keys(params).length ? params : 'none',
+          expand: expand.length ? expand : 'none',
+          errorName: error.name
+        });
+      } else {
+        this.logger.error('Error fetching spaces: Unknown error');
+      }
       throw error;
     }
   }
@@ -1202,9 +1277,15 @@ export class ConfluenceClient {
         params: {
           ...(expand.length ? { expand: expand.join(',') } : {})
         }
-      });
-    } catch (error) {
-      this.logger.error(`Error fetching space with key "${spaceKey}":`, error);
+      });    } catch (error) {
+      // Log just the essential error information without the full error object
+      if (error instanceof Error) {
+        this.logger.error(`Error fetching space with key "${spaceKey}": ${error.message}`);
+        // Only log detailed error in debug mode
+        this.logger.debug('Get space error details:', { spaceKey, errorName: error.name });
+      } else {
+        this.logger.error(`Error fetching space with key "${spaceKey}": Unknown error`);
+      }
       throw error;
     }
   }
