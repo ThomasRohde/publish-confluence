@@ -27,6 +27,22 @@ export interface ConfluenceClientConfig {
 }
 
 /**
+ * Structure for Confluence XHTML validation errors
+ */
+export interface ConfluenceXhtmlValidationError {
+  /** The line number where the error occurred */
+  line?: number;
+  /** The column number where the error occurred */
+  column?: number;
+  /** The error message */
+  message: string;
+  /** The XHTML tag with the error */
+  tagName?: string;
+  /** Raw error message from the XML processor */
+  rawMessage?: string;
+}
+
+/**
  * Configuration for publishing content to Confluence
  */
 export interface PublishConfig {

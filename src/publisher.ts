@@ -4,9 +4,10 @@ import Handlebars from 'handlebars';
 import path from 'path';
 import { ConfluenceClient } from './client';
 import { loadConfiguration } from './config';
+import { BadRequestError } from './errors';
 import { createLogger, shutdownLogger } from './logger';
 import { processMarkdownFile } from './markdown-processor';
-import { ConfluenceApiCredentials, PublishConfig, PublishOptions } from './types';
+import { ConfluenceApiCredentials, ConfluenceXhtmlValidationError, PublishConfig, PublishOptions } from './types';
 import { generateUuid } from './utils';
 
 // Initialize logger
@@ -516,13 +517,99 @@ async function publishPageRecursive(
       // Add pageId and baseUrl to the context now that we have them
       context.pageId = pageId;
       context.baseUrl = getBaseUrl(options);
-      
-      if (files.length > 0 && cfg.macroTemplatePath) {
+        if (files.length > 0 && cfg.macroTemplatePath) {
         needsFinalUpdate = true; // We'll need to update the page with attachment links
       }
     } catch (error: any) {
+      // Handle specific error types with helpful messages
+      if (error instanceof BadRequestError && error.xhtmlErrors?.length) {
+        // This is a malformed XHTML error with detailed information
+        log.error('Failed to publish page due to malformed XHTML content.');
+          // Check for specific types of errors to provide targeted help
+        const hasConfluenceMacroIssues = error.xhtmlErrors.some((err: ConfluenceXhtmlValidationError) => 
+          (err.tagName && (err.tagName.startsWith('ac:') || err.tagName.startsWith('ri:'))) ||
+          (err.rawMessage && (err.rawMessage.includes('ac:') || err.rawMessage.includes('ri:')))
+        );
+        
+        const hasMismatchedTagIssues = error.xhtmlErrors.some((err: ConfluenceXhtmlValidationError) => 
+          err.message && (
+            err.message.includes('Tag mismatch') || 
+            err.message.includes('Unclosed HTML tag') ||
+            err.message.includes('mismatch') ||
+            err.message.includes('expected </')
+          )
+        );
+        
+        // Log each validation error with line/column information
+        error.xhtmlErrors.forEach((err: ConfluenceXhtmlValidationError, index: number) => {
+          const locationInfo = err.line ? 
+            `Line ${err.line}${err.column ? `, Column ${err.column}` : ''}` : 
+            '';
+          
+          const tagInfo = err.tagName ? `Tag <${err.tagName}>` : '';
+          const separator = locationInfo && tagInfo ? ' - ' : '';
+          const location = locationInfo || tagInfo ? ` (${locationInfo}${separator}${tagInfo})` : '';
+          
+          log.error(`  ${index + 1}. ${err.message}${location}`);
+        });
+        
+        // Provide suggestions based on the specific error types
+        log.info('\nSuggestions to fix XHTML issues:');
+        
+        // Tag mismatch specific guidance
+        if (hasMismatchedTagIssues) {
+          log.info('1. Fix HTML tag nesting issues:');
+          log.info('   - HTML tags must be properly nested: <outer><inner></inner></outer>');
+          log.info('   - Check for missing closing tags or tags closed in wrong order');
+          log.info('   - Common mistake: <li><div></li></div> should be <li><div></div></li>');
+        } else {
+          log.info('1. Ensure all HTML tags are properly closed (e.g., <div></div>)');
+        }
+        
+        // Character entity guidance
+        log.info('2. Use HTML entities for special characters:');
+        log.info('   - & must be written as &amp;');
+        log.info('   - < must be written as &lt;');
+        log.info('   - > must be written as &gt;');
+        log.info('   - " must be written as &quot; in attributes');
+        
+        // Confluence-specific guidance if needed
+        if (hasConfluenceMacroIssues) {
+          log.info('3. Confluence macro structure issues detected:');
+          log.info('   - Ensure all Confluence macro tags are properly closed');
+          log.info('   - Common Confluence macros and their correct structure:');
+          log.info('     * <ac:structured-macro>...</ac:structured-macro>');
+          log.info('     * <ac:layout-section><ac:layout-cell>...</ac:layout-cell></ac:layout-section>');
+          log.info('     * <ac:parameter>...</ac:parameter> must be inside a macro');
+          log.info('     * Lists and tables must not be interrupted by layout macros');
+          log.info('   - See Confluence Storage Format documentation for proper syntax');
+        } else {
+          log.info('3. Check for invalid or unrecognized HTML attributes');
+        }
+        
+        log.info('4. Validate your HTML content using an XHTML validator');
+          // If it's a Confluence layout issue, provide extra specific guidance
+        if (error.xhtmlErrors.some((err: ConfluenceXhtmlValidationError) => 
+            (err.tagName && err.tagName.includes('layout')) || 
+            (err.rawMessage && err.rawMessage.includes('layout')))) {
+          log.info('\nSpecific guidance for Confluence layout issues:');
+          log.info('1. Layout structure must be properly nested:');
+          log.info('   <ac:layout-section>');
+          log.info('     <ac:layout-cell>...content...</ac:layout-cell>');
+          log.info('     <ac:layout-cell>...content...</ac:layout-cell>');
+          log.info('   </ac:layout-section>');
+          log.info('2. Common layout mistakes:');
+          log.info('   - Layout cells must be direct children of layout sections');
+          log.info('   - List items <li> cannot contain layout sections (close the list first)');
+          log.info('   - Tables cannot contain layout sections (close the table first)');
+          log.info('   - Cannot place <ac:layout-section> directly inside another <ac:layout-section>');
+        }
+        
+        // Rethrow the error so the calling code knows the operation failed
+        throw error;
+      }
       // Check if this is a "page already exists" error
-      if (isPageAlreadyExistsError(error)) {
+      else if (isPageAlreadyExistsError(error)) {
         log.debug(`Caught "page already exists" error. Searching again for the page.`);
         
         // The page exists but we couldn't find it earlier - try again with retries and backoff

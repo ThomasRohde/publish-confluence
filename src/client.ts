@@ -160,13 +160,67 @@ export class ConfluenceClient {
                 } 
               });
             }
-          }
-
-          // Handle different status codes according to OpenAPI spec
+          }          // Handle different status codes according to OpenAPI spec
           switch (status) {
             case 400:
-              this.logger.error('Invalid request parameters', errorContext);
-              return Promise.reject(new BadRequestError('Invalid request parameters', error));
+              // Check for XHTML validation errors
+              const errorData: any = errorContext.responseData;
+              let errorMessage = 'Invalid request parameters';
+                // Look for common XHTML error patterns in the response
+              if (errorData && typeof errorData === 'object') {
+                if (typeof errorData.message === 'string') {
+                  // Check for specific XHTML error patterns
+                  const isXhtmlError = errorData.message.includes('invalid xhtml') || 
+                     errorData.message.includes('Invalid XHTML') ||
+                     errorData.message.includes('Error parsing xhtml') ||
+                     errorData.message.includes('Error on line') ||
+                     errorData.message.includes('must be terminated') ||
+                     errorData.message.includes('entity reference') ||
+                     errorData.message.includes('Unexpected close tag') ||
+                     errorData.message.match(/at \[row,col [^:]*\]:/i);
+                     
+                  if (isXhtmlError) {
+                    // Extract specific error details for better logging
+                    const tagMismatchMatch = errorData.message.match(/Unexpected close tag <\/([^>]+)>; expected <\/([^>]+)>/i);
+                    const lineColMatch = errorData.message.match(/at \[row,col [^:]*\]: \[(\d+),(\d+)\]/i);
+                    
+                    const solutions = ['Check for unclosed HTML tags'];
+                    let specificError = 'Malformed XHTML content';
+                    
+                    if (tagMismatchMatch) {
+                      const [_, foundTag, expectedTag] = tagMismatchMatch;
+                      specificError = `HTML tag mismatch: Found </${foundTag}> when </${expectedTag}> was expected`;
+                      
+                      solutions.push(`Fix tag nesting issue between <${expectedTag}> and <${foundTag}> tags`);
+                      solutions.push('Make sure all HTML tags are properly nested (inner tags must be closed before outer tags)');
+                      
+                      // Special handling for Confluence macros
+                      if (foundTag.startsWith('ac:') || expectedTag.startsWith('ac:')) {
+                        solutions.push('Check Confluence macro structure - ensure all macro tags are properly closed');
+                      }
+                    }
+                    
+                    const location = lineColMatch ? 
+                      `at line ${lineColMatch[1]}, column ${lineColMatch[2]}` : '';
+                      
+                    this.logger.error(`Malformed XHTML content detected ${location}`, {
+                      ...errorContext,
+                      errorMessage: errorData.message,
+                      specificError: specificError,
+                      location: lineColMatch ? { line: parseInt(lineColMatch[1]), col: parseInt(lineColMatch[2]) } : undefined,
+                      possibleSolutions: solutions.concat([
+                        'Ensure special characters are properly escaped',
+                        'Validate your HTML/XHTML using a checker tool',
+                        'Make sure HTML entities use the correct format (e.g., &amp; for &)'
+                      ])
+                    });
+                    
+                    errorMessage = specificError;
+                  }
+                }
+              }
+              
+              return Promise.reject(new BadRequestError(errorMessage, error));
             case 401:
               // Authentication errors are already logged above
               return Promise.reject(new AuthenticationError('Authentication credentials are invalid', error));
@@ -198,10 +252,26 @@ export class ConfluenceClient {
    */
   private createCustomError(status: number, errorContext: any, originalError: AxiosError): any {
     // Create the appropriate error type based on status code
-    let error;
-    switch (status) {
+    let error;    switch (status) {
       case 400:
-        error = new BadRequestError('Invalid request parameters', originalError);
+        // Check for XHTML validation errors in the response
+        const errorData: any = originalError.response?.data;
+        let errorMessage = 'Invalid request parameters';
+        
+        // Check for XHTML-specific error patterns
+        if (errorData && typeof errorData === 'object') {
+          if (typeof errorData.message === 'string') {
+            if (errorData.message.includes('invalid xhtml') || 
+               errorData.message.includes('Invalid XHTML') ||
+               errorData.message.includes('Error on line') ||
+               errorData.message.includes('must be terminated') ||
+               errorData.message.includes('entity reference')) {
+              errorMessage = 'Malformed XHTML content';
+            }
+          }
+        }
+        
+        error = new BadRequestError(errorMessage, originalError);
         break;
       case 401:
         error = new AuthenticationError('Authentication credentials are invalid', originalError);
@@ -224,6 +294,193 @@ export class ConfluenceClient {
     error.method = errorContext.method;
 
     return error;
+  }
+
+  /**
+   * Validates XHTML content before submitting to Confluence
+   * 
+   * This method performs basic checks on content to identify common XHTML issues
+   * before sending to the Confluence API, which can help avoid 400 errors.
+   * 
+   * @param content XHTML content to validate
+   * @returns Object with validation results and any detected issues
+   */
+  validateXhtml(content: string): { 
+    valid: boolean; 
+    errors: Array<{ message: string; line?: number; column?: number; suggestion?: string }> 
+  } {
+    const errors = [];
+    
+    try {
+      // Check for unclosed tags using a simple regex-based approach
+      // This is not a complete parser but catches common issues
+      const tagStack: string[] = [];
+      const tagPattern = /<(\/?)([\w:-]+)[^>]*>/g;
+      let selfClosingTags = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+      
+      let match;
+      let line = 1;
+      let lastNewlinePos = 0;
+      
+      // Track line numbers
+      for (let i = 0; i < content.length; i++) {
+        if (content[i] === '\n') {
+          line++;
+          lastNewlinePos = i;
+        }
+        
+        // Reset regex search position
+        if (i === 0) {
+          tagPattern.lastIndex = 0;
+        }
+        
+        // Find next tag
+        if ((match = tagPattern.exec(content)) !== null) {
+          i = match.index; // Move main counter to match position
+          
+          const isClosingTag = match[1] === '/';
+          const tagName = match[2].toLowerCase();
+          const column = match.index - lastNewlinePos;
+          
+          if (!isClosingTag) {
+            // Opening tag
+            if (!selfClosingTags.includes(tagName)) {
+              tagStack.push(tagName);
+            }
+          } else {
+            // Closing tag
+            if (tagStack.length > 0) {
+              const expectedTag = tagStack.pop();
+              if (expectedTag !== tagName) {
+                errors.push({
+                  message: `Mismatched tag: found </${tagName}> but expected </${expectedTag}>`,
+                  line,
+                  column,
+                  suggestion: `Make sure all opening tags have matching closing tags in the right order`
+                });
+              }
+            } else {
+              errors.push({
+                message: `Unexpected closing tag </${tagName}>`,
+                line,
+                column,
+                suggestion: `Remove this closing tag or add a matching opening tag`
+              });
+            }
+          }
+        } else {
+          // No more tags
+          break;
+        }
+      }
+      
+      // Check for unclosed tags
+      if (tagStack.length > 0) {
+        tagStack.forEach(tag => {
+          errors.push({
+            message: `Unclosed tag: <${tag}>`,
+            suggestion: `Add a closing </${tag}> tag`
+          });
+        });
+      }
+      
+      // Check for unescaped special characters in content
+      const unescapedAmpersand = /&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[a-f0-9]+);)/i;
+      const ampMatch = unescapedAmpersand.exec(content);
+      if (ampMatch) {
+        // Count lines up to this point
+        let ampLine = 1;
+        let lastNewline = 0;
+        for (let i = 0; ampMatch.index && i < ampMatch.index; i++) {
+          if (content[i] === '\n') {
+            ampLine++;
+            lastNewline = i;
+          }
+        }
+        
+        errors.push({
+          message: `Unescaped ampersand (&) found`,
+          line: ampLine,
+          column: ampMatch.index - lastNewline,
+          suggestion: `Replace & with &amp;`
+        });
+      }
+      
+      // Check for potential macro issues
+      if (content.includes('<ac:') && !content.includes('</ac:')) {
+        errors.push({
+          message: `Potential unclosed Confluence macro tag`,
+          suggestion: `Ensure all Confluence macros have proper opening and closing tags`
+        });
+      }
+    } catch (e) {
+      // If our validation code throws an error, report it
+      errors.push({
+        message: `Validation error: ${e instanceof Error ? e.message : String(e)}`,
+        suggestion: `Try validating your content with an external XHTML validator`
+      });
+    }
+    
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Validates content for XHTML compliance before sending to Confluence
+   * 
+   * This utility method can be used to check content for common XHTML errors
+   * that would cause Confluence to reject the content with a 400 Bad Request error.
+   * It's useful for preprocessing content before submitting it via createPage or updatePage.
+   * 
+   * @param content The content to validate as Confluence Storage Format (XHTML)
+   * @param throwOnError Whether to throw an error if validation fails
+   * @returns Validation result with errors and suggestions
+   */
+  async validateContentForConfluence(
+    content: string, 
+    throwOnError: boolean = false
+  ): Promise<{
+    valid: boolean;
+    errors: Array<{
+      message: string;
+      line?: number;
+      column?: number;
+      suggestion?: string;
+    }>;
+  }> {
+    // Use the internal validation method
+    const result = this.validateXhtml(content);
+    
+    // Log validation results
+    if (!result.valid) {
+      this.logger.warn(`XHTML validation found ${result.errors.length} issues:`, {
+        errorCount: result.errors.length
+      });
+      
+      result.errors.forEach(err => {
+        const location = err.line ? ` (Line: ${err.line}${err.column ? `, Column: ${err.column}` : ''})` : '';
+        this.logger.warn(`⚠️ XHTML warning: ${err.message}${location}`);
+        if (err.suggestion) {
+          this.logger.warn(`   Suggestion: ${err.suggestion}`);
+        }
+      });
+      
+      // If requested, throw an error with the collected validation issues
+      if (throwOnError) {
+        const errorMessage = result.errors.map(err => {
+          const location = err.line ? ` (Line: ${err.line}${err.column ? `, Column: ${err.column}` : ''})` : '';
+          return `- ${err.message}${location}${err.suggestion ? `. Suggestion: ${err.suggestion}` : ''}`;
+        }).join('\n');
+        
+        throw new BadRequestError(`XHTML validation failed:\n${errorMessage}`);
+      }
+    } else {
+      this.logger.debug('XHTML validation successful: No issues found');
+    }
+    
+    return result;
   }
 
   /** Make a generic request to the Confluence API */
@@ -483,8 +740,7 @@ export class ConfluenceClient {
    * @param version - The current version number of the page
    * @param updateMessage - Optional message for the page history
    * @returns The updated page
-   */
-  async updatePage(
+   */  async updatePage(
     pageId: string,
     title: string,
     bodyContent: string,
@@ -492,6 +748,32 @@ export class ConfluenceClient {
     updateMessage?: string
   ): Promise<ConfluencePage> {
     try {
+      // Validate the XHTML content before submitting to prevent common errors
+      const validationResult = this.validateXhtml(bodyContent);
+      
+      if (!validationResult.valid && this.debug) {
+        this.logger.warn(`XHTML validation detected potential issues before update:`, {
+          pageId,
+          title,
+          issues: validationResult.errors.map(err => ({
+            message: err.message,
+            line: err.line,
+            column: err.column,
+            suggestion: err.suggestion
+          }))
+        });
+        
+        // Only log warnings here, don't block the request
+        // This approach allows the user to see validation warnings but still proceed
+        validationResult.errors.forEach(err => {
+          const location = err.line ? ` (Line: ${err.line}${err.column ? `, Column: ${err.column}` : ''})` : '';
+          this.logger.warn(`⚠️ XHTML warning: ${err.message}${location}`);
+          if (err.suggestion) {
+            this.logger.warn(`   Suggestion: ${err.suggestion}`);
+          }
+        });
+      }
+      
       // First, get the latest version of the page to ensure we're using the correct version number
       const latestPage = await this.getContentById(pageId, ['version']);
       const currentVersion = latestPage.version?.number || version;
@@ -528,14 +810,37 @@ export class ConfluenceClient {
 
   /**
    * Creates a new page
-   */
-  private async createPage(
+   */  private async createPage(
     spaceKey: string,
     title: string,
     bodyContent: string,
     parentPageId?: string
   ): Promise<ConfluencePage> {
     try {
+      // Validate the XHTML content before submitting to prevent common errors
+      const validationResult = this.validateXhtml(bodyContent);
+      
+      if (!validationResult.valid && this.debug) {
+        this.logger.warn(`XHTML validation detected potential issues before page creation:`, {
+          title,
+          spaceKey,
+          issues: validationResult.errors.map(err => ({
+            message: err.message,
+            line: err.line,
+            column: err.column,
+            suggestion: err.suggestion
+          }))
+        });
+        
+        // Only log warnings, don't block the request
+        validationResult.errors.forEach(err => {
+          const location = err.line ? ` (Line: ${err.line}${err.column ? `, Column: ${err.column}` : ''})` : '';
+          this.logger.warn(`⚠️ XHTML warning: ${err.message}${location}`);
+          if (err.suggestion) {
+            this.logger.warn(`   Suggestion: ${err.suggestion}`);
+          }
+        });
+      }
       const data: Record<string, any> = {
         type: 'page',
         title,

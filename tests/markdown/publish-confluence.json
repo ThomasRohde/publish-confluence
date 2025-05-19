@@ -1,0 +1,10 @@
+{
+  "spaceKey": "~thro",
+  "pageTitle": "Error",
+  "parentPageTitle": "Testing",
+  "distDir": "./",
+  "templatePath": "./confluence-template.md",
+  "includedFiles": [
+    "**/*.jpg"
+  ]
+}
