@@ -38,23 +38,55 @@ export class HandlebarsProcessor extends BasePostProcessor {
     }
 
     // Get macro body content
-    const bodyContent = this.extractMacroBody(macroElement);
-
-    // Handle different macro types with specific formatting
+    const bodyContent = this.extractMacroBody(macroElement);    // Handle different macro types with specific formatting
     switch (macroName.toLowerCase()) {
       case 'code':
         const language = parameters.language || 'text';
-        return `{{#code language="${language}"}}${bodyContent}{{/code}}`;
+        return `{{#confluence-code language="${language}" title="${parameters.title || ''}" linenumbers=${parameters.linenumbers || 'false'}}}${bodyContent}{{/confluence-code}}`;
 
       case 'info':
+        return `{{#confluence-info title="${parameters.title || ''}"}}${bodyContent}{{/confluence-info}}`;
+        
       case 'note':
+        return `{{#confluence-note title="${parameters.title || ''}"}}${bodyContent}{{/confluence-note}}`;
+        
       case 'warning':
+        return `{{#confluence-warning title="${parameters.title || ''}"}}${bodyContent}{{/confluence-warning}}`;
+        
       case 'tip':
-        return `{{#${macroName}}}${bodyContent}{{/${macroName}}}`;
+        return `{{#confluence-tip title="${parameters.title || ''}"}}${bodyContent}{{/confluence-tip}}`;
 
       case 'panel':
-        return `{{#panel title="${parameters.title || ''}"}}${bodyContent}{{/panel}}`;
+        return `{{#confluence-panel title="${parameters.title || ''}"}}${bodyContent}{{/confluence-panel}}`;
+        
+      case 'expand':
+        return `{{#confluence-expand title="${parameters.title || ''}"}}${bodyContent}{{/confluence-expand}}`;
+        
+      case 'toc':
+        const minLevel = parameters.minLevel || '2';
+        const maxLevel = parameters.maxLevel || '5';
+        return `{{confluence-toc minLevel=${minLevel} maxLevel=${maxLevel}}}`;
+        
+      case 'html':
+        return `{{#confluence-html}}${bodyContent}{{/confluence-html}}`;
+        
+      case 'children':
+        const sortBy = parameters.sort || '';
+        const reverse = parameters.reverse || 'false';
+        const includeLabels = parameters.labels || '';
+        const excludeLabels = parameters.excludeLabels || '';
+        const mode = parameters.mode || '';
+        return `{{confluence-children sortBy="${sortBy}" reverse=${reverse} includeLabels="${includeLabels}" excludeLabels="${excludeLabels}" mode="${mode}"}}`;
+        
+      case 'status':
+        const type = parameters.colour || parameters.color || 'neutral';
+        const text = parameters.title || '';
+        return `{{confluence-status type="${type}" text="${text}"}}`;
 
+      case 'anchor':
+        const name = parameters.name || '';
+        return `{{confluence-anchor name="${name}"}}`;
+        
       // For all other macros, use a partial
       default:
         return `{{> ${macroName}}}`;
@@ -88,12 +120,46 @@ export class HandlebarsProcessor extends BasePostProcessor {
       return this.processMacro(macroName, element);
     }
 
+    // Handle Confluence layout elements
+    if (element.nodeName === 'ac:layout') {
+      // Process children of the layout element
+      let layoutContent = '';
+      for (let i = 0; i < element.childNodes.length; i++) {
+        layoutContent += this.processNode(element.childNodes[i]);
+      }
+      
+      return `{{#confluence-layout}}${layoutContent}{{/confluence-layout}}`;
+    }
+
+    if (element.nodeName === 'ac:layout-section') {
+      // Get the section type
+      const sectionType = element.getAttribute('ac:type') || 'single';
+      
+      // Process children (layout cells)
+      let sectionContent = '';
+      for (let i = 0; i < element.childNodes.length; i++) {
+        sectionContent += this.processNode(element.childNodes[i]);
+      }
+      
+      return `{{#layout-section type="${sectionType}"}}${sectionContent}{{/layout-section}}`;
+    }
+
+    if (element.nodeName === 'ac:layout-cell') {
+      // Process cell content
+      let cellContent = '';
+      for (let i = 0; i < element.childNodes.length; i++) {
+        cellContent += this.processNode(element.childNodes[i]);
+      }
+      
+      return `{{#layout-cell}}${cellContent}{{/layout-cell}}`;
+    }
+
     // Handle Confluence-specific tags
     if (element.nodeName === 'ac:image') {
       const attachmentNode = element.getElementsByTagName('ri:attachment')[0];
       if (attachmentNode) {
         const filename = attachmentNode.getAttribute('ri:filename') || '';
-        return `{{image "${filename}"}}`;
+        return `{{confluence-image src="${filename}"}}`;
       }
       return '';
     }

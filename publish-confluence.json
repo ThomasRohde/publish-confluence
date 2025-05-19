@@ -1,5 +1,5 @@
 {
-  "spaceKey": "TEST",
+  "spaceKey": "~thro",
   "parentTitle": "Publish-Confluence Test",
   "title": "CLI Dry Run Test",
   "baseUrl": "https://example.confluence.com",
@@ -7,5 +7,8 @@
   "password": "placeholder",
   "content": {
     "main": "./README.md"
-  }
+  },
+  "childPages": [],
+  "pageTitle": "Testing",
+  "templatePath": "././content/~thro/Testing/Testing.html"
 }

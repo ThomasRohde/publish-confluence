@@ -5,10 +5,14 @@ import { dirname, join, resolve } from 'path';
 import { ConfluenceClient } from './client';
 import { readFetchConfigFile, saveFetchConfigFile, updatePageInConfig } from './config';
 import { createLogger, setVerbosityLevel, VERBOSITY } from './logger';
+import { initializePostProcessors } from './post-processor';
 import { ConfluenceApiCredentials, PageConfig, PublishConfig } from './types';
 
 // Load environment variables from .env file
 config();
+
+// Initialize post-processors
+initializePostProcessors();
 
 // Initialize logger
 const log = createLogger();
@@ -302,7 +306,9 @@ export async function fetchPages(options: {
         outputDir,
         quiet: options.quiet,
         verbose: options.verbose,
-        debug: options.debug
+        debug: options.debug,
+        processor: options.processor,
+        processorOptions: options.processorOptions
       });
       
       allFetchedPages.push(...fetchedPages);

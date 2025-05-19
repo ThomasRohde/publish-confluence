@@ -223,22 +223,21 @@ The following existing dependencies in esbuild.config.js will be utilized:
 - [x] Implement types and interfaces
 - [x] Create base processor class
 - [x] Implement processor factory
-- [ ] Update CLI command options
+- [x] Update CLI command options
 
 ### Phase 2: Default Processors
 - [x] Implement Handlebars processor (default)
 - [x] Implement Markdown processor example
 
 ### Phase 3: Integration
-- [ ] Integrate with fetch command
-- [ ] Update file handling to support different extensions
-- [ ] Add processor options handling
-- [ ] Update documentation
+- [x] Integrate with fetch command
+- [x] Update file handling to support different extensions
+- [x] Add processor options handling
+- [x] Update documentation in README.md and Page-5.hbs
 
 ### Phase 4: Testing and Refinement
-- [ ] Add unit tests for processors
-- [ ] Test with real Confluence content
-- [ ] Refine macro conversion
+- [x] Test with real Confluence content. Do not create test cases yet but collaborate with the team to gather real-world examples.
+- [x] Refine macro conversion
 - [ ] Optimize performance
 
 ## Future Enhancements

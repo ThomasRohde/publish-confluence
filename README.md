@@ -593,7 +593,25 @@ publish-confluence fetch -s MYSPACE -p "My Page Title" -c
 
 # Fetch using verbose logging for more details
 publish-confluence fetch -s MYSPACE -p "My Page Title" -v
+
+# Fetch and convert to Handlebars template (note: use -s for space key, -p for page title)
+publish-confluence fetch -s MYSPACE -p "My Page Title" --process handlebars
+
+# Fetch and convert to Markdown
+publish-confluence fetch -s MYSPACE -p "My Page Title" --process markdown
+
+# Fetch with custom processor options
+publish-confluence fetch -s MYSPACE -p "My Page Title" --process handlebars --processor-options '{"macroPrefix":"custom-"}'
 ```
+
+#### Content Post-Processing
+
+The `--process` option allows you to automatically convert Confluence storage format to other formats:
+
+- **handlebars**: Converts to Handlebars templates, transforming Confluence macros to corresponding helpers
+- **markdown**: Converts to Markdown format with appropriate formatting for headings, lists, and other elements
+
+Custom processor options can be provided as a JSON string with the `--processor-options` parameter.
 
 #### Roundtripping Workflow
 

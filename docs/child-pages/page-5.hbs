@@ -234,6 +234,30 @@ publish-confluence fetch -c
 
 # Fetch using verbose logging
 publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" -v
+
+# Fetch and convert to Handlebars template
+publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" --process handlebars
+
+# Fetch and convert to Markdown
+publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" --process markdown
+
+# Fetch with custom processor options
+publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" --process handlebars --processor-options '{"macroPrefix":"custom-"}'
+{{/confluence-code}}
+
+<h4>Post-Processing Content</h4>
+<p>You can automatically convert Confluence content to other formats using post-processors:</p>
+
+<ul>
+  <li><code>--process handlebars</code>: Converts to Handlebars templates with macro helpers</li>
+  <li><code>--process markdown</code>: Converts to Markdown format</li>
+</ul>
+
+<p>Custom processor options can be provided as a JSON string:</p>
+
+{{#confluence-code language="bash" title="Post-processor options example"}}
+# Add a prefix to all macro names
+publish-confluence fetch -s TEAMSPACE -p "API Documentation" --process handlebars --processor-options '{"macroPrefix":"api-"}'
 {{/confluence-code}}
 
 <h4>Fetch Workflow and Roundtripping</h4>
