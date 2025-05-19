@@ -18,6 +18,37 @@ initializePostProcessors();
 const log = createLogger();
 
 /**
+ * Clear the output directory for a specific space key
+ * @param outputDir Base output directory
+ * @param spaceKey The space key to clear
+ */
+async function clearOutputDirectory(outputDir: string, spaceKey: string): Promise<void> {
+  try {
+    const spaceDir = join(outputDir, spaceKey);
+    log.verbose(`Clearing output directory: ${spaceDir}`);
+    
+    try {
+      // Check if directory exists before attempting to clear it
+      await fs.access(spaceDir);
+      
+      // Remove the directory and all its contents
+      await fs.rm(spaceDir, { recursive: true, force: true });
+      log.verbose(`Removed directory ${spaceDir}`);
+    } catch (error) {
+      // Directory doesn't exist, nothing to clear
+      log.verbose(`Directory ${spaceDir} doesn't exist, no need to clear`);
+    }
+    
+    // Recreate the empty directory
+    await fs.mkdir(spaceDir, { recursive: true });
+    log.verbose(`Created empty directory ${spaceDir}`);
+  } catch (error) {
+    log.error(`Error clearing output directory: ${(error as Error).message}`);
+    throw error;
+  }
+}
+
+/**
  * Get authentication credentials from environment variables
  */
 function getAuthCredentials(): { auth: ConfluenceApiCredentials, baseUrl: string } {
@@ -203,6 +234,65 @@ async function fetchPageAndChildren(
 }
 
 /**
+ * Clean up the config to ensure there are no duplicates or pages that appear as both root and child
+ * @param config Config to clean up
+ * @returns Cleaned up config
+ */
+function cleanupConfig(config: PublishConfig): PublishConfig {
+  // Skip if there's no root pageTitle or no childPages
+  if (!config.pageTitle || !config.childPages || config.childPages.length === 0) {
+    return config;
+  }
+  
+  // Track processed pages to avoid duplicates
+  const processedPages = new Set<string>();
+  
+  // Add the root page to the set
+  const rootPageKey = `${config.spaceKey}:${config.pageTitle}`;
+  processedPages.add(rootPageKey);
+  
+  log.verbose(`Cleaning up config: root page is ${rootPageKey}`);
+    // Recursive function to clean up child pages
+  const cleanupChildPages = (childPages: PublishConfig[]): PublishConfig[] => {
+    const cleanedPages: PublishConfig[] = [];
+    
+    for (const childPage of childPages) {
+      const childKey = `${childPage.spaceKey || config.spaceKey}:${childPage.pageTitle}`;
+      const rootPageKey = `${config.spaceKey}:${config.pageTitle}`;
+      
+      // Skip if this is the root page or if we've already processed it
+      if (childKey === rootPageKey) {
+        log.verbose(`Skipping child page "${childPage.pageTitle}" that matches root page`);
+        continue;
+      } else if (processedPages.has(childKey)) {
+        log.verbose(`Skipping duplicate child page "${childPage.pageTitle}"`);
+        continue;
+      }
+      
+      // Mark this page as processed
+      processedPages.add(childKey);
+      log.verbose(`Processing child page: ${childKey}`);
+      
+      // Clean up nested child pages if any
+      const cleanedChild = { ...childPage };
+      if (cleanedChild.childPages && cleanedChild.childPages.length > 0) {
+        cleanedChild.childPages = cleanupChildPages(cleanedChild.childPages);
+      }
+      
+      cleanedPages.push(cleanedChild);
+    }
+    
+    return cleanedPages;
+  };
+  
+  // Create a new config with cleaned up childPages
+  return {
+    ...config,
+    childPages: cleanupChildPages(config.childPages)
+  };
+}
+
+/**
  * Fetch pages based on command options or config file
  */
 export async function fetchPages(options: {
@@ -230,7 +320,8 @@ export async function fetchPages(options: {
     } else {
       setVerbosityLevel(VERBOSITY.NORMAL);
     }
-      // Normalize options
+      
+    // Normalize options
     const {
       spaceKey, 
       pageTitle,
@@ -257,10 +348,95 @@ export async function fetchPages(options: {
     // Determine which pages to fetch
     let pagesToFetch: { spaceKey: string; pageTitle: string }[] = [];
     
+    // Flag to determine if we're regenerating based on existing config
+    const isRegeneratingFromConfig = !spaceKey && !pageTitle;
+    
     if (spaceKey && pageTitle) {
       // Fetch single page specified by command line arguments
       pagesToFetch = [{ spaceKey, pageTitle }];
-      log.info(`Fetching page "${pageTitle}" from space "${spaceKey}"...`);
+      
+      // Clear the output directory for this space when explicitly specifying a page
+      await clearOutputDirectory(outputDir, spaceKey);
+      
+      // Start with a clean config when running with command-line parameters
+      config = { 
+        spaceKey,
+        pageTitle: '',  // Will be updated during the fetch process
+        templatePath: './confluence-template.html',
+        macroTemplatePath: null,
+        includedFiles: [],
+        excludedFiles: [],
+        distDir: './dist',
+        childPages: []
+      };
+    } else if (isRegeneratingFromConfig) {
+      // We're regenerating from config file, collect all pages
+      log.info(`Regenerating content from config file...`);
+        // Helper function to collect pages from config
+      const collectPages = (parentConfig: PublishConfig, parentSpaceKey: string, processedPages = new Set<string>()): void => {
+        // Add the current page if it has a title
+        if (parentConfig.pageTitle) {
+          const pageSpaceKey = parentConfig.spaceKey || parentSpaceKey;
+          // Create a unique key for this page to avoid duplicates
+          const pageKey = `${pageSpaceKey}:${parentConfig.pageTitle}`;
+          
+          // Only add if we haven't processed this page yet
+          if (!processedPages.has(pageKey)) {
+            pagesToFetch.push({
+              spaceKey: pageSpaceKey,
+              pageTitle: parentConfig.pageTitle
+            });
+            
+            // Mark this page as processed
+            processedPages.add(pageKey);
+            
+            // Clear output directory for this space key if not done yet
+            clearOutputDirectory(outputDir, pageSpaceKey).catch(error => {
+              log.error(`Failed to clear directory for ${pageSpaceKey}: ${(error as Error).message}`);
+            });
+          }
+        }
+        
+        // Process child pages if any
+        if (parentConfig.childPages && parentConfig.childPages.length > 0) {
+          for (const childConfig of parentConfig.childPages) {
+            const childSpaceKey = childConfig.spaceKey || parentSpaceKey;
+            // Create a unique key for this child page
+            const childPageKey = `${childSpaceKey}:${childConfig.pageTitle}`;
+            
+            // Only add if we haven't processed this page yet
+            if (!processedPages.has(childPageKey)) {
+              pagesToFetch.push({
+                spaceKey: childSpaceKey,
+                pageTitle: childConfig.pageTitle
+              });
+              
+              // Mark this child page as processed
+              processedPages.add(childPageKey);
+              
+              // Recursively collect nested child pages
+              collectPages(childConfig, childSpaceKey, processedPages);
+            }
+          }
+        }
+      };
+      
+      // Start collecting pages from the root config
+      collectPages(config, config.spaceKey);
+      
+      log.info(`Found ${pagesToFetch.length} page(s) to fetch from config file`);
+      
+      // Start with a clean config that preserves only the root settings
+      config = { 
+        spaceKey: config.spaceKey,
+        pageTitle: config.pageTitle || '',
+        templatePath: config.templatePath || './confluence-template.html',
+        macroTemplatePath: config.macroTemplatePath || null,
+        includedFiles: config.includedFiles || [],
+        excludedFiles: config.excludedFiles || [],
+        distDir: config.distDir || './dist',
+        childPages: []
+      };
     } else if (config.childPages && config.childPages.length > 0) {
       // Fetch pages from config's childPages
       pagesToFetch = config.childPages.map(childConfig => ({
@@ -274,14 +450,14 @@ export async function fetchPages(options: {
         spaceKey: config.spaceKey,
         pageTitle: config.pageTitle
       }];
-      log.info(`Fetching page "${config.pageTitle}" from space "${config.spaceKey}"...`);
     } else {
       throw new Error(
         'No pages to fetch. Please provide --space-key and --page-title options ' +
         'or ensure a valid publish-confluence.json file exists with page definitions.'
       );
     }
-      // If outputFile is provided, it overrides the directory-based approach
+      
+    // If outputFile is provided, it overrides the directory-based approach
     if (options.outputFile && pagesToFetch.length === 1) {
       // Use the original fetchPageContent logic for backward compatibility
       await fetchPageContent({
@@ -312,16 +488,18 @@ export async function fetchPages(options: {
       });
       
       allFetchedPages.push(...fetchedPages);
-    }
-    
-    // Update config with all fetched pages
+    }    // Update config with all fetched pages
     log.verbose(`Updating config file with ${allFetchedPages.length} pages...`);
     for (const page of allFetchedPages) {
       config = updatePageInConfig(config, page);
     }
     
+    // Clean up the config to ensure there are no duplicates
+    // or pages that appear as both root and child
+    const cleanedConfig = cleanupConfig(config);
+    
     // Save updated config
-    await saveFetchConfigFile(configFile, config);
+    await saveFetchConfigFile(configFile, cleanedConfig);
     
     log.success(`Successfully fetched ${allFetchedPages.length} total page(s)`);
   } catch (error) {

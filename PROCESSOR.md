@@ -251,11 +251,11 @@ The following existing dependencies in esbuild.config.js will be utilized:
 
 ```powershell
 # Test with default handlebars processor
-node dist/cli.js fetch --space-key MYSPACE --page-title "My Page" --process handlebars
+cd "c:\Users\E29667\GitHub\publish-confluence\tests\fetch"; node ..\..\dist\cli.js fetch -s ~thro -p Testing --process handlebars --verbose
 
 # Test with markdown processor
-node dist/cli.js fetch --space-key MYSPACE --page-title "My Page" --process markdown
+cd "c:\Users\E29667\GitHub\publish-confluence\tests\fetch"; node ..\..\dist\cli.js fetch -s ~thro -p Testing --process markdown --verbose
 
 # Using with child pages
-node dist/cli.js fetch --space-key MYSPACE --page-title "My Page" --children --process markdown
+cd "c:\Users\E29667\GitHub\publish-confluence\tests\fetch"; node ..\..\dist\cli.js fetch -s ~thro -p Testing --children --process markdown --verbose
 ```

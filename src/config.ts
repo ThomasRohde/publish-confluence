@@ -290,7 +290,8 @@ export async function saveFetchConfigFile(
 export function updatePageInConfig(
   config: import('./types').PublishConfig, 
   page: import('./types').PageConfig
-): import('./types').PublishConfig {  // Create a new PublishConfig entry from the page data
+): import('./types').PublishConfig {  
+  // Create a new PublishConfig entry from the page data
   const pageConfig: import('./types').PublishConfig = {
     spaceKey: page.spaceKey,
     pageTitle: page.title,
@@ -305,8 +306,19 @@ export function updatePageInConfig(
   if (page.parentTitle) {
     pageConfig.parentPageTitle = page.parentTitle;
   }
-    // If this is the root config and has no pageTitle set, use the page title
-  if (!config.pageTitle && !page.parentId) {
+  
+  // Check if this page should be the root page
+  // A page is the root page if:
+  // 1. It has no parent OR
+  // 2. Config doesn't have a pageTitle set yet OR
+  // 3. This page's title matches the config's root pageTitle
+  const isRootPage = 
+    !page.parentId || 
+    !config.pageTitle || 
+    (config.pageTitle === page.title && config.spaceKey === page.spaceKey);
+  
+  // If this should be the root page, update the root config
+  if (isRootPage) {
     const updatedConfig = {
       ...config,
       spaceKey: page.spaceKey,
@@ -315,7 +327,7 @@ export function updatePageInConfig(
     };
     return updatedConfig;
   }
-  
+    
   // If this is a child page, find its parent and add it to the childPages array
   if (page.parentId && page.parentTitle) {
     // We need to recursively find the parent and add this as a child
@@ -325,9 +337,20 @@ export function updatePageInConfig(
         if (!parentConfig.childPages) {
           parentConfig.childPages = [];
         }
+          // Check if this page is the same as the root page
+        if (config.pageTitle === page.title && 
+            (config.spaceKey === page.spaceKey || 
+             (!page.spaceKey && parentConfig.spaceKey === config.spaceKey))) {
+          // Skip adding the root page as a child of itself
+          log.verbose(`Skipping adding root page "${page.title}" (${page.spaceKey || parentConfig.spaceKey}) as a child of itself`);
+          return true;
+        }
         
         // Check if this child already exists
-        const existingIndex = parentConfig.childPages.findIndex(child => child.pageTitle === page.title);
+        const existingIndex = parentConfig.childPages.findIndex(child => 
+          child.pageTitle === page.title && 
+          (child.spaceKey === page.spaceKey || (!child.spaceKey && parentConfig.spaceKey === page.spaceKey))
+        );
         
         if (existingIndex >= 0) {
           // Update existing child
@@ -336,8 +359,10 @@ export function updatePageInConfig(
             ...pageConfig,
           };
         } else {
-          // Add new child
-          parentConfig.childPages.push(pageConfig);
+          // Add new child (but never add the root page as a child)
+          if (!(config.pageTitle === page.title && config.spaceKey === page.spaceKey)) {
+            parentConfig.childPages.push(pageConfig);
+          }
         }
         return true;
       }
