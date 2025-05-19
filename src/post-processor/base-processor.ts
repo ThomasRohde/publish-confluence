@@ -31,8 +31,7 @@ export abstract class BasePostProcessor implements PostProcessor {
    * 
    * @param content - Raw XML content that may contain special entities
    * @returns Sanitized XML content ready for parsing
-   */
-  protected prepareXmlContent(content: string): string {
+   */  protected prepareXmlContent(content: string): string {
     // Handle special XML entities
     const sanitizedContent = content
       .replace(/&nbsp;/g, '\u00A0')  // Non-breaking space
@@ -43,8 +42,9 @@ export abstract class BasePostProcessor implements PostProcessor {
       .replace(/&amp;([a-z]+);/g, '&$1;'); // Fix double-escaped entities
 
     // Wrap in a root element if not already present to ensure valid XML
+    // Use a special root tag that will be removed in post-processing
     return sanitizedContent.trim().startsWith('<')
-      ? `<div>${sanitizedContent}</div>`
+      ? `<confluence-root>${sanitizedContent}</confluence-root>`
       : sanitizedContent;
   }
 

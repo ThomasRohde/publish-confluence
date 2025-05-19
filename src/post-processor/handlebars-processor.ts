@@ -126,6 +126,15 @@ export class HandlebarsProcessor extends BasePostProcessor {
    * @override
    */
   protected override processElementNode(element: Element): string {
+    // Skip our special root element and just process its children
+    if (element.nodeName === 'confluence-root') {
+      let output = '';
+      for (let i = 0; i < element.childNodes.length; i++) {
+        output += this.processNode(element.childNodes[i]);
+      }
+      return output;
+    }
+    
     // Special handling for Confluence macros
     if (element.nodeName === 'ac:structured-macro') {
       const macroName = element.getAttribute('ac:name') || '';
@@ -155,9 +164,7 @@ export class HandlebarsProcessor extends BasePostProcessor {
       const indentedContent = sectionContent.split('\n').map(line => line ? '    ' + line : line).join('\n');
       
       return `\n  {{#layout-section type="${sectionType}"}}\n${indentedContent}\n  {{/layout-section}}\n`;
-    }
-
-    if (element.nodeName === 'ac:layout-cell') {
+    }    if (element.nodeName === 'ac:layout-cell') {
       // Process cell content
       let cellContent = '';
       for (let i = 0; i < element.childNodes.length; i++) {
@@ -167,7 +174,7 @@ export class HandlebarsProcessor extends BasePostProcessor {
       // Indent the content and add newlines
       const indentedContent = cellContent.split('\n').map(line => line ? '      ' + line : line).join('\n');
       
-      return `\n    {{#layout-cell}}\n${indentedContent}\n    {{/layout-cell}}\n`;
+      return `\n\n    {{#layout-cell}}\n${indentedContent}\n    {{/layout-cell}}\n\n`;
     }
 
     // Handle Confluence-specific tags
@@ -235,12 +242,19 @@ export class HandlebarsProcessor extends BasePostProcessor {
         ? processedContent.replace(/\{\{\s*>\s*(\w+)\s*\}\}/g, `{{> ${options.macroPrefix}$1}}`)
         : processedContent;
         
-      // Clean up extra whitespace and normalize formatting
+      // Remove the special root element tag
+      finalContent = finalContent.replace(/<confluence-root>|<\/confluence-root>/g, '');
+      
+      // Remove extra div wrappers that might be present from Confluence storage format
+      finalContent = finalContent.replace(/^<div>\s*/, '').replace(/\s*<\/div>$/, '');
+        // Clean up extra whitespace and normalize formatting
       finalContent = finalContent
         // Fix multiple newlines (more than 3) to be exactly 2
         .replace(/\n{4,}/g, '\n\n\n')
         // Fix spacing around Handlebars expressions
         .replace(/(\{\{[^}]+\}\})\n\n+(\{\{[^}]+\}\})/g, '$1\n\n$2')
+        // Ensure proper spacing between layout cells
+        .replace(/\}\}\n\s*\{\{#layout-cell/g, '}}\n\n\n    {{#layout-cell')
         // Clean up any trailing whitespace on lines
         .replace(/[ \t]+$/gm, '')
         // Ensure proper whitespace at beginning/end of document
