@@ -198,18 +198,32 @@ program
 // Fetch command
 program
   .command('fetch')
-  .description('Fetch content from Confluence pages')
-  .option('-s, --space-key <key>', 'Confluence space key')
+  .description('Fetch content from Confluence pages')  .option('-s, --space-key <key>', 'Confluence space key')
   .option('-p, --page-title <title>', 'Title of the page to fetch')
   .option('-o, --output <file>', 'Save output to a file instead of stdout')
   .option('-c, --children', 'Recursively fetch all child pages', false)
   .option('--output-dir <dir>', 'Directory to save fetched pages (default: ./content)', './content')
   .option('--config <file>', 'Path to config file (default: ./publish-confluence.json)', './publish-confluence.json')
+  .option('--process <processor>', 'Post-process fetched content (available: handlebars, markdown)')
+  .option('--processor-options <json>', 'JSON string with additional processor options')
   .action((cmdOptions) => {
     // Merge command options with global options
     const options = { ...program.opts(), ...cmdOptions };
-    configureCommandOptions(options);
-      // Use fetchPages imported at the top of the file
+    configureCommandOptions(options);    // Parse processor options if provided as JSON string
+    let processorOptions: Record<string, unknown> | undefined = undefined;
+    
+    if (options.processorOptions) {
+      try {
+        processorOptions = JSON.parse(options.processorOptions);
+      } catch (error) {
+        log.error(`Failed to parse processor options: ${(error as Error).message}`);
+        log.error('Processor options must be a valid JSON string');
+        shutdownLogger();
+        process.exit(1);
+      }
+    }
+    
+    // Use fetchPages imported at the top of the file
     fetchPages({
       spaceKey: options.spaceKey,
       pageTitle: options.pageTitle,
@@ -220,7 +234,9 @@ program
       quiet: options.quiet,
       verbose: options.verbose,
       debug: options.debug,
-      allowSelfSigned: options.allowSelfSigned
+      allowSelfSigned: options.allowSelfSigned,
+      processor: options.process,
+      processorOptions
     }).catch(err => {
       log.error(`Failed to execute fetch command: ${(err as Error).message}`);
       log.debug((err as Error).stack || 'No stack trace available');

@@ -49,6 +49,8 @@ async function fetchPageAndChildren(
     quiet?: boolean;
     verbose?: boolean;
     debug?: boolean;
+    processor?: string;
+    processorOptions?: Record<string, unknown>;
   }
 ): Promise<PageConfig[]> {
   const fetchedPages: PageConfig[] = [];
@@ -116,9 +118,45 @@ async function fetchPageAndChildren(
     // Create directory if it doesn't exist
   const dir = dirname(resolve(pagePath));
   await fs.mkdir(dir, { recursive: true });
+    // Save the page content in storage format
+  let contentToSave = pageContent;
+  let fileExtension = 'html';
+  let relativeFileExtension = 'html';
   
-  // Save the page content in storage format
-  const contentToSave = pageContent;
+  // Apply post-processing if a processor was specified
+  if (options.processor) {
+    log.verbose(`Post-processing content with "${options.processor}" processor...`);
+    
+    try {
+      // Importing here to avoid circular dependencies
+      const { ProcessorFactory } = await import('./post-processor');
+      
+      const processor = ProcessorFactory.createProcessor(options.processor);
+      const result = await processor.process(contentToSave, {
+        spaceKey,
+        pageId: page.id,
+        pageTitle,
+        ...options.processorOptions
+      });
+      
+      contentToSave = result.content;
+      
+      // Update file extension if needed
+      if (processor.outputExtension !== 'html') {
+        fileExtension = processor.outputExtension;
+        relativeFileExtension = processor.outputExtension;
+        
+        pagePath = pagePath.replace(/\.html$/, `.${fileExtension}`);
+        relativeTemplatePath = relativeTemplatePath.replace(/\.html$/, `.${relativeFileExtension}`);
+      }
+      
+      log.verbose(`Post-processing complete. Output format: ${fileExtension}`);
+    } catch (error) {
+      log.error(`Post-processing failed: ${(error as Error).message}`);
+      log.debug((error as Error).stack || 'No stack trace available');
+      // Continue with original content if processing fails
+    }
+  }
   
   // Write to file
   await fs.writeFile(pagePath, contentToSave);
@@ -140,8 +178,7 @@ async function fetchPageAndChildren(
     const children = await client.getChildPages(page.id);
     
     log.verbose(`Found ${children.length} child pages`);
-    
-    for (const child of children) {
+      for (const child of children) {
       const childPages = await fetchPageAndChildren(
         client,
         spaceKey,
@@ -175,6 +212,8 @@ export async function fetchPages(options: {
   verbose?: boolean;
   debug?: boolean;
   allowSelfSigned?: boolean;
+  processor?: string;
+  processorOptions?: Record<string, unknown>;
 }): Promise<void> {
   try {
     // Set verbosity level based on options
