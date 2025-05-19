@@ -153,7 +153,7 @@ publish-confluence create -q
 <p>This command is useful for quickly scaffolding a new project that you intend to publish to Confluence.</p>
 
 <h3><code>fetch</code> Command</h3>
-<p>The <code>fetch</code> command allows you to retrieve the content of an existing Confluence page, primarily in its raw Storage Format (XHTML).</p>
+<p>The <code>fetch</code> command allows you to retrieve the content of Confluence pages, save them to your local filesystem, and generate a configuration file for easy roundtripping. This is useful for downloading pages for local editing or creating templates based on existing pages.</p>
 {{#confluence-code language="bash" title="Fetch Usage"}}
 publish-confluence fetch [options]
 {{/confluence-code}}
@@ -173,13 +173,19 @@ publish-confluence fetch [options]
       <td><code>--space-key</code> &lt;key&gt;</td>
       <td><code>-s</code> &lt;key&gt;</td>
       <td>The key of the Confluence space containing the page. Use <code>~username</code> for personal spaces.</td>
-      <td>Yes</td>
+      <td>No*</td>
     </tr>
     <tr>
       <td><code>--page-title</code> &lt;title&gt;</td>
       <td><code>-p</code> &lt;title&gt;</td>
       <td>The exact title of the Confluence page to fetch.</td>
-      <td>Yes</td>
+      <td>No*</td>
+    </tr>
+    <tr>
+      <td><code>--children</code></td>
+      <td><code>-c</code></td>
+      <td>Recursively fetch all child pages under the specified page.</td>
+      <td>No</td>
     </tr>
     <tr>
       <td><code>--format</code> &lt;format&gt;</td>
@@ -190,16 +196,32 @@ publish-confluence fetch [options]
     <tr>
       <td><code>--output</code> &lt;file&gt;</td>
       <td><code>-o</code> &lt;file&gt;</td>
-      <td>Save the output to a file instead of stdout. Will create directories if they don't exist.</td>
+      <td>Save the output to a specific file instead of using the page directory structure.</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>--output-dir</code> &lt;dir&gt;</td>
+      <td></td>
+      <td>Directory to save fetched pages (default: <code>./content</code>)</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td><code>--config</code> &lt;file&gt;</td>
+      <td></td>
+      <td>Path to config file (default: <code>./publish-confluence.json</code>)</td>
       <td>No</td>
     </tr>
   </tbody>
 </table>
+<p>* Either provide both <code>--space-key</code> and <code>--page-title</code>, or have a valid <code>publish-confluence.json</code> file in your workspace.</p>
 
 <h4>Fetch Examples</h4>
 {{#confluence-code language="bash" title="Fetch Examples"}}
 # Fetch the storage format (XHTML) of a page in space "MYSPACE"
 publish-confluence fetch -s MYSPACE -p "My Important Page"
+
+# Fetch a page and all its children recursively
+publish-confluence fetch -s MYSPACE -p "My Important Page" -c
 
 # Fetch the storage format from a personal space
 publish-confluence fetch -s ~jsmith -p "My Personal Notes"
@@ -210,11 +232,38 @@ publish-confluence fetch -s DOCS -p "API Reference" -f json
 # Save the page content to a file
 publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" -o ./output/dashboard.html
 
-# Save JSON content to a file
-publish-confluence fetch -s DOCS -p "API Reference" -f json -o ./output/api-reference.json
+# Save to a custom output directory
+publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" --output-dir ./my-pages
+
+# Fetch using an existing config file (no space/page arguments needed)
+publish-confluence fetch
+
+# Fetch with children using an existing config file
+publish-confluence fetch -c
 
 # Fetch using verbose logging
 publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" -v
+{{/confluence-code}}
+
+<h4>Fetch Workflow and Roundtripping</h4>
+<p>The fetch command creates or updates a <code>publish-confluence.json</code> file with information about the pages you've fetched, allowing for easy roundtripping:</p>
+
+<ol>
+  <li>First fetch: <code>publish-confluence fetch -s MYSPACE -p "Parent Page" -c</code></li>
+  <li>Edit the downloaded content files locally</li>
+  <li>Publish back: <code>publish-confluence</code> (using the generated config file)</li>
+  <li>Later updates: <code>publish-confluence fetch -c</code> (will use the config file)</li>
+</ol>
+
+<p>The command creates a directory structure that preserves the parent-child relationship of pages:</p>
+{{#confluence-code language="text" title="Fetch Directory Structure"}}
+content/
+└── MYSPACE/
+    ├── Parent_Page/
+    │   ├── Parent_Page.html
+    │   └── Child_Page/
+    │       └── Child_Page.html
+    └── publish-confluence.json
 {{/confluence-code}}
 
 <h3><code>generate-prompt</code> Command</h3>

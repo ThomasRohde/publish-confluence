@@ -573,6 +573,74 @@ You can open the generated `index.html` file in any browser to browse your pages
 
 This feature is ideal for teams that want to review content locally before publishing to Confluence, or for developing and testing complex page structures without repeatedly updating the actual Confluence instance.
 
+### Fetch Command
+
+The `fetch` command allows you to download content from Confluence pages to your local filesystem. This is useful for:
+
+- Creating templates based on existing Confluence pages
+- Editing page content locally with your preferred tools
+- Setting up a roundtrip workflow (fetch → edit → publish)
+- Backing up or archiving Confluence content
+
+#### Basic Usage
+
+```powershell
+# Fetch a single page from a space
+publish-confluence fetch -s MYSPACE -p "My Page Title"
+
+# Fetch a page and all its child pages recursively
+publish-confluence fetch -s MYSPACE -p "My Page Title" -c
+
+# Fetch using verbose logging for more details
+publish-confluence fetch -s MYSPACE -p "My Page Title" -v
+```
+
+#### Roundtripping Workflow
+
+The fetch command creates or updates a `publish-confluence.json` file with information about the pages you've fetched, enabling a smooth roundtrip workflow:
+
+1. **First fetch:** Download pages from Confluence
+   ```powershell
+   publish-confluence fetch -s MYSPACE -p "Parent Page" -c
+   ```
+
+2. **Edit locally:** Modify the downloaded HTML/JSON files with your preferred tools
+
+3. **Publish back:** Update the pages in Confluence
+   ```powershell
+   publish-confluence
+   ```
+
+4. **Later updates:** Use the config file for subsequent fetches
+   ```powershell
+   publish-confluence fetch -c
+   ```
+
+#### Directory Structure
+
+The command creates a directory structure that preserves parent-child relationships:
+
+```
+content/
+└── MYSPACE/
+    ├── Parent_Page/
+    │   ├── Parent_Page.html
+    │   └── Child_Page/
+    │       └── Child_Page.html
+    └── publish-confluence.json
+```
+
+#### Options
+
+- `--space-key, -s <key>`: The key of the Confluence space
+- `--page-title, -p <title>`: The title of the Confluence page to fetch
+- `--children, -c`: Recursively fetch all child pages
+- `--format, -f <format>`: Output format (`storage` for XHTML or `json` for full page data)
+- `--output, -o <file>`: Save output to a specific file
+- `--output-dir <dir>`: Directory to save fetched pages (default: `./content`)
+
+If no `--space-key` and `--page-title` are provided, the command will read from the `publish-confluence.json` file if available.
+
 ## Authentication
 
 Authentication details are read from environment variables:

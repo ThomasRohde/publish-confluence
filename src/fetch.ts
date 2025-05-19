@@ -1,7 +1,7 @@
 // src/fetch.ts
 import { config } from 'dotenv';
 import { promises as fs } from 'fs';
-import { dirname, resolve, join } from 'path';
+import { dirname, join, resolve } from 'path';
 import { ConfluenceClient } from './client';
 import { readFetchConfigFile, saveFetchConfigFile, updatePageInConfig } from './config';
 import { createLogger, setVerbosityLevel, VERBOSITY } from './logger';

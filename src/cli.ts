@@ -6,7 +6,7 @@ import Handlebars from 'handlebars';
 import path from 'path';
 import * as readline from 'readline';
 import { fileURLToPath } from 'url';
-import { fetchPageContent, fetchPages } from './fetch';
+import { fetchPages } from './fetch';
 import { configureFileLogging, createLogger, setVerbosityLevel, shutdownLogger, VERBOSITY } from './logger';
 import { registerMacroHelpers } from './macro-helpers';
 import { createProject } from './project-creator';
