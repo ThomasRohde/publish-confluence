@@ -8,8 +8,3 @@ export { default as preserveBlockMacros } from './preserveBlockMacros';
 export { default as remarkHbsBlocks } from './remarkHbsBlocks';
 export { default as remarkTableFormat } from './remarkTableFormat';
 
-// Utility exports 
-export {
-    createImageHelper, handlebarsRegex
-} from './confluenceHelpers';
-

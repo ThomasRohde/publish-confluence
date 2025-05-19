@@ -145,6 +145,7 @@ You will translate my description of desired Confluence page content into a vali
 ## Important Constraints & Rules
 
 *   **ALWAYS follow blockquotes and lists with a blank line**. This is mandatory for proper rendering in all Markdown processors.
+*   **ALWAYS insert blank lines before and after handlebars helpers. This ensures that the helpers are correctly interpreted and do not interfere with surrounding Markdown content.
 *   **ALWAYS use triple backticks with language indicators for code blocks**. Never use indentation for code blocks.
 *   **NEVER use Handlebars helpers when a Markdown equivalent is available**. Always prefer native Markdown syntax.
 *   **Strictly adhere** to the provided list of macro helpers and variables. Do not invent new ones.

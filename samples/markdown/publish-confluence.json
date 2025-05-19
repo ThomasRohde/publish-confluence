@@ -2,10 +2,9 @@
   "spaceKey": "~thro",
   "pageTitle": "Quantum Markdown",
   "parentPageTitle": "10. Samples",
-  "distDir": "./dist",
+  "distDir": "./",
   "templatePath": "./confluence-template.md",
   "includedFiles": [
-  ],
-  "excludedFiles": [
+    "**/*.jpg"
   ]
 }

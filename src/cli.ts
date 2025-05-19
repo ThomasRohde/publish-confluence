@@ -7,7 +7,7 @@ import path from 'path';
 import * as readline from 'readline';
 import { fileURLToPath } from 'url';
 import { fetchPageContent } from './fetch';
-import { configureFileLogging, createLogger, VERBOSITY, shutdownLogger, setVerbosityLevel } from './logger';
+import { configureFileLogging, createLogger, setVerbosityLevel, shutdownLogger, VERBOSITY } from './logger';
 import { registerMacroHelpers } from './macro-helpers';
 import { createProject } from './project-creator';
 import { generatePrompt } from './prompt-generator';
@@ -144,7 +144,7 @@ function runPublishCommand(options: any): void {
 program
   .name('publish-confluence')
   .description('Publish JavaScript builds and HTML content to Confluence')
-  .version('1.2.1')
+  .version('1.2.2')
   .showHelpAfterError('(add --help for additional information)')
   .helpOption('-h, --help', 'display help for command')
   .addHelpText('after', '\nWhen run without a command, publish-confluence will execute the "publish" command by default.')

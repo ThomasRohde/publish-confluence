@@ -1,5 +1,3 @@
-*Last updated: {{currentDate}}*
-
 {{confluence-toc minLevel=2 maxLevel=3}}
 
 ## Executive Summary
@@ -7,7 +5,9 @@
 Quantum computing represents a paradigm shift in computational capacity with significant implications for the banking sector. This document outlines key use cases, challenges, and strategic considerations for financial institutions exploring quantum technologies.
 
 {{#confluence-info title="Definition" comment=false}}
+
 **Quantum Computing** leverages quantum-mechanical phenomena such as superposition and entanglement to perform calculations exponentially faster than classical computers for specific problem types.
+
 {{/confluence-info}}
 
 ## Strategic Value for Banking
@@ -304,6 +304,7 @@ Quantum computing remains an emerging technology with uncertain timelines to pra
 
 ---
 
-*For more information, contact the Emerging Technology team.*
+*Last updated: {{currentDate}}*
 
 {{confluence-anchor name="quantum-banking-footer"}}
+
