@@ -347,9 +347,11 @@ export async function fetchPages(options: {
     
     // Determine which pages to fetch
     let pagesToFetch: { spaceKey: string; pageTitle: string }[] = [];
-    
-    // Flag to determine if we're regenerating based on existing config
+      // Flag to determine if we're regenerating based on existing config
     const isRegeneratingFromConfig = !spaceKey && !pageTitle;
+    
+    // Store child-parent relationships for hierarchy preservation
+    const childParentMap = new Map<string, string>();
     
     if (spaceKey && pageTitle) {
       // Fetch single page specified by command line arguments
@@ -404,7 +406,7 @@ export async function fetchPages(options: {
             // Create a unique key for this child page
             const childPageKey = `${childSpaceKey}:${childConfig.pageTitle}`;
             
-            // Only add if we haven't processed this page yet
+      // Only add if we haven't processed this page yet
             if (!processedPages.has(childPageKey)) {
               pagesToFetch.push({
                 spaceKey: childSpaceKey,
@@ -424,19 +426,42 @@ export async function fetchPages(options: {
       // Start collecting pages from the root config
       collectPages(config, config.spaceKey);
       
-      log.info(`Found ${pagesToFetch.length} page(s) to fetch from config file`);
+      log.info(`Found ${pagesToFetch.length} page(s) to fetch from config file`);      // Store original config structure and settings
+      const originalConfig = { ...config };
       
       // Start with a clean config that preserves only the root settings
       config = { 
-        spaceKey: config.spaceKey,
-        pageTitle: config.pageTitle || '',
-        templatePath: config.templatePath || './confluence-template.html',
-        macroTemplatePath: config.macroTemplatePath || null,
-        includedFiles: config.includedFiles || [],
-        excludedFiles: config.excludedFiles || [],
-        distDir: config.distDir || './dist',
+        spaceKey: originalConfig.spaceKey,
+        pageTitle: originalConfig.pageTitle || '',
+        templatePath: originalConfig.templatePath || './confluence-template.html',
+        macroTemplatePath: originalConfig.macroTemplatePath || null,
+        includedFiles: originalConfig.includedFiles || [],
+        excludedFiles: originalConfig.excludedFiles || [],
+        distDir: originalConfig.distDir || './dist',
         childPages: []
       };
+      
+      // Helper function to build relationship map from the original config
+      const buildRelationshipMap = (parentConfig: PublishConfig, parentKey: string): void => {
+        if (parentConfig.childPages && parentConfig.childPages.length > 0) {
+          for (const child of parentConfig.childPages) {
+            const childSpaceKey = child.spaceKey || parentConfig.spaceKey;
+            const childKey = `${childSpaceKey}:${child.pageTitle}`;
+            // Store parent-child relationship
+            childParentMap.set(childKey, parentKey);
+            log.verbose(`Mapped relationship: ${childKey} -> ${parentKey}`);
+            // Process nested children
+            buildRelationshipMap(child, childKey);
+          }
+        }
+      };
+      
+      // Build the relationship map starting from root
+      if (originalConfig.pageTitle && originalConfig.spaceKey) {
+        const rootKey = `${originalConfig.spaceKey}:${originalConfig.pageTitle}`;
+        buildRelationshipMap(originalConfig, rootKey);
+        log.verbose(`Built relationship map with ${childParentMap.size} entries from config file`);
+      }
     } else if (config.childPages && config.childPages.length > 0) {
       // Fetch pages from config's childPages
       pagesToFetch = config.childPages.map(childConfig => ({
@@ -471,14 +496,17 @@ export async function fetchPages(options: {
       });
       return;
     }
-    
-    // Fetch each page and update config
+      // Fetch each page and update config
     const allFetchedPages: PageConfig[] = [];
     for (const { spaceKey, pageTitle } of pagesToFetch) {
       log.info(`Fetching page "${pageTitle}" from space "${spaceKey}"...`);
       
+      // When regenerating from config, always fetch children regardless of the 'children' parameter
+      // Otherwise, respect the provided 'children' parameter
+      const shouldFetchChildren = isRegeneratingFromConfig ? true : children;
+      
       const fetchedPages = await fetchPageAndChildren(client, spaceKey, pageTitle, {
-        fetchChildren: children,
+        fetchChildren: shouldFetchChildren,
         outputDir,
         quiet: options.quiet,
         verbose: options.verbose,
@@ -490,8 +518,57 @@ export async function fetchPages(options: {
       allFetchedPages.push(...fetchedPages);
     }    // Update config with all fetched pages
     log.verbose(`Updating config file with ${allFetchedPages.length} pages...`);
-    for (const page of allFetchedPages) {
-      config = updatePageInConfig(config, page);
+    
+    // If we're regenerating from config and have relationship mappings
+    if (isRegeneratingFromConfig && childParentMap.size > 0) {
+      log.verbose(`Rebuilding page hierarchy using ${childParentMap.size} mapped relationships`);
+      
+      // First pass: process the root page
+      let rootPageProcessed = false;
+      for (const page of allFetchedPages) {
+        // Root page either has no parent or matches the original root page title
+        if (!page.parentId || (config.pageTitle === page.title && config.spaceKey === page.spaceKey)) {
+          log.verbose(`Processing root page: ${page.title}`);
+          config = updatePageInConfig(config, page);
+          rootPageProcessed = true;
+          break;
+        }
+      }
+      
+      // If we didn't find a root page, use the first one (fallback)
+      if (!rootPageProcessed && allFetchedPages.length > 0) {
+        log.verbose(`No root page found, using the first page as root: ${allFetchedPages[0].title}`);
+        config = updatePageInConfig(config, allFetchedPages[0]);
+      }
+      
+      // Second pass: process all child pages with their correct parent relationships 
+      for (const page of allFetchedPages) {
+        // Skip the root page which we already processed
+        if (!page.parentId || (config.pageTitle === page.title && config.spaceKey === page.spaceKey)) {
+          continue;
+        }
+        
+        // Get the page key
+        const pageKey = `${page.spaceKey}:${page.title}`;
+        
+        // Check if we have a mapped parent relationship from the original config
+        if (childParentMap.has(pageKey)) {
+          const parentKey = childParentMap.get(pageKey)!;
+          const [parentSpaceKey, parentTitle] = parentKey.split(':');
+          
+          // Override the detected parent with the one from our original config
+          page.parentTitle = parentTitle;
+          log.verbose(`Using preserved hierarchy: ${page.title} -> ${parentTitle}`);
+        }
+        
+        // Update the config with this page (using the proper parent)
+        config = updatePageInConfig(config, page);
+      }
+    } else {
+      // Regular processing - update each page in sequence
+      for (const page of allFetchedPages) {
+        config = updatePageInConfig(config, page);
+      }
     }
     
     // Clean up the config to ensure there are no duplicates
