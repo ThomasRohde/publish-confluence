@@ -76,22 +76,44 @@ async function fetchPageAndChildren(
   
   // Create sanitized filename
   const sanitizedTitle = pageTitle.replace(/[^\w\s-]/g, '_').replace(/\s+/g, '_');
-    // Create path for saving the page
+  // Create path for saving the page
   let pagePath;
   let relativeTemplatePath;
-    if (options.parentPath) {
+    
+  // Helper function to normalize paths and avoid duplicate slashes
+  const normalizePath = (pathStr: string): string => {
+    return pathStr
+      .replace(/\/+/g, '/') // Replace multiple consecutive forward slashes with a single one
+      .replace(/\\/g, '/'); // Replace backslashes with forward slashes
+  };
+  
+  if (options.parentPath) {
     // For child pages, create a path under the parent's directory
     const parentDir = dirname(options.parentPath);
-    pagePath = join(parentDir, sanitizedTitle, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));    // Create relative path for templatePath - need to include the full relative path from the workspace root
-    relativeTemplatePath = `./${options.outputDir}/${spaceKey}/${dirname(options.parentPath).split(spaceKey)[1] || ''}/${sanitizedTitle}/${sanitizedTitle}.html`
-      .replace(/\/+/g, '/') // Replace multiple consecutive forward slashes with a single one
-      .replace(/\\/g, '/'); // Replace backslashes with forward slashes
+    pagePath = join(parentDir, sanitizedTitle, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));
+    
+    // Extract the part of the path after the space key for relative template path
+    const pathAfterSpaceKey = dirname(options.parentPath).split(spaceKey)[1] || '';
+    const templatePathParts = ['.', options.outputDir, spaceKey];
+    
+    // Only add the path part after space key if it exists and isn't empty
+    if (pathAfterSpaceKey && pathAfterSpaceKey !== '/') {
+      // Remove any leading slash before adding to the parts array
+      templatePathParts.push(pathAfterSpaceKey.replace(/^\/+/, ''));
+    }
+    
+    templatePathParts.push(sanitizedTitle, `${sanitizedTitle}.html`);
+    
+    // Join all parts with / and normalize the result
+    relativeTemplatePath = normalizePath(templatePathParts.join('/'));
   } else {
     // For root pages
-    pagePath = join(options.outputDir, spaceKey, sanitizedTitle, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));    // Create relative path for templatePath
-    relativeTemplatePath = `./${options.outputDir}/${spaceKey}/${sanitizedTitle}/${sanitizedTitle}.html`
-      .replace(/\/+/g, '/') // Replace multiple consecutive forward slashes with a single one
-      .replace(/\\/g, '/'); // Replace backslashes with forward slashes
+    pagePath = join(options.outputDir, spaceKey, sanitizedTitle, sanitizedTitle + (options.outputFormat === 'json' ? '.json' : '.html'));
+    
+    // Build path from individual parts to avoid duplicate slashes
+    relativeTemplatePath = normalizePath([
+      '.', options.outputDir, spaceKey, sanitizedTitle, `${sanitizedTitle}.html`
+    ].join('/'));
   }
   
   // Create directory if it doesn't exist
