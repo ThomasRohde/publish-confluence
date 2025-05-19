@@ -41,12 +41,11 @@ export class HandlebarsProcessor extends BasePostProcessor {
     const bodyContent = this.extractMacroBody(macroElement);    // Handle different macro types with specific formatting
     switch (macroName.toLowerCase()) {
       case 'code':
-        const language = parameters.language || 'text';
-        // Format and indent code blocks properly
+        const language = parameters.language || 'text';        // Format and indent code blocks properly
         let formattedCodeContent = bodyContent.replace(/\n/g, '\n  ');        // Checking for the 'handlebars' or 'hbs' language which might indicate intentional unescaped handlebar templates
         const isHandlebarsCode = ['handlebars', 'hbs'].includes(language.toLowerCase());        // Escape Handlebars syntax in code blocks, unless it's explicitly a Handlebars template
         if (!isHandlebarsCode) {
-          formattedCodeContent = formattedCodeContent.replace(/\{\{/g, '\\{{');
+          formattedCodeContent = formattedCodeContent.replace(/(?<!\\)\{\{/g, '\\{{');
         }
         return `\n\n{{#confluence-code language="${language}" title="${parameters.title || ''}" linenumbers=${parameters.linenumbers || 'false'}}}\n  ${formattedCodeContent}\n{{/confluence-code}}\n\n`;
 
@@ -197,14 +196,14 @@ export class HandlebarsProcessor extends BasePostProcessor {
       let innerContent = '';
       for (let i = 0; i < element.childNodes.length; i++) {
         innerContent += this.processNode(element.childNodes[i]);
-      }
-      // Escape Handlebars syntax in code and pre elements
+      }      // Escape Handlebars syntax in code and pre elements
       if (['code', 'pre'].includes(tagName)) {
         // Check for class attribute to see if this is explicitly marked as Handlebars code
         const classAttr = element.getAttribute('class') || '';
         const isHandlebarsCode = classAttr.includes('handlebars') || classAttr.includes('hbs');        // Only escape if not explicitly marked as Handlebars content
         if (!isHandlebarsCode) {
-          innerContent = innerContent.replace(/\{\{/g, String.fromCharCode(92) + '{{');
+          // Use a direct single backslash instead of String.fromCharCode(92)
+          innerContent = innerContent.replace(/(?<!\\)\{\{/g, '\\{{');
         }
       }
 
@@ -240,7 +239,8 @@ export class HandlebarsProcessor extends BasePostProcessor {
    * @returns Content with Handlebars syntax escaped in code blocks
    */  private escapeHandlebarsInCodeBlocks(content: string): string {    // Function to escape Handlebars syntax
     const escapeHandlebars = (match: string): string => {
-      return match.replace(/\{\{/g, '\\{{');
+      // Only escape double braces that aren't already escaped
+      return match.replace(/(?<!\\)\{\{/g, '\\{{');
     };
 
     // Escape Handlebars syntax in code blocks (identified by confluence-code blocks)
@@ -268,7 +268,6 @@ export class HandlebarsProcessor extends BasePostProcessor {
 
     return result;
   }
-
   /**
    * Process Confluence storage format content into a Handlebars template
    * 
@@ -282,9 +281,9 @@ export class HandlebarsProcessor extends BasePostProcessor {
       let finalContent = options.macroPrefix
         ? processedContent.replace(/\{\{\s*>\s*(\w+)\s*\}\}/g, `{{> ${options.macroPrefix}$1}}`)
         : processedContent;
-
-      // Always escape Handlebars syntax in code blocks and pre tags
-      finalContent = this.escapeHandlebarsInCodeBlocks(finalContent);
+      
+      // We're no longer doing the second escaping here as it's already handled in the element processors
+      // Removed: finalContent = this.escapeHandlebarsInCodeBlocks(finalContent);
 
       // Remove the special root element tag
       finalContent = finalContent.replace(/<confluence-root>|<\/confluence-root>/g, '');
