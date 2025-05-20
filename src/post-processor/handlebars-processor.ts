@@ -153,6 +153,30 @@ export class HandlebarsProcessor extends BasePostProcessor {
   }
 
   /**
+   * Extract attributes from an HTML element
+   * 
+   * @param element - The element to extract attributes from
+   * @returns Record of attribute name-value pairs
+   */
+  private extractElementAttributes(element: Element): Record<string, string> {
+    const attributes: Record<string, string> = {};
+    console.log('Extracting attributes from element:', element.nodeName);
+    // Get all attributes from the element
+    for (let i = 0; i < element.attributes.length; i++) {
+      const attr = element.attributes[i];
+      const name = attr.name;
+      const value = attr.value;
+      
+      // Skip ac: and xmlns: prefixed attributes - they're Confluence-specific
+      if (!name.startsWith('ac:') && !name.startsWith('xmlns:')) {
+        attributes[name] = value;
+      }
+    }
+    
+    return attributes;
+  }
+
+  /**
    * Process an HTML element node for Handlebars output
    * 
    * @param element - The Element node to process
@@ -235,11 +259,22 @@ export class HandlebarsProcessor extends BasePostProcessor {
       let innerContent = '';
       for (let i = 0; i < element.childNodes.length; i++) {
         innerContent += this.processNode(element.childNodes[i]);
-      }      // Escape Handlebars syntax in code and pre elements
+      }
+      
+      // Extract attributes for this element
+      const attributes = this.extractElementAttributes(element);
+      const attributesString = Object.keys(attributes).length > 0 
+        ? ' ' + Object.entries(attributes)
+            .map(([key, value]) => `${key}="${value}"`)
+            .join(' ')
+        : '';
+
+      // Escape Handlebars syntax in code and pre elements
       if (['code', 'pre'].includes(tagName)) {
         // Check for class attribute to see if this is explicitly marked as Handlebars code
         const classAttr = element.getAttribute('class') || '';
-        const isHandlebarsCode = classAttr.includes('handlebars') || classAttr.includes('hbs');        // Only escape if not explicitly marked as Handlebars content
+        const isHandlebarsCode = classAttr.includes('handlebars') || classAttr.includes('hbs');        
+        // Only escape if not explicitly marked as Handlebars content
         if (!isHandlebarsCode) {
           // Use a direct single backslash instead of String.fromCharCode(92)
           innerContent = innerContent.replace(/(?<!\\)\{\{/g, '\\{{');
@@ -249,17 +284,17 @@ export class HandlebarsProcessor extends BasePostProcessor {
       // Add special formatting for heading elements
       if (tagName.startsWith('h') && tagName.length === 2) {
         // Add extra newlines around headings 
-        return `\n\n<${tagName}>${innerContent}</${tagName}>\n`;
+        return `\n\n<${tagName}${attributesString}>${innerContent}</${tagName}>\n`;
       }
 
       // Add special formatting for lists and tables
       if (['ul', 'ol', 'table'].includes(tagName)) {
         const formattedContent = innerContent.replace(/\n/g, '\n  ');
-        return `\n<${tagName}>\n  ${formattedContent}\n</${tagName}>\n`;
+        return `\n<${tagName}${attributesString}>\n  ${formattedContent}\n</${tagName}>\n`;
       }
 
-      // For simple elements with no attributes, just wrap the inner content
-      return `<${tagName}>${innerContent}</${tagName}>`;
+      // For simple elements with attributes, include the attributes
+      return `<${tagName}${attributesString}>${innerContent}</${tagName}>`;
     }
 
     // For other elements, just process their children
