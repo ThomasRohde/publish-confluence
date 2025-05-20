@@ -64,5 +64,6 @@ samples/target-architecture-template/
 log.txt
 dry/
 samples/macro-showcase/package-lock.json
-tests/fetch/
+tests/fetch/publish-confluence.json
+tests/fetch/content/
 
