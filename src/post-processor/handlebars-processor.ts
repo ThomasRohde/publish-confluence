@@ -16,6 +16,26 @@ export class HandlebarsProcessor extends BasePostProcessor {
   readonly outputExtension = 'hbs';
 
   /**
+ * Formats parameters for Handlebars output, excluding empty string values
+ * 
+ * @param params - Record of parameter key-value pairs
+ * @returns Formatted parameters string for Handlebars template
+ */
+  private formatParameters(params: Record<string, string>): string {
+    return Object.entries(params)
+      .filter(([_, value]) => value !== '')
+      .map(([key, value]) => {
+        // For boolean values and numbers, don't use quotes
+        if (value === 'true' || value === 'false' || /^\d+$/.test(value)) {
+          return `${key}=${value}`;
+        }
+        // For strings, use quotes
+        return `${key}="${value}"`;
+      })
+      .join(' ');
+  }
+
+  /**
    * Process a Confluence macro element specifically for Handlebars output
    * 
    * @param macroName - The name of the macro
@@ -39,67 +59,80 @@ export class HandlebarsProcessor extends BasePostProcessor {
 
     // Get macro body content
     const bodyContent = this.extractMacroBody(macroElement);    // Handle different macro types with specific formatting
-    switch (macroName.toLowerCase()) {
-      case 'code':
+    switch (macroName.toLowerCase()) {      case 'code':
         const language = parameters.language || 'text';        // Format and indent code blocks properly
         let formattedCodeContent = bodyContent.replace(/\n/g, '\n  ');        // Checking for the 'handlebars' or 'hbs' language which might indicate intentional unescaped handlebar templates
         const isHandlebarsCode = ['handlebars', 'hbs'].includes(language.toLowerCase());        // Escape Handlebars syntax in code blocks, unless it's explicitly a Handlebars template
         if (!isHandlebarsCode) {
           formattedCodeContent = formattedCodeContent.replace(/(?<!\\)\{\{/g, '\\{{');
         }
-        return `\n\n{{#confluence-code language="${language}" title="${parameters.title || ''}" linenumbers=${parameters.linenumbers || 'false'}}}\n  ${formattedCodeContent}\n{{/confluence-code}}\n\n`;
-
-      case 'info':
+        const codeParams = {
+          language,
+          title: parameters.title || '',
+          linenumbers: parameters.linenumbers || 'false'
+        };
+        return `\n\n{{#confluence-code ${this.formatParameters(codeParams)}}}\n  ${formattedCodeContent}\n{{/confluence-code}}\n\n`;      case 'info':
         // Format info blocks with proper indentation
         const formattedInfoContent = bodyContent.replace(/\n/g, '\n  ');
-        return `\n\n{{#confluence-info title="${parameters.title || ''}"}}\n  ${formattedInfoContent}\n{{/confluence-info}}\n\n`;
-
-      case 'note':
+        const infoParams = {
+          title: parameters.title || ''
+        };
+        return `\n\n{{#confluence-info ${this.formatParameters(infoParams)}}}\n  ${formattedInfoContent}\n{{/confluence-info}}\n\n`;      case 'note':
         // Format note blocks with proper indentation
         const formattedNoteContent = bodyContent.replace(/\n/g, '\n  ');
-        return `\n\n{{#confluence-note title="${parameters.title || ''}"}}\n  ${formattedNoteContent}\n{{/confluence-note}}\n\n`;
-
-      case 'warning':
+        const noteParams = {
+          title: parameters.title || ''
+        };
+        return `\n\n{{#confluence-note ${this.formatParameters(noteParams)}}}\n  ${formattedNoteContent}\n{{/confluence-note}}\n\n`;      case 'warning':
         // Format warning blocks with proper indentation
         const formattedWarningContent = bodyContent.replace(/\n/g, '\n  ');
-        return `\n\n{{#confluence-warning title="${parameters.title || ''}"}}\n  ${formattedWarningContent}\n{{/confluence-warning}}\n\n`;
-
-      case 'tip':
+        const warningParams = {
+          title: parameters.title || ''
+        };
+        return `\n\n{{#confluence-warning ${this.formatParameters(warningParams)}}}\n  ${formattedWarningContent}\n{{/confluence-warning}}\n\n`;      case 'tip':
         // Format tip blocks with proper indentation
         const formattedTipContent = bodyContent.replace(/\n/g, '\n  ');
-        return `\n\n{{#confluence-tip title="${parameters.title || ''}"}}\n  ${formattedTipContent}\n{{/confluence-tip}}\n\n`;
-
-      case 'panel':
+        const tipParams = {
+          title: parameters.title || ''
+        };
+        return `\n\n{{#confluence-tip ${this.formatParameters(tipParams)}}}\n  ${formattedTipContent}\n{{/confluence-tip}}\n\n`;      case 'panel':
         // Format panel blocks with proper indentation
         const formattedPanelContent = bodyContent.replace(/\n/g, '\n  ');
-        return `\n\n{{#confluence-panel title="${parameters.title || ''}"}}\n  ${formattedPanelContent}\n{{/confluence-panel}}\n\n`;
-      case 'expand':
+        const panelParams = {
+          title: parameters.title || ''
+        };
+        return `\n\n{{#confluence-panel ${this.formatParameters(panelParams)}}}\n  ${formattedPanelContent}\n{{/confluence-panel}}\n\n`;      case 'expand':
         const formattedExpandContent = bodyContent.replace(/\n/g, '\n  ');
-        return `\n\n{{#confluence-expand title="${parameters.title || ''}"}}\n  ${formattedExpandContent}\n{{/confluence-expand}}\n\n`;
-
-      case 'toc':
-        const minLevel = parameters.minLevel || '2';
-        const maxLevel = parameters.maxLevel || '5';
-        return `\n\n{{confluence-toc minLevel=${minLevel} maxLevel=${maxLevel}}}\n\n`;
+        const expandParams = {
+          title: parameters.title || ''
+        };
+        return `\n\n{{#confluence-expand ${this.formatParameters(expandParams)}}}\n  ${formattedExpandContent}\n{{/confluence-expand}}\n\n`;      case 'toc':
+        const tocParams = {
+          minLevel: parameters.minLevel || '2',
+          maxLevel: parameters.maxLevel || '5'
+        };
+        return `\n\n{{confluence-toc ${this.formatParameters(tocParams)}}}\n\n`;
 
       case 'html':
         const formattedHtmlContent = bodyContent.replace(/\n/g, '\n  ');
-        return `\n\n{{#confluence-html}}\n  ${formattedHtmlContent}\n{{/confluence-html}}\n\n`;
-
-      case 'children':
-        const sortBy = parameters.sort || '';
-        const reverse = parameters.reverse || 'false';
-        const includeLabels = parameters.labels || '';
-        const excludeLabels = parameters.excludeLabels || '';
-        const mode = parameters.mode || '';
-        return `\n\n{{confluence-children sortBy="${sortBy}" reverse=${reverse} includeLabels="${includeLabels}" excludeLabels="${excludeLabels}" mode="${mode}"}}\n\n`;
-      case 'status':
-        const type = parameters.colour || parameters.color || 'neutral';
-        const text = parameters.title || '';
-        return `\n\n{{confluence-status type="${type}" text="${text}"}}\n\n`;
-      case 'anchor':
-        const name = parameters.name || '';
-        return `\n\n{{confluence-anchor name="${name}"}}\n\n`;
+        return `\n\n{{#confluence-html}}\n  ${formattedHtmlContent}\n{{/confluence-html}}\n\n`;      case 'children':
+        const childrenParams = {
+          sortBy: parameters.sort || '',
+          reverse: parameters.reverse || 'false',
+          includeLabels: parameters.labels || '',
+          excludeLabels: parameters.excludeLabels || '',
+          mode: parameters.mode || ''
+        };
+        return `\n\n{{confluence-children ${this.formatParameters(childrenParams)}}}\n\n`;      case 'status':
+        const statusParams = {
+          type: parameters.colour || parameters.color || 'neutral',
+          text: parameters.title || ''
+        };
+        return `\n\n{{confluence-status ${this.formatParameters(statusParams)}}}\n\n`;      case 'anchor':
+        const anchorParams = {
+          name: parameters.name || ''
+        };
+        return `\n\n{{confluence-anchor ${this.formatParameters(anchorParams)}}}\n\n`;
       // For all other macros, use a partial
       default:
         return `\n\n{{> ${macroName}}}\n\n`;
@@ -164,7 +197,10 @@ export class HandlebarsProcessor extends BasePostProcessor {
       // Indent the content and add newlines
       const indentedContent = sectionContent.split('\n').map(line => line ? '    ' + line : line).join('\n');
 
-      return `\n  {{#layout-section type="${sectionType}"}}\n${indentedContent}\n  {{/layout-section}}\n`;
+      const sectionParams = {
+        type: sectionType
+      };
+      return `\n  {{#layout-section ${this.formatParameters(sectionParams)}}}\n${indentedContent}\n  {{/layout-section}}\n`;
     } if (element.nodeName === 'ac:layout-cell') {
       // Process cell content
       let cellContent = '';
@@ -183,7 +219,10 @@ export class HandlebarsProcessor extends BasePostProcessor {
       const attachmentNode = element.getElementsByTagName('ri:attachment')[0];
       if (attachmentNode) {
         const filename = attachmentNode.getAttribute('ri:filename') || '';
-        return `{{confluence-image src="${filename}"}}`;
+        const imageParams = {
+          src: filename
+        };
+        return `{{confluence-image ${this.formatParameters(imageParams)}}}`;
       }
       return '';
     }    // Handle regular HTML elements
@@ -281,7 +320,7 @@ export class HandlebarsProcessor extends BasePostProcessor {
       let finalContent = options.macroPrefix
         ? processedContent.replace(/\{\{\s*>\s*(\w+)\s*\}\}/g, `{{> ${options.macroPrefix}$1}}`)
         : processedContent;
-      
+
       // Remove the special root element tag
       finalContent = finalContent.replace(/<confluence-root>|<\/confluence-root>/g, '');
 
