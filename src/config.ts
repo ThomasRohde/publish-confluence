@@ -290,7 +290,7 @@ export async function saveFetchConfigFile(
 export function updatePageInConfig(
   config: import('./types').PublishConfig, 
   page: import('./types').PageConfig
-): import('./types').PublishConfig {    // Create a new PublishConfig entry from the page data
+): import('./types').PublishConfig {  // Create a new PublishConfig entry from the page data
   const pageConfig: import('./types').PublishConfig = {
     spaceKey: page.spaceKey,
     pageTitle: page.title,
@@ -300,10 +300,19 @@ export function updatePageInConfig(
     excludedFiles: [],
     distDir: './dist',
   };
-  
-  // Add attachments if they exist
+    // Add attachments if they exist
   if (page.attachments && page.attachments.length > 0) {
     pageConfig.attachments = page.attachments;
+    
+    // Update distDir to point to attachments relative directory
+    // Extract the directory from the first attachment's localPath
+    if (page.path) {
+      const pageDirname = path.dirname(page.path);
+      // Use forward slashes for consistency and normalize the path
+      pageConfig.distDir = pageDirname + '/attachments';
+      // Add a glob pattern to includedFiles to include all files in the distDir
+      pageConfig.includedFiles = ['**/*'];
+    }
   }
 
   // If parent info is available, add it
@@ -320,8 +329,7 @@ export function updatePageInConfig(
     !page.parentId || 
     !config.pageTitle || 
     (config.pageTitle === page.title && config.spaceKey === page.spaceKey);
-  
-  // If this should be the root page, update the root config
+    // If this should be the root page, update the root config
   if (isRootPage) {
     const updatedConfig = {
       ...config,
@@ -329,6 +337,15 @@ export function updatePageInConfig(
       pageTitle: page.title,
       templatePath: page.path ? page.path : './confluence-template.html',
     };
+      // If the root page has attachments, update distDir to point to the attachments relative directory
+    if (page.attachments && page.attachments.length > 0 && page.path) {
+      const pageDirname = path.dirname(page.path);
+      // Use forward slashes for consistency and normalize the path
+      updatedConfig.distDir = pageDirname + '/attachments';
+      // Add a glob pattern to includedFiles to include all files in the distDir
+      updatedConfig.includedFiles = ['**/*'];
+    }
+    
     return updatedConfig;
   }
     
