@@ -610,6 +610,48 @@ publish-confluence fetch -s MYSPACE -p "My Page Title" --process markdown
 publish-confluence fetch -s MYSPACE -p "My Page Title" --process handlebars --processor-options '{"macroPrefix":"custom-"}'
 ```
 
+#### Enhanced Content Processing
+
+The `fetch` command supports powerful content processing options that enable advanced workflows:
+
+##### Roundtripping with Handlebars Templates
+
+The `--process handlebars` option creates a complete roundtrip workflow for your Confluence content:
+
+```powershell
+# Fetch a page and convert to Handlebars template
+publish-confluence fetch -s MYSPACE -p "Documentation Page" --process handlebars
+
+# Edit the generated templates locally with your preferred tools
+# Templates will include Handlebars helpers for all Confluence macros
+
+# Publish the updated content back to Confluence
+publish-confluence
+```
+
+This workflow enables:
+- Source-controlled documentation (keep your templates in Git)
+- Local editing with specialized tools rather than the Confluence editor
+- Automated publishing pipelines for documentation
+- Standardized templates across multiple pages
+- Separation of content structure from page content
+
+##### Creating LLM Context with Markdown
+
+The `--process markdown` option converts Confluence content to clean Markdown format, perfect for:
+
+```powershell
+# Fetch a page and convert to Markdown
+publish-confluence fetch -s MYSPACE -p "Technical Documentation" --process markdown
+```
+
+This is especially valuable for:
+- Creating context for LLM prompts (ChatGPT, Claude, etc.)
+- Migrating content to Markdown-based documentation systems
+- Reviewing and editing complex content in a simplified format
+- Generating content snippets for inclusion in other documents
+- Creating training data for LLMs from your organizational knowledge
+
 #### Content Post-Processing
 
 The `--process` option allows you to automatically convert Confluence storage format to other formats:

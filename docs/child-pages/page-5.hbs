@@ -248,10 +248,72 @@ publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" --process handlebar
 <h4>Post-Processing Content</h4>
 <p>You can automatically convert Confluence content to other formats using post-processors:</p>
 
-<ul>
-  <li><code>--process handlebars</code>: Converts to Handlebars templates with macro helpers</li>
-  <li><code>--process markdown</code>: Converts to Markdown format</li>
-</ul>
+{{#confluence-panel title="Roundtripping with Handlebars Templates" borderStyle="solid" borderColor="#DDDDDD" borderWidth="1" bgColor="#F4F5F7" titleBGColor="#DFE1E6" titleColor="#42526E"}}
+  <p>The <code>--process handlebars</code> option creates a powerful roundtripping workflow, allowing you to:</p>
+  
+  <ul>
+    <li>Fetch content from Confluence and convert it to Handlebars templates</li>
+    <li>Edit the templates locally with your preferred text editor or IDE</li>
+    <li>Maintain documentation as code with full version control</li>
+    <li>Automatically publish changes back to Confluence</li>
+  </ul>
+  
+  <p>This enables teams to manage Confluence content as code, with all the benefits of source control, pull requests, and automated CI/CD pipelines.</p>
+  
+  <h5>Workflow Example</h5>
+  
+  {{#confluence-code language="bash" title="Handlebars Roundtripping Workflow"}}
+# Initial setup: Fetch and convert to Handlebars templates
+publish-confluence fetch -s MYSPACE -p "API Documentation" --process handlebars
+
+# The content is now available as Handlebars templates in your local filesystem
+# Make edits using your preferred tools
+
+# Test your changes locally
+publish-confluence --dry-run
+
+# When ready, publish back to Confluence
+publish-confluence
+
+# Later, update from Confluence if changes were made there
+publish-confluence fetch --process handlebars
+
+# Resolve any conflicts, then publish again
+publish-confluence
+  {{/confluence-code}}
+  
+  <p>The generated Handlebars templates convert Confluence macros to corresponding <code>publish-confluence</code> helpers, making it easy to edit and maintain complex Confluence pages as code.</p>
+{{/confluence-panel}}
+
+{{#confluence-panel title="Creating LLM Context with Markdown" borderStyle="solid" borderColor="#DDDDDD" borderWidth="1" bgColor="#F4F5F7" titleBGColor="#DFE1E6" titleColor="#42526E"}}
+  <p>The <code>--process markdown</code> option is particularly valuable for working with Large Language Models (LLMs) like ChatGPT, Claude, or similar AI assistants:</p>
+  
+  <ul>
+    <li>Convert complex Confluence content into clean, standardized Markdown format</li>
+    <li>Create structured context for LLM prompts</li>
+    <li>Extract knowledge from your organization's Confluence for use with AI tools</li>
+    <li>Generate training data for fine-tuning custom LLMs</li>
+  </ul>
+  
+  <h5>LLM Context Example</h5>
+  
+  {{#confluence-code language="bash" title="Markdown Conversion for LLMs"}}
+# Fetch and convert a Confluence page to Markdown
+publish-confluence fetch -s KNOWLEDGEBASE -p "Product Architecture" --process markdown
+
+# The content is now available as clean Markdown
+# Copy it into your LLM prompt for context
+
+# For example, you might add a line like:
+# "Based on the following documentation about our architecture, answer my question..."
+  {{/confluence-code}}
+  
+  <p>The converter intelligently handles Confluence-specific content like macros, tables, and formatting, producing clean Markdown that's ideal for LLM context while preserving the key information from your documentation.</p>
+  
+  <p>This capability is particularly useful for teams that want to leverage their existing Confluence knowledge base with AI tools while maintaining a single source of truth in Confluence.</p>
+{{/confluence-panel}}
+
+<p>Use these processors to integrate Confluence content into your preferred workflow, whether that's code-based documentation management or AI-assisted content generation.</p>
 
 <p>Custom processor options can be provided as a JSON string:</p>
 
