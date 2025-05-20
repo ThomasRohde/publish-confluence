@@ -122,15 +122,14 @@ async function fetchPageAndChildren(
       .replace(/\/+/g, '/') // Replace multiple consecutive forward slashes with a single one
       .replace(/\\/g, '/'); // Replace backslashes with forward slashes
   };
-  
-  if (options.parentPath) {
+    if (options.parentPath) {
     // For child pages, create a path under the parent's directory
     const parentDir = dirname(options.parentPath);
     pagePath = join(parentDir, sanitizedTitle, sanitizedTitle + '.html');
     
     // Extract the part of the path after the space key for relative template path
     const pathAfterSpaceKey = dirname(options.parentPath).split(spaceKey)[1] || '';
-    const templatePathParts = ['.', options.outputDir, spaceKey];
+    const templatePathParts = [options.outputDir, spaceKey];
     
     // Only add the path part after space key if it exists and isn't empty
     if (pathAfterSpaceKey && pathAfterSpaceKey !== '/') {
@@ -148,7 +147,7 @@ async function fetchPageAndChildren(
     
     // Build path from individual parts to avoid duplicate slashes
     relativeTemplatePath = normalizePath([
-      '.', options.outputDir, spaceKey, sanitizedTitle, `${sanitizedTitle}.html`
+      options.outputDir, spaceKey, sanitizedTitle, `${sanitizedTitle}.html`
     ].join('/'));
   }
     // Create directory if it doesn't exist

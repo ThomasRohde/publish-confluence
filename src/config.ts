@@ -300,7 +300,7 @@ export function updatePageInConfig(
     excludedFiles: [],
     distDir: './dist',
   };
-    // Add attachments if they exist
+  // Add attachments if they exist
   if (page.attachments && page.attachments.length > 0) {
     pageConfig.attachments = page.attachments;
     
@@ -308,8 +308,10 @@ export function updatePageInConfig(
     // Extract the directory from the first attachment's localPath
     if (page.path) {
       const pageDirname = path.dirname(page.path);
+      // Remove any leading "./" from the path to avoid the extra dot
+      const cleanedDirname = pageDirname.replace(/^\.\/+/, '');
       // Use forward slashes for consistency and normalize the path
-      pageConfig.distDir = pageDirname + '/attachments';
+      pageConfig.distDir = cleanedDirname + '/attachments';
       // Add a glob pattern to includedFiles to include all files in the distDir
       pageConfig.includedFiles = ['**/*'];
     }
@@ -336,12 +338,13 @@ export function updatePageInConfig(
       spaceKey: page.spaceKey,
       pageTitle: page.title,
       templatePath: page.path ? page.path : './confluence-template.html',
-    };
-      // If the root page has attachments, update distDir to point to the attachments relative directory
+    };    // If the root page has attachments, update distDir to point to the attachments relative directory
     if (page.attachments && page.attachments.length > 0 && page.path) {
       const pageDirname = path.dirname(page.path);
+      // Remove any leading "./" from the path to avoid the extra dot
+      const cleanedDirname = pageDirname.replace(/^\.\/+/, '');
       // Use forward slashes for consistency and normalize the path
-      updatedConfig.distDir = pageDirname + '/attachments';
+      updatedConfig.distDir = cleanedDirname + '/attachments';
       // Add a glob pattern to includedFiles to include all files in the distDir
       updatedConfig.includedFiles = ['**/*'];
     }
