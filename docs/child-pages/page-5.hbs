@@ -52,15 +52,10 @@ publish-confluence [options] [command]
       <td><code>--comment</code></td>
       <td><code>-c</code></td>
       <td>Display content marked with <code>comment=true</code> in admonition macros (info, note, warning, tip). Useful for showing developer-only documentation.</td>
-    </tr><tr>
+    </tr>    <tr>
       <td><code>--log-file</code> [path]</td>
       <td></td>
       <td>Enable logging to a file for persistent error tracking and debugging. If a path is provided, logs will be written to that file; otherwise, logs will be written to <code>publish-confluence.log</code> in the current directory.</td>
-    </tr>
-    <tr>
-      <td><code>--markdown</code></td>
-      <td></td>
-      <td>When used with <code>--dry-run</code>, saves the processed Markdown templates as <code>.hbs</code> files for review. This allows you to see how your Markdown will be converted to Confluence storage format.</td>
     </tr>
     <tr>
       <td><code>--help</code></td>
@@ -168,16 +163,15 @@ publish-confluence fetch [options]
       <th>Required</th>
     </tr>
   </thead>
-  <tbody>
-    <tr>
-      <td><code>--space-key SPACE_KEY</code> </td>
-      <td><code>-s SPACE_KEY</code></td>
+  <tbody>    <tr>
+      <td><code>--space-key</code> [space-key]</td>
+      <td><code>-s</code> [space-key]</td>
       <td>The key of the Confluence space containing the page. Use <code>~username</code> for personal spaces.</td>
       <td>No*</td>
     </tr>
     <tr>
-      <td><code>--page-title PAGE_TITLE</code></td>
-      <td><code>-p PAGE_TITLE</code></td>
+      <td><code>--page-title</code> [page-title]</td>
+      <td><code>-p</code> [page-title]</td>
       <td>The exact title of the Confluence page to fetch.</td>
       <td>No*</td>
     </tr>
@@ -186,21 +180,20 @@ publish-confluence fetch [options]
       <td><code>-c</code></td>
       <td>Recursively fetch all child pages under the specified page.</td>
       <td>No</td>
-    </tr>    <!-- Format option removed as it's redundant, storage format is now the only option -->
-    <tr>
-      <td><code>--output</code> &lt;file&gt;</td>
-      <td><code>-o</code> &lt;file&gt;</td>
+    </tr>    <!-- Format option removed as it's redundant, storage format is now the only option -->    <tr>
+      <td><code>--output</code> [file]</td>
+      <td><code>-o</code> [file]</td>
       <td>Save the output to a specific file instead of using the page directory structure.</td>
       <td>No</td>
     </tr>
     <tr>
-      <td><code>--output-dir</code> &lt;dir&gt;</td>
+      <td><code>--output-dir</code> [dir]</td>
       <td></td>
       <td>Directory to save fetched pages (default: <code>./content</code>)</td>
       <td>No</td>
     </tr>
     <tr>
-      <td><code>--config</code> &lt;file&gt;</td>
+      <td><code>--config</code> [file]</td>
       <td></td>
       <td>Path to config file (default: <code>./publish-confluence.json</code>)</td>
       <td>No</td>
@@ -240,9 +233,6 @@ publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" --process handlebar
 
 # Fetch and convert to Markdown
 publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" --process markdown
-
-# Fetch with custom processor options
-publish-confluence fetch -s TEAMSPACE -p "Project Dashboard" --process handlebars --processor-options '{"macroPrefix":"custom-"}'
 {{/confluence-code}}
 
 <h4>Post-Processing Content</h4>
@@ -359,10 +349,9 @@ publish-confluence generate-prompt [options]
       <th>Required</th>
     </tr>
   </thead>
-  <tbody>
-    <tr>
-      <td><code>--file</code> &lt;filepath&gt;</td>
-      <td><code>-f</code> &lt;filepath&gt;</td>
+  <tbody>    <tr>
+      <td><code>--file</code> [path]</td>
+      <td><code>-f</code> [path]</td>
       <td>Read the initial project idea or requirements from a specified text file instead of prompting interactively.</td>
       <td>No</td>
     </tr>
