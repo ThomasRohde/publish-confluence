@@ -6,7 +6,7 @@ import { ConfluenceClient } from './client';
 import { readFetchConfigFile, saveFetchConfigFile, updatePageInConfig } from './config';
 import { createLogger, setVerbosityLevel, VERBOSITY } from './logger';
 import { initializePostProcessors } from './post-processor';
-import { ConfluenceApiCredentials, PageConfig, PublishConfig } from './types';
+import { AttachmentMetadata, ConfluenceApiCredentials, PageConfig, PublishConfig } from './types';
 
 // Load environment variables from .env file
 config();
@@ -77,6 +77,7 @@ async function fetchPageAndChildren(
   pageTitle: string,
   options: {
     fetchChildren: boolean;
+    fetchAttachments?: boolean;
     outputDir: string;
     parentId?: string;
     parentTitle?: string;
@@ -197,14 +198,23 @@ async function fetchPageAndChildren(
   await fs.writeFile(pagePath, contentToSave);
   
   log.success(`Saved page "${pageTitle}" to ${pagePath}`);
-    // Add page to fetched pages
+  // Fetch attachments if requested
+  let attachments: AttachmentMetadata[] = [];
+  if (options.fetchAttachments) {
+    log.info(`Fetching attachments for page "${pageTitle}"...`);
+    attachments = await fetchPageAttachments(client, page.id, pagePath);
+    log.verbose(`Downloaded ${attachments.length} attachments for page "${pageTitle}"`);
+  }
+  
+  // Add page to fetched pages
   fetchedPages.push({
     id: page.id,
     title: pageTitle,
     spaceKey: spaceKey,
     path: relativeTemplatePath,  // Use the relative path for templatePath
     parentId: options.parentId,
-    parentTitle: options.parentTitle
+    parentTitle: options.parentTitle,
+    attachments: attachments.length > 0 ? attachments : undefined
   });
   
   // Fetch children if requested
@@ -231,6 +241,80 @@ async function fetchPageAndChildren(
   }
   
   return fetchedPages;
+}
+
+/**
+ * Fetch and download attachments for a page
+ * @param client ConfluenceClient instance
+ * @param pageId Page ID
+ * @param outputDir Base output directory
+ * @param pagePath Path to the page file
+ * @returns Array of attachment metadata
+ */
+async function fetchPageAttachments(
+  client: ConfluenceClient,
+  pageId: string,
+  pagePath: string
+): Promise<AttachmentMetadata[]> {
+  try {
+    // Get the base directory for storing attachments
+    const pageDir = dirname(resolve(pagePath));
+    const attachmentsDir = join(pageDir, 'attachments');
+    
+    // Create attachments directory
+    await fs.mkdir(attachmentsDir, { recursive: true });
+    
+    // Get all attachments for the page
+    const attachments = await client.listAttachments(pageId);
+    log.verbose(`Found ${attachments.length} attachments for page ID ${pageId}`);
+    
+    if (attachments.length === 0) {
+      return [];
+    }
+    
+    const downloadedAttachments: AttachmentMetadata[] = [];
+    
+    for (const attachment of attachments) {
+      // Create safe filename
+      const safeFileName = attachment.title.replace(/[^\w\s.-]/g, '_');
+      const attachmentPath = join(attachmentsDir, safeFileName);
+      
+      // Download the attachment
+      log.verbose(`Downloading attachment "${attachment.title}" (${attachment.extensions?.fileSize || 'unknown'} bytes)`);
+      const data = await client.downloadAttachment(attachment.id);
+      
+      // Save to file
+      await fs.writeFile(attachmentPath, data);
+      log.success(`Saved attachment "${attachment.title}" to ${attachmentPath}`);
+      
+      // Helper function to normalize paths from fetchPageAndChildren
+      const normalizePath = (pathStr: string): string => {
+        return pathStr
+          .replace(/\/+/g, '/') // Replace multiple consecutive forward slashes with a single one
+          .replace(/\\/g, '/'); // Replace backslashes with forward slashes
+      };
+      
+      // Create relative path for config
+      const relativePath = normalizePath(['attachments', safeFileName].join('/'));
+      
+      // Add to downloaded attachments with local path
+      downloadedAttachments.push({
+        id: attachment.id,
+        title: attachment.title,
+        fileName: attachment.title,
+        mediaType: attachment.extensions?.mediaType || 'application/octet-stream',
+        size: attachment.extensions?.fileSize || data.length,
+        downloadUrl: attachment._links.download,
+        localPath: relativePath
+      });
+    }
+    
+    return downloadedAttachments;
+  } catch (error) {
+    log.error(`Error fetching attachments: ${(error as Error).message}`);
+    log.debug((error as Error).stack || 'No stack trace available');
+    return []; // Return empty array on error
+  }
 }
 
 /**
@@ -301,6 +385,7 @@ export async function fetchPages(options: {
   outputFile?: string;
   outputDir?: string;
   children?: boolean;
+  fetchAttachments?: boolean;
   configFile?: string;
   quiet?: boolean;
   verbose?: boolean;
@@ -504,9 +589,9 @@ export async function fetchPages(options: {
       // When regenerating from config, always fetch children regardless of the 'children' parameter
       // Otherwise, respect the provided 'children' parameter
       const shouldFetchChildren = isRegeneratingFromConfig ? true : children;
-      
-      const fetchedPages = await fetchPageAndChildren(client, spaceKey, pageTitle, {
+        const fetchedPages = await fetchPageAndChildren(client, spaceKey, pageTitle, {
         fetchChildren: shouldFetchChildren,
+        fetchAttachments: options.fetchAttachments,
         outputDir,
         quiet: options.quiet,
         verbose: options.verbose,

@@ -290,8 +290,7 @@ export async function saveFetchConfigFile(
 export function updatePageInConfig(
   config: import('./types').PublishConfig, 
   page: import('./types').PageConfig
-): import('./types').PublishConfig {  
-  // Create a new PublishConfig entry from the page data
+): import('./types').PublishConfig {    // Create a new PublishConfig entry from the page data
   const pageConfig: import('./types').PublishConfig = {
     spaceKey: page.spaceKey,
     pageTitle: page.title,
@@ -301,6 +300,11 @@ export function updatePageInConfig(
     excludedFiles: [],
     distDir: './dist',
   };
+  
+  // Add attachments if they exist
+  if (page.attachments && page.attachments.length > 0) {
+    pageConfig.attachments = page.attachments;
+  }
 
   // If parent info is available, add it
   if (page.parentTitle) {

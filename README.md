@@ -591,6 +591,12 @@ publish-confluence fetch -s MYSPACE -p "My Page Title"
 # Fetch a page and all its child pages recursively
 publish-confluence fetch -s MYSPACE -p "My Page Title" -c
 
+# Fetch a page with all its attachments
+publish-confluence fetch -s MYSPACE -p "My Page Title" -a
+
+# Fetch a page with all its child pages and attachments
+publish-confluence fetch -s MYSPACE -p "My Page Title" -c -a
+
 # Fetch using verbose logging for more details
 publish-confluence fetch -s MYSPACE -p "My Page Title" -v
 
@@ -617,12 +623,12 @@ Custom processor options can be provided as a JSON string with the `--processor-
 
 The fetch command creates or updates a `publish-confluence.json` file with information about the pages you've fetched, enabling a smooth roundtrip workflow:
 
-1. **First fetch:** Download pages from Confluence
+1. **First fetch:** Download pages from Confluence (with optional attachments)
    ```powershell
-   publish-confluence fetch -s MYSPACE -p "Parent Page" -c
+   publish-confluence fetch -s MYSPACE -p "Parent Page" -c -a
    ```
 
-2. **Edit locally:** Modify the downloaded HTML/JSON files with your preferred tools
+2. **Edit locally:** Modify the downloaded HTML/JSON files and attachments with your preferred tools
 
 3. **Publish back:** Update the pages in Confluence
    ```powershell

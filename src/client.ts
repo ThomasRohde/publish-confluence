@@ -1108,6 +1108,72 @@ export class ConfluenceClient {
   }
 
   /**
+   * Download an attachment by ID
+   * @param attachmentId The ID of the attachment to download
+   * @returns Promise resolving to a Buffer with the attachment data
+   */
+  async downloadAttachment(attachmentId: string): Promise<Buffer> {
+    try {
+      // Use the getChildContent method to get all details including _links.download
+      const attachmentResponse = await this.request<ConfluenceAttachment>({
+        method: 'GET',
+        url: `/content/${attachmentId}`,
+        params: {
+          expand: 'version'
+        }
+      });
+      
+      if (attachmentResponse.type !== 'attachment') {
+        throw new Error(`Content with ID ${attachmentId} is not an attachment`);
+      }
+      
+      this.logger.debug(`Downloading attachment: ${attachmentResponse.title}`);
+      
+      // Get the direct download URL from the attachment _links
+      if (!attachmentResponse._links || !attachmentResponse._links.download) {
+        throw new Error(`No download link available for attachment ${attachmentId}`);
+      }
+      
+      const downloadUrl = attachmentResponse._links.download;
+      
+      // Create absolute URL if it's a relative path
+      const absoluteUrl = downloadUrl.startsWith('http') 
+        ? downloadUrl 
+        : `${new URL(this.restApiBase).origin}${downloadUrl}`;
+
+      this.logger.debug(`Downloading attachment from URL: ${absoluteUrl}`);
+      
+      // Make a direct request to the download URL with responseType set to arraybuffer
+      const response = await this.axiosInstance({
+        method: 'GET',
+        url: absoluteUrl,
+        responseType: 'arraybuffer',
+      });
+      
+      this.logger.verbose(`Downloaded attachment ${attachmentId} (${response.data.length} bytes)`);
+      
+      return Buffer.from(response.data);
+    } catch (error) {
+      this.logger.error(`Error downloading attachment ${attachmentId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all attachments for a page
+   * @param pageId The ID of the page
+   * @returns Promise resolving to array of attachment metadata objects
+   */
+  async getAttachments(pageId: string): Promise<ConfluenceAttachment[]> {
+    try {
+      return await this.listAttachments(pageId);
+    } catch (error) {
+      this.logger.error(`Error getting attachments for page ${pageId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Search for content in Confluence using the Confluence Query Language (CQL)
    * 
    * @param cqlQuery The CQL query to execute 

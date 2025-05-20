@@ -201,7 +201,9 @@ program
   .description('Fetch content from Confluence pages')  .option('-s, --space-key <key>', 'Confluence space key')
   .option('-p, --page-title <title>', 'Title of the page to fetch')
   .option('-o, --output <file>', 'Save output to a file instead of stdout')
-  .option('-c, --children', 'Recursively fetch all child pages', false)  .option('--output-dir <dir>', 'Directory to save fetched pages (default: ./content)', './content')
+  .option('-c, --children', 'Recursively fetch all child pages', false)
+  .option('-a, --attachments', 'Download page attachments', false)
+  .option('--output-dir <dir>', 'Directory to save fetched pages (default: ./content)', './content')
   .option('--config <file>', 'Path to config file (default: ./publish-confluence.json)', './publish-confluence.json')
   .option('--process <processor>', 'Post-process and convert fetched content format (available: handlebars, markdown). Changes file extensions to match the output format.')
   .option('--processor-options <json>', 'JSON string with additional processor options (e.g., \'{"macroPrefix":"custom-"}\')')
@@ -221,14 +223,14 @@ program
         process.exit(1);
       }
     }
-    
-    // Use fetchPages imported at the top of the file
+      // Use fetchPages imported at the top of the file
     fetchPages({
       spaceKey: options.spaceKey,
       pageTitle: options.pageTitle,
       outputFile: options.output,
       outputDir: options.outputDir,
       children: options.children,
+      fetchAttachments: options.attachments,
       configFile: options.config,
       quiet: options.quiet,
       verbose: options.verbose,

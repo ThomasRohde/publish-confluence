@@ -21,7 +21,7 @@ if (Test-Path "publish-confluence.json" -PathType Leaf) {
 
 # Step 2: Execute fetch command to recreate files
 Write-Host "Fetching content from Confluence..." -ForegroundColor Cyan;
-node "..\..\dist\cli.js" fetch -s ~thro -p Testing --process handlebars;
+node "..\..\dist\cli.js" fetch -s ~thro -p Testing --process handlebars --attachments;
 
 # Verify files were created
 if (-not (Test-Path "publish-confluence.json" -PathType Leaf)) {

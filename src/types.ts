@@ -9,6 +9,26 @@ export interface ConfluenceApiCredentials {
 }
 
 /**
+ * Metadata for Confluence page attachments
+ */
+export interface AttachmentMetadata {
+  /** The unique ID of the attachment */
+  id: string;
+  /** The title or name of the attachment */
+  title: string;
+  /** The filename of the attachment */
+  fileName: string;
+  /** The MIME type of the attachment */
+  mediaType: string;
+  /** The size in bytes of the attachment */
+  size: number;
+  /** The download URL for the attachment */
+  downloadUrl?: string;
+  /** The local path where the attachment is saved */
+  localPath?: string;
+}
+
+/**
  * Configuration for fetching pages from Confluence
  */
 export interface PageConfig {
@@ -26,6 +46,8 @@ export interface PageConfig {
   path?: string;
   /** ISO timestamp when the page was last fetched */
   lastFetched?: string;
+  /** Attachments associated with this page */
+  attachments?: AttachmentMetadata[];
 }
 
 /**
@@ -89,11 +111,12 @@ export interface PublishConfig {
   /** Array of glob patterns for files to include as attachments */
   includedFiles: string[];
   /** Array of glob patterns for files to exclude from attachments */
-  excludedFiles: string[];
-  /** Directory containing build output files (defaults to './dist') */
+  excludedFiles: string[];  /** Directory containing build output files (defaults to './dist') */
   distDir: string;
   /** Nested child pages to publish under this page */
   childPages?: PublishConfig[];
+  /** Attachments associated with this page */
+  attachments?: AttachmentMetadata[];
 }
 
 /**
