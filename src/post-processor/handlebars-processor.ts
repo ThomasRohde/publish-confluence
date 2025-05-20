@@ -133,6 +133,27 @@ export class HandlebarsProcessor extends BasePostProcessor {
           name: parameters.name || ''
         };
         return `\n\n{{confluence-anchor ${this.formatParameters(anchorParams)}}}\n\n`;
+
+      case 'tabs-group':
+        // Process and format tabs content
+        const formattedTabsContent = bodyContent.replace(/\n/g, '\n  ');
+        const tabsParams = {
+          disposition: parameters.disposition || 'horizontal',
+          outline: parameters.outline || 'false',
+          color: parameters.color || ''
+        };
+        return `\n\n{{#confluence-tabs ${this.formatParameters(tabsParams)}}}\n  ${formattedTabsContent}\n{{/confluence-tabs}}\n\n`;
+
+      case 'tab-pane':
+        // Process and format tab pane content
+        const formattedTabContent = bodyContent.replace(/\n/g, '\n  ');
+        const tabParams = {
+          name: parameters.title || 'Tab',
+          icon: parameters.icon || '',
+          anchor: parameters.anchor || ''
+        };
+        return `\n\n{{#confluence-tab ${this.formatParameters(tabParams)}}}\n  ${formattedTabContent}\n{{/confluence-tab}}\n\n`;
+
       // For all other macros, use a partial
       default:
         return `\n\n{{> ${macroName}}}\n\n`;
