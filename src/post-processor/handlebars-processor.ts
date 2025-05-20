@@ -108,7 +108,7 @@ export class HandlebarsProcessor extends BasePostProcessor {
         };
         return `\n\n{{#confluence-expand ${this.formatParameters(expandParams)}}}\n  ${formattedExpandContent}\n{{/confluence-expand}}\n\n`;      case 'toc':
         const tocParams = {
-          minLevel: parameters.minLevel || '2',
+          minLevel: parameters.minLevel || '1',
           maxLevel: parameters.maxLevel || '5'
         };
         return `\n\n{{confluence-toc ${this.formatParameters(tocParams)}}}\n\n`;
@@ -160,7 +160,6 @@ export class HandlebarsProcessor extends BasePostProcessor {
    */
   private extractElementAttributes(element: Element): Record<string, string> {
     const attributes: Record<string, string> = {};
-    console.log('Extracting attributes from element:', element.nodeName);
     // Get all attributes from the element
     for (let i = 0; i < element.attributes.length; i++) {
       const attr = element.attributes[i];
