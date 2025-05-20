@@ -14,6 +14,34 @@ export class MarkdownProcessor extends BasePostProcessor {
   
   /** The default file extension for output files */
   readonly outputExtension = 'md';
+
+  /**
+   * Normalizes text for Markdown output by properly handling whitespace
+   * 
+   * @param text - The text to normalize
+   * @param preserveIndentation - Whether to preserve intentional indentation (for code blocks, etc.)
+   * @returns Normalized text for markdown output
+   */
+  private normalizeText(text: string, preserveIndentation = false): string {
+    if (!text) return '';
+
+    if (preserveIndentation) {
+      // For code blocks, we preserve all formatting
+      return text;
+    } else {
+      // For normal text, we normalize whitespace
+      // 1. Trim all lines
+      // 2. Replace consecutive spaces with a single space
+      // 3. Preserve paragraph breaks (double newlines)
+      return text
+        .split('\n')
+        .map(line => line.trim())
+        .join('\n')
+        .replace(/ {2,}/g, ' ')
+        .replace(/\n{3,}/g, '\n\n');
+    }
+  }
+
   /**
    * Process a Confluence macro element specifically for Markdown output
    * 
@@ -37,7 +65,7 @@ export class MarkdownProcessor extends BasePostProcessor {
     }
 
     // Get macro body content
-    const bodyContent = this.extractMacroBody(macroElement);    // Handle different macro types with specific Markdown formatting
+    const bodyContent = this.normalizeText(this.extractMacroBody(macroElement));    // Handle different macro types with specific Markdown formatting
     switch (macroName.toLowerCase()) {
       // Code block with syntax highlighting
       case 'code':
@@ -154,17 +182,22 @@ export class MarkdownProcessor extends BasePostProcessor {
         }
     }
   }
+
   /**
    * Extract the body content of a macro element
    * 
    * @param macroElement - The macro element
    * @returns The body content as a string
-   */
-  private extractMacroBody(macroElement: Element): string {
+   */  private extractMacroBody(macroElement: Element): string {
+    // Determine if this is a code-like macro that should preserve formatting
+    const macroName = macroElement.getAttribute('ac:name')?.toLowerCase() || '';
+    const preserveFormatting = macroName === 'code' || macroName === 'codeblock' || macroName === 'pre';
+    
     // Try to find rich text body first (formatted content)
     const richBodyNode = macroElement.getElementsByTagName('ac:rich-text-body')[0];
     if (richBodyNode) {
-      return this.processNode(richBodyNode);
+      const content = this.processNode(richBodyNode);
+      return preserveFormatting ? content : this.normalizeText(content);
     }
     
     // If no rich text body, try plain text body (unformatted content)
@@ -172,7 +205,7 @@ export class MarkdownProcessor extends BasePostProcessor {
     if (plainBodyNode) {
       // Plain text body might be wrapped in CDATA section
       const content = plainBodyNode.textContent || '';
-      return content.trim();
+      return preserveFormatting ? content.trim() : this.normalizeText(content);
     }
     
     // If neither is found, look for content parameter which some macros use
@@ -180,7 +213,8 @@ export class MarkdownProcessor extends BasePostProcessor {
       .find(param => param.getAttribute('ac:name') === 'content');
     
     if (contentParam) {
-      return contentParam.textContent || '';
+      const content = contentParam.textContent || '';
+      return preserveFormatting ? content : this.normalizeText(content);
     }
     
     return '';
@@ -197,23 +231,21 @@ export class MarkdownProcessor extends BasePostProcessor {
    * 
    * @param linkElement - The link element
    * @returns The body content as a string
-   */
-  private extractLinkBody(linkElement: Element): string {
+   */  private extractLinkBody(linkElement: Element): string {
     // Try rich link body first
     const linkBody = linkElement.getElementsByTagName('ac:link-body')[0];
     if (linkBody) {
-      return this.processNode(linkBody);
+      return this.normalizeText(this.processNode(linkBody));
     }
     
     // Then try plain text link body
     const plainTextLinkBody = linkElement.getElementsByTagName('ac:plain-text-link-body')[0];
     if (plainTextLinkBody) {
-      return plainTextLinkBody.textContent || '';
+      return this.normalizeText(plainTextLinkBody.textContent || '');
     }
     
     return '';
   }
-
   protected override processElementNode(element: Element): string {
     const nodeName = element.nodeName.toLowerCase();
     
@@ -230,7 +262,7 @@ export class MarkdownProcessor extends BasePostProcessor {
       if (attachmentNode) {
         const filename = attachmentNode.getAttribute('ri:filename') || '';
         const altText = element.getAttribute('ac:alt') || filename;
-        return `![${altText}](${filename})`;
+        return `![${this.normalizeText(altText)}](${filename})`;
       }
       
       // Try URL reference if there's no attachment
@@ -324,9 +356,7 @@ export class MarkdownProcessor extends BasePostProcessor {
       };
       
       return emoticons[name] || `(${name})`;
-    }
-
-    // Process children content first
+    }    // Process children content first
     let innerContent = '';
     for (let i = 0; i < element.childNodes.length; i++) {
       innerContent += this.processNode(element.childNodes[i]);
@@ -336,47 +366,46 @@ export class MarkdownProcessor extends BasePostProcessor {
     const tagName = element.nodeName.toLowerCase();
     
     switch (tagName) {
-      case 'h1': return `# ${innerContent}\n\n`;
-      case 'h2': return `## ${innerContent}\n\n`;
-      case 'h3': return `### ${innerContent}\n\n`;
-      case 'h4': return `#### ${innerContent}\n\n`;
-      case 'h5': return `##### ${innerContent}\n\n`;
-      case 'h6': return `###### ${innerContent}\n\n`;
+      case 'h1': return `# ${this.normalizeText(innerContent)}\n\n`;
+      case 'h2': return `## ${this.normalizeText(innerContent)}\n\n`;
+      case 'h3': return `### ${this.normalizeText(innerContent)}\n\n`;
+      case 'h4': return `#### ${this.normalizeText(innerContent)}\n\n`;
+      case 'h5': return `##### ${this.normalizeText(innerContent)}\n\n`;
+      case 'h6': return `###### ${this.normalizeText(innerContent)}\n\n`;
       
-      case 'p': return `${innerContent}\n\n`;
+      case 'p': return `${this.normalizeText(innerContent)}\n\n`;
       case 'br': return '\n';
       
       case 'strong':
-      case 'b': return `**${innerContent}**`;
+      case 'b': return `**${this.normalizeText(innerContent)}**`;
       
       case 'em':
-      case 'i': return `*${innerContent}*`;
+      case 'i': return `*${this.normalizeText(innerContent)}*`;
       
-      case 'code': return `\`${innerContent}\``;
-      case 'pre': return `\`\`\`\n${innerContent}\n\`\`\`\n\n`;
+      case 'code': return `\`${innerContent}\``; // Preserve spacing in inline code
+      case 'pre': return `\`\`\`\n${innerContent}\n\`\`\`\n\n`; // Preserve spacing in code blocks
       
       case 'a': {
         const href = element.getAttribute('href') || '';
-        return `[${innerContent}](${href})`;
-      }
-        case 'ul': return `${innerContent}\n`;
+        return `[${this.normalizeText(innerContent)}](${href})`;
+      }        case 'ul': return `${innerContent}\n`;
       case 'ol': return `${innerContent}\n`;
       case 'li': {
         // Check if parent is an ordered list to use numbers instead of bullets
         const parentNode = element.parentNode;
         if (parentNode && parentNode.nodeName.toLowerCase() === 'ol') {
-          return `1. ${innerContent}\n`; // Markdown will auto-number regardless of the actual number used
+          return `1. ${this.normalizeText(innerContent)}\n`; // Markdown will auto-number regardless of the actual number used
         }
-        return `- ${innerContent}\n`;
+        return `- ${this.normalizeText(innerContent)}\n`;
       }
         case 'table': return `\n${innerContent}\n`;
       case 'tr': return `${innerContent}|\n`;
-      case 'th': return `| ${innerContent} `;
-      case 'td': return `| ${innerContent} `;
+      case 'th': return `| ${this.normalizeText(innerContent)} `;
+      case 'td': return `| ${this.normalizeText(innerContent)} `;
       
       // For other elements or those with complex attributes, 
       // just return the inner content
-      default: return innerContent;
+      default: return this.normalizeText(innerContent);
     }
   }
 
@@ -426,11 +455,8 @@ export class MarkdownProcessor extends BasePostProcessor {
    * 
    * @param markdown - The raw Markdown content
    * @returns Cleaned up Markdown
-   */
-  private cleanupMarkdown(markdown: string): string {
+   */  private cleanupMarkdown(markdown: string): string {
     return markdown
-      // Fix multiple consecutive newlines
-      .replace(/\n{3,}/g, '\n\n')
       // Fix table formatting
       .replace(/\|\n\|/g, '|\n|')
       // Add table headers when needed
@@ -439,7 +465,7 @@ export class MarkdownProcessor extends BasePostProcessor {
         const separator = '|' + ' --- |'.repeat(columns) + '\n';
         return `${header}\n${separator}|`;
       })
-      // Fix list formatting - ensure proper spacing
+      // Fix list formatting - ensure proper spacing between list items and following paragraphs
       .replace(/(\n- .+)\n([^\n-])/g, '$1\n\n$2')
       .replace(/(\n\d+\. .+)\n([^\n\d])/g, '$1\n\n$2')
       // Fix nested list indentation
@@ -448,7 +474,9 @@ export class MarkdownProcessor extends BasePostProcessor {
       .replace(/(```.*\n[\s\S]*?```)\n([^\n])/g, '$1\n\n$2')
       // Ensure headings have space after them
       .replace(/^(#{1,6} .+)\n([^\n])/gm, '$1\n\n$2')
-      // Trim trailing whitespace on lines
+      // Remove duplicate newlines (we still need this as a final pass)
+      .replace(/\n{3,}/g, '\n\n')
+      // Trim trailing whitespace on lines (this is still useful)
       .replace(/[ \t]+$/gm, '');
   }
 }
