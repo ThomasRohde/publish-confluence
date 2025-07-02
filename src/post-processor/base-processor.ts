@@ -37,8 +37,9 @@ export abstract class BasePostProcessor implements PostProcessor {
 
     // Wrap in a root element if not already present to ensure valid XML
     // Use a special root tag that will be removed in post-processing
+    // Include common Confluence namespaces to prevent namespace errors
     return sanitizedContent.trim().startsWith('<')
-      ? `<confluence-root>${sanitizedContent}</confluence-root>`
+      ? `<confluence-root xmlns:ac="http://www.atlassian.com/schema/confluence/4/ac/" xmlns:ri="http://www.atlassian.com/schema/confluence/4/ri/">${sanitizedContent}</confluence-root>`
       : sanitizedContent;
   }
 
@@ -117,6 +118,17 @@ export abstract class BasePostProcessor implements PostProcessor {
       // Parse the XML content
       const doc = this.domParser.parseFromString(xmlContent, 'text/xml');
       
+      // Check for parsing errors (like namespace issues)
+      const parseError = doc.getElementsByTagName('parsererror')[0];
+      if (parseError) {
+        log.warn('XML parsing failed, trying HTML parsing mode');
+        // Try parsing as HTML instead
+        const htmlDoc = this.domParser.parseFromString(xmlContent, 'text/html');
+        if (htmlDoc && htmlDoc.documentElement) {
+          return this.processNode(htmlDoc.documentElement as any);
+        }
+      }
+      
       // Process the DOM tree and convert to the desired format
       if (!doc.documentElement) {
         log.error('Failed to parse XML content - no document element found');
@@ -126,6 +138,20 @@ export abstract class BasePostProcessor implements PostProcessor {
       return this.processNode(doc.documentElement as any);
     } catch (error) {
       log.error(`Error converting macros: ${(error as Error).message}`);
+      // Try a fallback approach: strip namespaces and try again
+      if ((error as Error).message.includes('namespace') || (error as Error).message.includes('Namespace')) {
+        log.warn('Attempting namespace fallback parsing');
+        try {
+          const fallbackContent = this.stripNamespaces(content);
+          const fallbackXml = this.prepareXmlContent(fallbackContent);
+          const fallbackDoc = this.domParser.parseFromString(fallbackXml, 'text/xml');
+          if (fallbackDoc && fallbackDoc.documentElement) {
+            return this.processNode(fallbackDoc.documentElement as any);
+          }
+        } catch (fallbackError) {
+          log.debug(`Fallback parsing also failed: ${(fallbackError as Error).message}`);
+        }
+      }
       return content; // Return original content on error
     }
   }
@@ -138,4 +164,23 @@ export abstract class BasePostProcessor implements PostProcessor {
    * @returns A promise resolving to the processed content and metadata
    */
   abstract process(content: string, options: PostProcessorOptions): Promise<ProcessorResult>;
+
+  /**
+   * Strip XML namespaces from content as a fallback when namespace parsing fails
+   * 
+   * @param content - Content with XML namespaces
+   * @returns Content with namespaces removed
+   */
+  private stripNamespaces(content: string): string {
+    // Remove namespace declarations
+    let result = content.replace(/\s+xmlns:[^=]+="[^"]*"/g, '');
+    
+    // Convert namespaced elements to simple elements (e.g., ac:structured-macro -> structured-macro)
+    result = result.replace(/<\/?([a-zA-Z]+):([a-zA-Z0-9-]+)/g, '<$2');
+    
+    // Handle self-closing namespaced elements
+    result = result.replace(/<([a-zA-Z]+):([a-zA-Z0-9-]+)([^>]*?)\/>/, '<$2$3/>');
+    
+    return result;
+  }
 }

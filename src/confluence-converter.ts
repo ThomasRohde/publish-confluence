@@ -29,8 +29,9 @@ export class ConfluenceConverter {
         .replace(/&amp;([a-z]+);/g, '&$1;'); // Fix double-escaped entities
 
       // Wrap in a root element if not already present to ensure valid XML
+      // Include common Confluence namespaces to prevent namespace errors
       const xmlContent = sanitizedContent.trim().startsWith('<')
-        ? `<div>${sanitizedContent}</div>`
+        ? `<div xmlns:ac="http://www.atlassian.com/schema/confluence/4/ac/" xmlns:ri="http://www.atlassian.com/schema/confluence/4/ri/">${sanitizedContent}</div>`
         : sanitizedContent;
 
       const doc = this.DOM_PARSER.parseFromString(xmlContent, 'text/xml');
