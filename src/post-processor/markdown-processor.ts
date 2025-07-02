@@ -435,7 +435,7 @@ export class MarkdownProcessor extends BasePostProcessor {
       return '\n<!-- Empty table -->\n';
     }
 
-    let result = '\n';
+    let result = '\n\n';
     
     // Determine the maximum number of columns
     const maxColumns = Math.max(...tableData.map(row => row.length));
