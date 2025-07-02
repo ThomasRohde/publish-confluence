@@ -60,6 +60,7 @@ test-results/
 docs/dry-run/
 docs/dry/
 docs/output/
+content/
 samples/target-architecture-template/
 log.txt
 dry/
