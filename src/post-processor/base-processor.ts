@@ -1,5 +1,5 @@
 // src/post-processor/base-processor.ts
-import { DOMParser } from 'xmldom';
+import { DOMParser } from '@xmldom/xmldom';
 import { createLogger } from '../logger';
 import { PostProcessor, PostProcessorOptions, ProcessorResult } from './types';
 
@@ -18,13 +18,7 @@ export abstract class BasePostProcessor implements PostProcessor {
   abstract readonly outputExtension: string;
   
   /** XML DOM parser with error handling */
-  protected readonly domParser = new DOMParser({
-    errorHandler: {
-      warning: () => { }, // Suppress warnings
-      error: (msg) => log.debug(`XML Parse Error: ${msg}`),
-      fatalError: (msg) => log.error(`Fatal XML Parse Error: ${msg}`)
-    }
-  });
+  protected readonly domParser = new DOMParser();
 
   /**
    * Prepare XML content for parsing by handling special entities and ensuring valid structure
@@ -124,7 +118,12 @@ export abstract class BasePostProcessor implements PostProcessor {
       const doc = this.domParser.parseFromString(xmlContent, 'text/xml');
       
       // Process the DOM tree and convert to the desired format
-      return this.processNode(doc.documentElement);
+      if (!doc.documentElement) {
+        log.error('Failed to parse XML content - no document element found');
+        return content;
+      }
+      
+      return this.processNode(doc.documentElement as any);
     } catch (error) {
       log.error(`Error converting macros: ${(error as Error).message}`);
       return content; // Return original content on error

@@ -1,5 +1,5 @@
 // src/confluence-converter.ts
-import { DOMParser } from 'xmldom';
+import { DOMParser } from '@xmldom/xmldom';
 import { createLogger } from './logger';
 
 const log = createLogger();
@@ -8,13 +8,7 @@ const log = createLogger();
  * Transforms Confluence storage format content to HTML for preview
  */
 export class ConfluenceConverter {
-  private static readonly DOM_PARSER = new DOMParser({
-    errorHandler: {
-      warning: () => { }, // Suppress warnings
-      error: (msg) => log.debug(`XML Parse Error: ${msg}`),
-      fatalError: (msg) => log.error(`Fatal XML Parse Error: ${msg}`)
-    }
-  });
+  private static readonly DOM_PARSER = new DOMParser();
   /**
    * Converts the Confluence storage format to proper HTML
    * @param content The Confluence storage format content
@@ -42,7 +36,12 @@ export class ConfluenceConverter {
       const doc = this.DOM_PARSER.parseFromString(xmlContent, 'text/xml');
 
       // Process Confluence-specific elements
-      return this.processNode(doc.documentElement, attachmentBaseUrl);
+      if (!doc.documentElement) {
+        log.error('Failed to parse XML content - no document element found');
+        return `<div class="error">Failed to parse XML content</div><pre>${content}</pre>`;
+      }
+      
+      return this.processNode(doc.documentElement as any, attachmentBaseUrl);
     } catch (error) {
       log.error(`Error converting Confluence storage format: ${(error as Error).message}`);
       return `<div class="error">Error converting content: ${(error as Error).message}</div>` +
