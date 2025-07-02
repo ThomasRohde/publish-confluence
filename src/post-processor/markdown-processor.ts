@@ -255,6 +255,11 @@ export class MarkdownProcessor extends BasePostProcessor {
       return this.processMacro(macroName, element);
     }
     
+    // Handle tables - let the base class handle the table structure
+    if (nodeName === 'table') {
+      return this.processTable(element);
+    }
+    
     // Handle Confluence images
     if (nodeName === 'ac:image') {
       // Try to get attachment reference
@@ -398,15 +403,102 @@ export class MarkdownProcessor extends BasePostProcessor {
         }
         return `- ${this.normalizeText(innerContent)}\n`;
       }
-        case 'table': return `\n${innerContent}\n`;
-      case 'tr': return `${innerContent}|\n`;
-      case 'th': return `| ${this.normalizeText(innerContent)} `;
-      case 'td': return `| ${this.normalizeText(innerContent)} `;
+      
+      // Table elements inside table structure are handled by base class processTable method
+      // These cases are for when table elements appear outside of proper table structure
+      case 'tbody':
+      case 'thead':
+      case 'tr':
+      case 'th':
+      case 'td':
+        // If we reach here, these elements are not within a proper table structure
+        // Just return the inner content
+        return this.normalizeText(innerContent);
       
       // For other elements or those with complex attributes, 
       // just return the inner content
       default: return this.normalizeText(innerContent);
     }
+  }
+
+  /**
+   * Format table data as Markdown table
+   * 
+   * @param tableData - 2D array of table cell contents
+   * @param hasHeader - Whether the first row should be treated as a header
+   * @returns Formatted Markdown table string
+   * @override
+   */
+  protected override formatTable(tableData: string[][], hasHeader: boolean): string {
+    if (tableData.length === 0) {
+      log.warn('Empty table data received');
+      return '\n<!-- Empty table -->\n';
+    }
+
+    let result = '\n';
+    
+    // Determine the maximum number of columns
+    const maxColumns = Math.max(...tableData.map(row => row.length));
+    log.debug(`Formatting table with ${tableData.length} rows and ${maxColumns} columns`);
+    
+    // Ensure all rows have the same number of columns
+    const normalizedData = tableData.map((row, index) => {
+      const normalizedRow = [...row];
+      while (normalizedRow.length < maxColumns) {
+        normalizedRow.push('');
+      }
+      
+      // Log any rows that were padded
+      if (normalizedRow.length !== row.length) {
+        log.debug(`Padded row ${index} from ${row.length} to ${normalizedRow.length} columns`);
+      }
+      
+      return normalizedRow;
+    });
+
+    // If we don't have a header but have data, treat first row as header for better Markdown table formatting
+    if (!hasHeader && normalizedData.length > 0) {
+      hasHeader = true;
+      log.debug('Treating first row as header for Markdown table formatting');
+    }
+
+    // Process each row
+    for (let rowIndex = 0; rowIndex < normalizedData.length; rowIndex++) {
+      const row = normalizedData[rowIndex];
+      
+      // Format row - escape pipes and clean up cell content
+      const formattedCells = row.map((cell, cellIndex) => {
+        try {
+          // Additional cell content cleaning for Markdown
+          let cleanCell = this.normalizeText(cell)
+            .replace(/\|/g, '\\|')        // Escape pipes in cell content
+            .replace(/\r?\n/g, ' ')       // Replace any remaining newlines with spaces
+            .replace(/\s+/g, ' ')         // Collapse multiple spaces
+            .trim();                      // Trim whitespace
+          
+          // Handle empty cells
+          if (!cleanCell) {
+            cleanCell = ' ';
+          }
+          
+          return cleanCell;
+        } catch (error) {
+          log.warn(`Error processing cell [${rowIndex}][${cellIndex}]: ${(error as Error).message}`);
+          return ' '; // Return empty cell on error
+        }
+      });
+      
+      result += '| ' + formattedCells.join(' | ') + ' |\n';
+      
+      // Add header separator after first row if it's a header
+      if (rowIndex === 0 && hasHeader) {
+        result += '|' + ' --- |'.repeat(maxColumns) + '\n';
+      }
+    }
+    
+    result += '\n';
+    log.debug(`Generated Markdown table with ${normalizedData.length} rows`);
+    return result;
   }
 
   /**
@@ -450,21 +542,10 @@ export class MarkdownProcessor extends BasePostProcessor {
    * 
    * @param markdown - The raw Markdown content
    * @returns Cleaned up Markdown
-   */  /**
-   * Clean up the generated Markdown for better formatting
-   * 
-   * @param markdown - The raw Markdown content
-   * @returns Cleaned up Markdown
-   */  private cleanupMarkdown(markdown: string): string {
+   */
+  private cleanupMarkdown(markdown: string): string {
     return markdown
-      // Fix table formatting
-      .replace(/\|\n\|/g, '|\n|')
-      // Add table headers when needed
-      .replace(/(\n\|[^\n]+\|)\n\|/g, (match, header) => {
-        const columns = (header.match(/\|/g) || []).length - 1;
-        const separator = '|' + ' --- |'.repeat(columns) + '\n';
-        return `${header}\n${separator}|`;
-      })
+      // Remove old table cleanup patterns since we now handle tables properly
       // Fix list formatting - ensure proper spacing between list items and following paragraphs
       .replace(/(\n- .+)\n([^\n-])/g, '$1\n\n$2')
       .replace(/(\n\d+\. .+)\n([^\n\d])/g, '$1\n\n$2')

@@ -25,15 +25,30 @@ export abstract class BasePostProcessor implements PostProcessor {
    * 
    * @param content - Raw XML content that may contain special entities
    * @returns Sanitized XML content ready for parsing
-   */  protected prepareXmlContent(content: string): string {
+   */
+  protected prepareXmlContent(content: string): string {
     // Handle special XML entities
     const sanitizedContent = content
       .replace(/&nbsp;/g, '\u00A0')  // Non-breaking space
       .replace(/&mdash;/g, '—')
       .replace(/&ndash;/g, '–')
+      .replace(/&hellip;/g, '…')
+      .replace(/&ldquo;/g, '"')
+      .replace(/&rdquo;/g, '"')
+      .replace(/&lsquo;/g, "'")
+      .replace(/&rsquo;/g, "'")
       // Handle encoded XML tags in code blocks
       .replace(/&lt;(\/?)code(\s+[^>]*)?>/gi, '<$1code$2>')
-      .replace(/&amp;([a-z]+);/g, '&$1;'); // Fix double-escaped entities
+      .replace(/&lt;(\/?)pre(\s+[^>]*)?>/gi, '<$1pre$2>')
+      // Handle table-specific entities and formatting
+      .replace(/&lt;(\/?)table(\s+[^>]*)?>/gi, '<$1table$2>')
+      .replace(/&lt;(\/?)tr(\s+[^>]*)?>/gi, '<$1tr$2>')
+      .replace(/&lt;(\/?)td(\s+[^>]*)?>/gi, '<$1td$2>')
+      .replace(/&lt;(\/?)th(\s+[^>]*)?>/gi, '<$1th$2>')
+      .replace(/&lt;(\/?)tbody(\s+[^>]*)?>/gi, '<$1tbody$2>')
+      .replace(/&lt;(\/?)thead(\s+[^>]*)?>/gi, '<$1thead$2>')
+      // Fix double-escaped entities
+      .replace(/&amp;([a-z]+);/g, '&$1;');
 
     // Wrap in a root element if not already present to ensure valid XML
     // Use a special root tag that will be removed in post-processing
@@ -83,6 +98,11 @@ export abstract class BasePostProcessor implements PostProcessor {
       return this.processMacro(macroName, element);
     }
 
+    // Special handling for tables - extract table structure
+    if (element.nodeName.toLowerCase() === 'table') {
+      return this.processTable(element);
+    }
+
     // Process children and combine their output
     let output = '';
     for (let i = 0; i < element.childNodes.length; i++) {
@@ -90,6 +110,176 @@ export abstract class BasePostProcessor implements PostProcessor {
     }
 
     return output;
+  }
+
+  /**
+   * Process a table element and extract its structure
+   * 
+   * @param tableElement - The table element to process
+   * @returns The processed table content
+   */
+  protected processTable(tableElement: Element): string {
+    const tableData: string[][] = [];
+    let hasHeader = false;
+
+    log.debug('Processing table element');
+
+    // Helper function to get elements by tag name from direct children
+    const getDirectChildrenByTagName = (parent: Element, tagName: string): Element[] => {
+      const children: Element[] = [];
+      for (let i = 0; i < parent.childNodes.length; i++) {
+        const child = parent.childNodes[i];
+        if (child.nodeType === 1 && (child as Element).nodeName.toLowerCase() === tagName) {
+          children.push(child as Element);
+        }
+      }
+      return children;
+    };
+
+    // Get all child elements by tag name (works with xmldom)
+    const getAllChildrenByTagName = (parent: Element, tagName: string): Element[] => {
+      const elements: Element[] = [];
+      const traverse = (node: Node) => {
+        if (node.nodeType === 1) {
+          const element = node as Element;
+          if (element.nodeName.toLowerCase() === tagName) {
+            elements.push(element);
+          }
+        }
+        for (let i = 0; i < node.childNodes.length; i++) {
+          traverse(node.childNodes[i]);
+        }
+      };
+      traverse(parent);
+      return elements;
+    };
+
+    // Process table body or direct rows
+    const tbodyElements = getAllChildrenByTagName(tableElement, 'tbody');
+    const theadElements = getAllChildrenByTagName(tableElement, 'thead');
+    
+    // Check if we have a table header
+    if (theadElements.length > 0) {
+      hasHeader = true;
+      const thead = theadElements[0];
+      const headerRows = getAllChildrenByTagName(thead, 'tr');
+      log.debug(`Found ${headerRows.length} header rows`);
+      
+      for (let i = 0; i < headerRows.length; i++) {
+        const row = this.processTableRow(headerRows[i]);
+        if (row.length > 0) {
+          tableData.push(row);
+          log.debug(`Header row ${i}: ${row.length} columns`);
+        }
+      }
+    }
+
+    // Process table body rows
+    let bodyRows: Element[] = [];
+    if (tbodyElements.length > 0) {
+      // Get rows from tbody
+      bodyRows = getAllChildrenByTagName(tbodyElements[0], 'tr');
+    } else {
+      // Get direct tr children from table
+      bodyRows = getAllChildrenByTagName(tableElement, 'tr');
+    }
+    
+    log.debug(`Found ${bodyRows.length} body rows`);
+    
+    for (let i = 0; i < bodyRows.length; i++) {
+      const row = this.processTableRow(bodyRows[i]);
+      if (row.length > 0) {
+        tableData.push(row);
+        log.debug(`Body row ${i}: ${row.length} columns`);
+      }
+    }
+
+    // If no header was found but we have rows, treat first row as header if it contains th elements
+    if (!hasHeader && tableData.length > 0) {
+      const firstRowElement = bodyRows[0];
+      if (firstRowElement) {
+        const thElements = getAllChildrenByTagName(firstRowElement, 'th');
+        if (thElements.length > 0) {
+          hasHeader = true;
+          log.debug('Detected first row as header based on th elements');
+        }
+      }
+    }
+
+    log.debug(`Table processed: ${tableData.length} rows, hasHeader: ${hasHeader}`);
+    return this.formatTable(tableData, hasHeader);
+  }
+
+  /**
+   * Process a table row and extract cell contents
+   * 
+   * @param rowElement - The table row element
+   * @returns Array of cell contents
+   */
+  protected processTableRow(rowElement: Element): string[] {
+    const cells: string[] = [];
+    
+    // Get all child elements that are td or th
+    const cellElements: Element[] = [];
+    for (let i = 0; i < rowElement.childNodes.length; i++) {
+      const child = rowElement.childNodes[i];
+      if (child.nodeType === 1) { // Element node
+        const element = child as Element;
+        const tagName = element.nodeName.toLowerCase();
+        if (tagName === 'td' || tagName === 'th') {
+          cellElements.push(element);
+        }
+      }
+    }
+    
+    for (let i = 0; i < cellElements.length; i++) {
+      const cell = cellElements[i];
+      let cellContent = '';
+      
+      // Process cell contents recursively
+      for (let j = 0; j < cell.childNodes.length; j++) {
+        cellContent += this.processNode(cell.childNodes[j]);
+      }
+      
+      // Clean up cell content - remove excess whitespace and newlines
+      // Handle nested elements that might introduce unwanted formatting
+      cellContent = cellContent
+        .replace(/\n+/g, ' ')           // Replace newlines with spaces
+        .replace(/\s+/g, ' ')           // Collapse multiple spaces
+        .replace(/^\s+|\s+$/g, '')      // Trim leading/trailing whitespace
+        .replace(/\|\|/g, '|')          // Fix doubled pipe characters
+        .replace(/\\\\/g, '\\');        // Fix doubled backslashes
+      
+      // Handle rowspan and colspan - add empty cells for merged columns
+      const colspan = parseInt(cell.getAttribute('colspan') || '1', 10);
+      const rowspan = parseInt(cell.getAttribute('rowspan') || '1', 10);
+      
+      cells.push(cellContent);
+      
+      // Add empty cells for colspan > 1
+      for (let k = 1; k < colspan; k++) {
+        cells.push('');
+      }
+      
+      // Note: rowspan handling is more complex and would require 
+      // tracking state across multiple rows. For now, we just process
+      // the content in the current row and let the markdown processor
+      // handle the display as best it can.
+    }
+    
+    return cells;
+  }
+
+  /**
+   * Format table data as the target format (should be overridden by specific processors)
+   * 
+   * @param tableData - 2D array of table cell contents
+   * @param hasHeader - Whether the first row should be treated as a header
+   * @returns Formatted table string
+   */
+  protected formatTable(tableData: string[][], hasHeader: boolean): string {
+    // Default implementation - just return the content
+    return tableData.map(row => row.join(' | ')).join('\n');
   }
 
   /**

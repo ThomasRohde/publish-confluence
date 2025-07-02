@@ -1,14 +1,193 @@
 {
-  "spaceKey": "~thro",
-  "parentTitle": "Publish-Confluence Test",
-  "title": "CLI Dry Run Test",
-  "baseUrl": "https://example.confluence.com",
-  "username": "test-user",
-  "password": "placeholder",
-  "content": {
-    "main": "./README.md"
-  },
-  "childPages": [],
-  "pageTitle": "Testing",
-  "templatePath": "././content/~thro/Testing/Testing.html"
+  "spaceKey": "STEA",
+  "pageTitle": "50.1 Target architecture standard v3.0",
+  "templatePath": "./content/STEA/50_1_Target_architecture_standard_v3_0/50_1_Target_architecture_standard_v3_0.md",
+  "macroTemplatePath": null,
+  "includedFiles": [],
+  "excludedFiles": [],
+  "distDir": "./dist",
+  "childPages": [
+    {
+      "spaceKey": "STEA",
+      "pageTitle": "Target Architecture Front Page",
+      "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/Target_Architecture_Front_Page.md",
+      "macroTemplatePath": null,
+      "includedFiles": [],
+      "excludedFiles": [],
+      "distDir": "./dist",
+      "parentPageTitle": "50.1 Target architecture standard v3.0",
+      "childPages": [
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "00 Progress and releases",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/00_Progress_and_releases/00_Progress_and_releases.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "01 Introduction",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/01_Introduction/01_Introduction.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "02 Terminology",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/02_Terminology/02_Terminology.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "03 Scope",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/03_Scope/03_Scope.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "04 Architecture objectives and key results",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/04_Architecture_objectives_and_key_results/04_Architecture_objectives_and_key_results.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "05 Architecture intention",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/05_Architecture_intention/05_Architecture_intention.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "06 Subsidiary integration with Group platform",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/06_Subsidiary_integration_with_Group_platform/06_Subsidiary_integration_with_Group_platform.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "07 Functional use cases",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/07_Functional_use_cases/07_Functional_use_cases.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "08 Platform service map",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/08_Platform_service_map/08_Platform_service_map.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "09 Architecture principles",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/09_Architecture_principles/09_Architecture_principles.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "10 Target operating model",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/10_Target_operating_model/10_Target_operating_model.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "11 Solution context maps",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/11_Solution_context_maps/11_Solution_context_maps.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "12 Reference architectures & standards",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/12_Reference_architectures___standards/12_Reference_architectures___standards.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "13 Technology choices",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/13_Technology_choices/13_Technology_choices.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "14 Governance model",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/14_Governance_model/14_Governance_model.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "15 Target architecture dependencies",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/15_Target_architecture_dependencies/15_Target_architecture_dependencies.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        },
+        {
+          "spaceKey": "STEA",
+          "pageTitle": "16 Implementation roadmap",
+          "templatePath": "./content/STEA//50_1_Target_architecture_standard_v3_0/Target_Architecture_Front_Page/16_Implementation_roadmap/16_Implementation_roadmap.md",
+          "macroTemplatePath": null,
+          "includedFiles": [],
+          "excludedFiles": [],
+          "distDir": "./dist",
+          "parentPageTitle": "Target Architecture Front Page"
+        }
+      ]
+    }
+  ]
 }
